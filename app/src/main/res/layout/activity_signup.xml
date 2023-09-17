@@ -43,33 +43,73 @@
             android:layout_centerInParent="true"
             android:layout_marginBottom="10dp"
             android:gravity="center"
-            android:text="Sign in"
+            android:text="Sign up"
             android:textColor="#000000"
             android:textSize="34sp"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editTextText"
+            android:id="@+id/firstnameTxt"
             android:layout_width="288dp"
             android:layout_height="48dp"
-            android:ems="10"
-            android:hint="Name"
             android:background="@drawable/rounded_corner"
-            android:padding="15dp"
-            android:inputType="text" />
+            android:ems="10"
+            android:hint="First Name"
+            android:inputType="text"
+            android:padding="15dp" />
 
 
         <EditText
-            android:id="@+id/editTextTextPassword"
+            android:id="@+id/lastnameTxt"
             android:layout_width="289dp"
             android:layout_height="48dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/rounded_corner"
+            android:ems="10"
+            android:hint="Last Name"
+            android:inputType="text"
+            android:padding="15dp"
+            android:paddingLeft="20dp" />
+
+        <EditText
+            android:id="@+id/emailTxt"
+            android:layout_width="289dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/rounded_corner"
+            android:ems="10"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:padding="15dp"
+            android:paddingLeft="20dp" />
+
+        <EditText
+            android:id="@+id/passwordTxt"
+            android:layout_width="289dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/rounded_corner"
             android:ems="10"
             android:hint="Password"
             android:inputType="textPassword"
+            android:padding="15dp"
+            android:paddingLeft="20dp" />
+
+        <EditText
+            android:id="@+id/conpasswordTxt"
+            android:layout_width="289dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="18dp"
             android:background="@drawable/rounded_corner"
+            android:ems="10"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
             android:padding="15dp"
             android:paddingLeft="20dp"
-            android:layout_marginTop="18dp" />
+
+
+
+            />
 
         <Button
             android:id="@+id/button"
@@ -79,17 +119,17 @@
             android:backgroundTint="@color/black"
             android:text="Sign in"
             android:textColorLink="#171616"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+             />
 
 
         <ProgressBar
+            android:id="@+id/progressBar"
             android:layout_width="24dp"
             android:layout_height="64dp"
-            android:id="@+id/progressBar"
             android:layout_gravity="center"
-            android:visibility="gone"
             android:layout_marginTop="12dp"
-            />
+            android:visibility="gone" />
 
 
     </LinearLayout>
