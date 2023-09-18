@@ -38,9 +38,13 @@ public class useraccessActivity extends AppCompatActivity {
         getbtnSign.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (userName == "admin" && userPass == "1234")
+                if (userName.equalsIgnoreCase("admin") && userPass.equals("1234"))
                 {
                     showMessage("Alert", "Correct! ");
+                }
+                else if (userName.equalsIgnoreCase("") || userPass.equals(""))
+                {
+                    showMessage("alert","incomplete credentials! ");
                 }
                 else
                 {
