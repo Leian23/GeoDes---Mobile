@@ -40,11 +40,11 @@ public class useraccessActivity extends AppCompatActivity {
                 String uName = userName.getText().toString();
                 String uPass = userName.getText().toString();
 
-                if (uName.equalsIgnoreCase("admin") && uPass.equals("1234"))
+                if (uName.equals("admin") && uPass.equals("password"))
                 {
                     showMessage("Alert", "Correct! ");
                 }
-                else if (uName.equalsIgnoreCase("") || uPass.equals(""))
+                else if (uName.equals("") || uPass.equals(""))
                 {
                     showMessage("alert","incomplete credentials! ");
                 }
