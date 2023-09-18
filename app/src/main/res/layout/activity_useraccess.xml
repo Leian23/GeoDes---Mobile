@@ -49,7 +49,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editTextText"
+            android:id="@+id/userName"
             android:layout_width="288dp"
             android:layout_height="48dp"
             android:ems="10"
@@ -60,7 +60,7 @@
 
 
         <EditText
-            android:id="@+id/editTextTextPassword"
+            android:id="@+id/userPass"
             android:layout_width="289dp"
             android:layout_height="48dp"
             android:ems="10"

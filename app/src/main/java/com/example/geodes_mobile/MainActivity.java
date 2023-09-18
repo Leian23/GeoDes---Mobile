@@ -36,9 +36,9 @@ public class MainActivity extends AppCompatActivity {
         getStartedbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Not running, force closing the application
                 Intent intent = new Intent(MainActivity.this, signupActivity.class);
                 startActivity(intent);
-
             }
         });
 
