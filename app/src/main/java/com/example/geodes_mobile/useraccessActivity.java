@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class useraccessActivity extends AppCompatActivity {
+
     public void showMessage(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
@@ -30,19 +31,20 @@ public class useraccessActivity extends AppCompatActivity {
 
         Button getbtnSign = findViewById(R.id.siButton);
 
-        EditText uName = findViewById(R.id.userName);
-        EditText uPass = findViewById(R.id.userPass);
-        String userName = uName.getText().toString();
-        String userPass = uPass.getText().toString();
+        EditText userName = findViewById(R.id.userName);
+        EditText userPass = findViewById(R.id.userPass);
 
         getbtnSign.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (userName.equalsIgnoreCase("admin") && userPass.equals("1234"))
+                String uName = userName.getText().toString();
+                String uPass = userName.getText().toString();
+
+                if (uName.equalsIgnoreCase("admin") && uPass.equals("1234"))
                 {
                     showMessage("Alert", "Correct! ");
                 }
-                else if (userName.equalsIgnoreCase("") || userPass.equals(""))
+                else if (uName.equalsIgnoreCase("") || uPass.equals(""))
                 {
                     showMessage("alert","incomplete credentials! ");
                 }
