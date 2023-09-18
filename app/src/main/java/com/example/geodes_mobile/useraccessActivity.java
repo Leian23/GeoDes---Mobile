@@ -24,7 +24,6 @@ public class useraccessActivity extends AppCompatActivity {
                 })
                 .show();
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,15 +40,22 @@ public class useraccessActivity extends AppCompatActivity {
                 String uName = userName.getText().toString();
                 String uPass = userPass.getText().toString();
 
-                if (uName.equalsIgnoreCase("admin") && uPass.equals("1234")) {
+                if (uName.equals("admin") && uPass.equals("password"))
+                {
                     showMessage("Alert", "Correct! ");
-                } else if (uName.isEmpty() || uPass.isEmpty()) {
-                    showMessage("Alert", "Incomplete credentials! ");
-                } else {
-                    showMessage("Alert", "Wrong!");
                 }
+                else if (uName.equals("") || uPass.equals(""))
+                {
+                    showMessage("alert","incomplete credentials! ");
+                }
+                else
+                {
+                    showMessage("Alert","Wrong!");
+                }
+
             }
         });
+
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
