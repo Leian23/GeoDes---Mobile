@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button getStartedbtn = findViewById(R.id.getstartbtn);
         TextView startSigninText = findViewById(R.id.start_signin);
+        TextView skiprocess = findViewById(R.id.skiprocess);
 
         startSigninText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,6 +42,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        skiprocess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Not running, force closing the application
+                Intent intent = new Intent(MainActivity.this, map_home.class);
+                startActivity(intent);
+            }
+        });
+
 
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

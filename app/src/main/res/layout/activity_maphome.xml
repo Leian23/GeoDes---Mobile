@@ -7,11 +7,19 @@
     android:layout_height="match_parent"
     tools:ignore="ExtraText">
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="240dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="14dp"
+        app:cardElevation="2dp"
+        app:cardCornerRadius="25dp"
+        app:cardBackgroundColor="#FFFFFF"
+         app:cardUseCompatPadding="true">
+
     <FrameLayout
-        android:layout_width="235dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="25dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view1"
@@ -34,12 +42,42 @@
             android:background="?android:attr/selectableItemBackground"
             android:contentDescription="Menu" />
     </FrameLayout>
+</androidx.cardview.widget.CardView>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+<androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
 
-    />
+
+    <Button
+        android:id="@+id/colorChangingButton"
+        android:layout_width="48dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="264dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/map_buttons"
+        android:drawableStart="@drawable/traffic_ic"
+        android:gravity="center_vertical|center_horizontal"
+        android:paddingLeft="11dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/colorChangingButton2"
+        android:layout_width="48dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="320dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/map_buttons"
+        android:drawableStart="@drawable/landmarks_ic"
+        android:paddingLeft="11dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

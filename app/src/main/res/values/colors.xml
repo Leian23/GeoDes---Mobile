@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="green">#A7FFC5</color>
+    <color name="normal_color">#0000FF</color>
+    <dimen name="corner_radius">16dp</dimen>
+
 </resources>

@@ -1,14 +1,62 @@
 package com.example.geodes_mobile;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import androidx.core.content.ContextCompat;
 
 public class map_home extends AppCompatActivity {
+    private boolean isFirstButtonColor1 = true; // Initial state for the first button is color 1
+    private boolean isSecondButtonColor1 = true; // Initial state for the second button is color 1
+    private Button firstButton;
+    private Button secondButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maphome);
+
+        firstButton = findViewById(R.id.colorChangingButton);
+        secondButton = findViewById(R.id.colorChangingButton2);
+
+        // Set the rounded button background with initial colors
+        setRoundedButtonBackground(firstButton, R.color.white, R.color.green);
+        setRoundedButtonBackground(secondButton, R.color.white, R.color.green);
+
+        firstButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleButtonColor(firstButton, isFirstButtonColor1);
+                isFirstButtonColor1 = !isFirstButtonColor1;
+            }
+        });
+
+        secondButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleButtonColor(secondButton, isSecondButtonColor1);
+                isSecondButtonColor1 = !isSecondButtonColor1;
+            }
+        });
+    }
+
+    private void toggleButtonColor(Button button, boolean isColor1) {
+        if (isColor1) {
+            setRoundedButtonBackground(button, R.color.green, R.color.white);
+        } else {
+            setRoundedButtonBackground(button, R.color.white, R.color.green);
+        }
+    }
+
+    private void setRoundedButtonBackground(Button button, int backgroundColor, int textColor) {
+        GradientDrawable roundedDrawable = new GradientDrawable();
+        roundedDrawable.setShape(GradientDrawable.RECTANGLE);
+        roundedDrawable.setCornerRadius(100); // Adjust the radius as needed
+        roundedDrawable.setColor(ContextCompat.getColor(this, backgroundColor));
+
+        button.setBackground(roundedDrawable);
+        button.setTextColor(ContextCompat.getColor(this, textColor));
     }
 }

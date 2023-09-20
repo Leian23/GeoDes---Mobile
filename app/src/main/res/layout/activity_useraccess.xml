@@ -74,12 +74,14 @@
         <Button
             android:id="@+id/siButton"
             android:layout_width="289dp"
-            android:layout_height="62dp"
+            android:layout_height="60dp"
             android:layout_marginTop="20dp"
-            android:backgroundTint="@color/black"
+            android:background="@drawable/main_corner_btn"
             android:text="Sign in"
+            android:textColor="@color/white"
             android:textColorLink="#171616"
             android:textSize="20sp" />
+
 
 
         <ProgressBar
