@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<style xmlns:tools="http://schemas.android.com/tools"
+    name="MySearchViewStyle" parent="Widget.AppCompat.SearchView"
+    tools:ignore="MissingPrefix">
+    <item name="android:textColorHint">@android:color/black</item>
+</style>
