@@ -14,8 +14,13 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true; // Initial state for the first button is color 1
     private boolean isSecondButtonColor1 = true; // Initial state for the second button is color 1
+    private boolean isThirdButtonColor1 = true;
+    private boolean isFourthButtonColor1 = true;
     private Button firstButton;
     private Button secondButton;
+    private Button thirdButton;
+    private Button fourthButton;
+
     private BottomSheetBehavior bottomSheetBehavior;
 
 
@@ -26,11 +31,14 @@ public class map_home extends AppCompatActivity {
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
+        thirdButton = findViewById(R.id.colorChangingButton3);
+        fourthButton = findViewById(R.id.colorChangingButton4);
 
         // Set the rounded button background with initial colors
         setRoundedButtonBackground(firstButton, R.color.white, R.color.green);
         setRoundedButtonBackground(secondButton, R.color.white, R.color.green);
-
+        setRoundedButtonBackground(thirdButton, R.color.white, R.color.green);
+        setRoundedButtonBackground(fourthButton, R.color.white, R.color.green);
         firstButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,6 +55,23 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+        thirdButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleButtonColor(thirdButton, isThirdButtonColor1);
+                isThirdButtonColor1 = !isThirdButtonColor1;
+            }
+        });
+
+        fourthButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleButtonColor(fourthButton, isFourthButtonColor1);
+                isFourthButtonColor1 = !isFourthButtonColor1;
+            }
+        });
+
+
 
         //Bottom Sheet
         LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
@@ -56,11 +81,6 @@ public class map_home extends AppCompatActivity {
         int customHeight = getResources().getDimensionPixelSize(R.dimen.custom_height);
 
         bottomSheetBehavior.setPeekHeight(customHeight);
-
-
-
-
-
 
     }
 
