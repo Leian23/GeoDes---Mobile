@@ -5,13 +5,19 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true; // Initial state for the first button is color 1
     private boolean isSecondButtonColor1 = true; // Initial state for the second button is color 1
     private Button firstButton;
     private Button secondButton;
+    private BottomSheetBehavior bottomSheetBehavior;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,22 @@ public class map_home extends AppCompatActivity {
                 isSecondButtonColor1 = !isSecondButtonColor1;
             }
         });
+
+
+        //Bottom Sheet
+        LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        bottomSheetBehavior.setHideable(false);
+
+        int customHeight = getResources().getDimensionPixelSize(R.dimen.custom_height);
+
+        bottomSheetBehavior.setPeekHeight(customHeight);
+
+
+
+
+
+
     }
 
     private void toggleButtonColor(Button button, boolean isColor1) {
@@ -59,4 +81,7 @@ public class map_home extends AppCompatActivity {
         button.setBackground(roundedDrawable);
         button.setTextColor(ContextCompat.getColor(this, textColor));
     }
+
+
+
 }

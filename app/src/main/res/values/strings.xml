@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GeoDes_Mobile</string>
+    <dimen name="custom_height">160dp</dimen>
 </resources>
