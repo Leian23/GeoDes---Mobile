@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="200dp"
+             android:layout_height="300dp"
              android:padding="20dp"
-             android:background="@color/green"
+             android:background="#E4E4E4"
              android:gravity="bottom">
 
     <TextView

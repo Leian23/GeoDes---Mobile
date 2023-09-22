@@ -6,10 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -17,6 +19,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.navigation.NavigationView;
 
 public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true; // Initial state for the first button is color 1
@@ -27,10 +30,9 @@ public class map_home extends AppCompatActivity {
     private Button secondButton;
     private Button thirdButton;
     private Button fourthButton;
-
     private BottomSheetBehavior bottomSheetBehavior;
-
     private ConstraintLayout changePosLayout;
+    private NavigationView navigationView;
 
 
     @Override
@@ -115,7 +117,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-        //opening navbar menu
         ImageButton menuButton = findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -124,9 +125,35 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
                 if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.openDrawer(GravityCompat.START);
+                } else {
+                    drawerLayout.closeDrawer(GravityCompat.START);
                 }
             }
         });
+
+        NavigationView navigationView = findViewById(R.id.nav_view); // Make sure to initialize your NavigationView
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.alerts) {
+                    Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
+                } else if (item.getItemId() == R.id.schedules) {
+                    Toast.makeText(map_home.this, "You have selected schedules", Toast.LENGTH_SHORT).show();
+                }
+                // Add more else-if blocks for other menu items if needed
+                drawerLayout.closeDrawer(GravityCompat.START); // Close the drawer after an item is selected
+                return true; // Return true to indicate that the item selection is handled
+            }
+        });
+
+
+
+
+
+
+
+
 
 
 

@@ -3,7 +3,9 @@
     <style name="Base.Theme.GeoDes_Mobile" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="Theme.GeoDes_Mobile" parent="Base.Theme.GeoDes_Mobile" />
+
 </resources>
