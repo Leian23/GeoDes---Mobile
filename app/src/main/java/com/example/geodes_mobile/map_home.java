@@ -1,12 +1,16 @@
 package com.example.geodes_mobile;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.DialogInterface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -23,11 +27,15 @@ public class map_home extends AppCompatActivity {
 
     private BottomSheetBehavior bottomSheetBehavior;
 
+    private ConstraintLayout changePosLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maphome);
+
+
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
@@ -52,6 +60,8 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
                 toggleButtonColor(secondButton, isSecondButtonColor1);
                 isSecondButtonColor1 = !isSecondButtonColor1;
+
+
             }
         });
 
@@ -82,7 +92,26 @@ public class map_home extends AppCompatActivity {
 
         bottomSheetBehavior.setPeekHeight(customHeight);
 
+
+        changePosLayout = findViewById(R.id.changePos);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                // Handle state changes if needed
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Update the vertical position of the ConstraintLayout with buttons
+                int layoutHeight = changePosLayout.getHeight();
+                int offset = (int) ((slideOffset * 1.55 * layoutHeight));
+                changePosLayout.setTranslationY(-offset);
+            }
+        });
     }
+
+
 
     private void toggleButtonColor(Button button, boolean isColor1) {
         if (isColor1) {
@@ -91,6 +120,8 @@ public class map_home extends AppCompatActivity {
             setRoundedButtonBackground(button, R.color.white, R.color.green);
         }
     }
+
+
 
     private void setRoundedButtonBackground(Button button, int backgroundColor, int textColor) {
         GradientDrawable roundedDrawable = new GradientDrawable();
@@ -101,6 +132,10 @@ public class map_home extends AppCompatActivity {
         button.setBackground(roundedDrawable);
         button.setTextColor(ContextCompat.getColor(this, textColor));
     }
+
+
+
+
 
 
 

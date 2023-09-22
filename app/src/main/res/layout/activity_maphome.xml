@@ -14,7 +14,7 @@
         android:layout_marginTop="14dp"
         app:cardElevation="2dp"
         app:cardCornerRadius="25dp"
-        app:cardBackgroundColor="#FFFFFF"
+        app:cardBackgroundColor="@android:color/transparent"
          app:cardUseCompatPadding="true">
 
     <FrameLayout
@@ -84,6 +84,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.766"
+            android:layout_marginBottom="8dp"
             tools:layout_editor_absoluteX="0dp">
 
             <Button
