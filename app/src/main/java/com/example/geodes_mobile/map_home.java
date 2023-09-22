@@ -8,10 +8,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -109,6 +112,26 @@ public class map_home extends AppCompatActivity {
                 changePosLayout.setTranslationY(-offset);
             }
         });
+
+
+
+        //opening navbar menu
+        ImageButton menuButton = findViewById(R.id.menu_button);
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+
+
+
+
+
     }
 
 
