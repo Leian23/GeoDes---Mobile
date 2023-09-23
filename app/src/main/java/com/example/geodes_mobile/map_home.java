@@ -22,8 +22,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 public class map_home extends AppCompatActivity {
-    private boolean isFirstButtonColor1 = true; // Initial state for the first button is color 1
-    private boolean isSecondButtonColor1 = true; // Initial state for the second button is color 1
+    private boolean isFirstButtonColor1 = true;
+    private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
     private boolean isFourthButtonColor1 = true;
     private Button firstButton;
@@ -39,8 +39,6 @@ public class map_home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maphome);
-
-
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
@@ -117,6 +115,9 @@ public class map_home extends AppCompatActivity {
 
 
 
+
+
+        //Menu Drawer
         ImageButton menuButton = findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -131,7 +132,7 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        NavigationView navigationView = findViewById(R.id.nav_view); // Make sure to initialize your NavigationView
+        navigationView = findViewById(R.id.nav_view); // Make sure to initialize your NavigationView
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -142,23 +143,12 @@ public class map_home extends AppCompatActivity {
                     Toast.makeText(map_home.this, "You have selected schedules", Toast.LENGTH_SHORT).show();
                 }
                 // Add more else-if blocks for other menu items if needed
+
                 drawerLayout.closeDrawer(GravityCompat.START); // Close the drawer after an item is selected
-                return true; // Return true to indicate that the item selection is handled
+                return true;
+
             }
         });
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
 
@@ -172,7 +162,6 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
     private void setRoundedButtonBackground(Button button, int backgroundColor, int textColor) {
         GradientDrawable roundedDrawable = new GradientDrawable();
         roundedDrawable.setShape(GradientDrawable.RECTANGLE);
@@ -182,11 +171,4 @@ public class map_home extends AppCompatActivity {
         button.setBackground(roundedDrawable);
         button.setTextColor(ContextCompat.getColor(this, textColor));
     }
-
-
-
-
-
-
-
 }

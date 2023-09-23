@@ -3,4 +3,9 @@
     <style name="MenuItemTextSize">
         <item name="android:textSize">18sp</item> <!-- You can adjust the text size as needed -->
     </style>
+
+    <style name="NavItemSelectedStyle">
+        <item name="android:background">@color/green</item>
+    </style>
+
 </resources>

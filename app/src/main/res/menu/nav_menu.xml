@@ -3,14 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/alerts"
+        <item
+            android:id="@+id/alerts"
             android:icon="@drawable/alert_ic"
-            android:title="Alerts"
-           >
+            android:title="Alerts" >
         </item>
         <item android:id="@+id/schedules"
             android:icon="@drawable/schedule_ic"
             android:title="Schedules" >
+        </item>
+        <item android:id="@+id/offline"
+            android:icon="@drawable/offline_ic"
+            android:title="Offline Map" >
         </item>
         <item android:id="@+id/settings"
             android:icon="@drawable/settings_ic"
@@ -32,5 +36,6 @@
             android:icon="@drawable/logout_ic"
             android:title="Log out" >
         </item>
+
     </group>
 </menu>
