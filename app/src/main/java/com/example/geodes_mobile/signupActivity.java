@@ -1,5 +1,10 @@
 package com.example.geodes_mobile;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -39,11 +44,16 @@ public class signupActivity extends AppCompatActivity {
         siButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                registerUser();
+                // Check for network connectivity before attempting to register
+                if (isNetworkAvailable()) {
+                    registerUser();
+                } else {
+                    Toast.makeText(signupActivity.this, "Not Connected to the Internet", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
     }
+
     private void registerUser() {
         final String firstName = firstNameTxt.getText().toString().trim();
         final String lastName = lastNameTxt.getText().toString().trim();
@@ -81,5 +91,19 @@ public class signupActivity extends AppCompatActivity {
                     }
                 });
     }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkCapabilities networkCapabilities = null;
+
+        // Check if network is available and if it has internet connectivity
+        Network network = connectivityManager.getActiveNetwork();
+        if (network != null) {
+            networkCapabilities = connectivityManager.getNetworkCapabilities(network);
+        }
+
+        return networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    }
+
+
 
 }
