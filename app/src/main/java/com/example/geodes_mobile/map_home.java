@@ -21,7 +21,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.MapView;
+import org.osmdroid.util.GeoPoint;
+
 public class map_home extends AppCompatActivity {
+    //Map View Initialization
+    private MapView mapView;
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
@@ -38,7 +45,14 @@ public class map_home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Configuration.getInstance().load(getApplicationContext(), getPreferences(MODE_PRIVATE));
         setContentView(R.layout.activity_maphome);
+
+        mapView = findViewById(R.id.map);
+        mapView.setTileSource(TileSourceFactory.MAPNIK);
+
+        mapView.getController().setCenter(new GeoPoint(12.8797, 121.7740));
+        mapView.getController().setZoom(12.0);
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
@@ -171,6 +185,17 @@ public class map_home extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
 
     private void toggleButtonColor(Button button, boolean isColor1) {
         if (isColor1) {
