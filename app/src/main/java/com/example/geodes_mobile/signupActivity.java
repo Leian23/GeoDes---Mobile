@@ -86,6 +86,7 @@ public class signupActivity extends AppCompatActivity {
 
                             Toast.makeText(signupActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(signupActivity.this, map_home.class);
+                            startActivity(intent);
                             // You can redirect to another activity here or perform any other action.
                         } else {
                             Toast.makeText(signupActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
