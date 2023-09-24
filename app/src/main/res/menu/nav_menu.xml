@@ -28,10 +28,6 @@
             android:icon="@drawable/baseline_feedback_24"
             android:title="Feedback" >
         </item>
-        <item android:id="@+id/about"
-            android:icon="@drawable/about_ic"
-            android:title="Settings" >
-        </item>
         <item android:id="@+id/logout"
             android:icon="@drawable/logout_ic"
             android:title="Log out" >

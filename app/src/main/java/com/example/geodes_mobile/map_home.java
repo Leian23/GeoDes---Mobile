@@ -138,9 +138,31 @@ public class map_home extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.alerts) {
-                    Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new AlertsFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
                 } else if (item.getItemId() == R.id.schedules) {
-                    Toast.makeText(map_home.this, "You have selected schedules", Toast.LENGTH_SHORT).show();
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new ScheduleFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
+                } else if (item.getItemId() == R.id.offline) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new OfflineMapFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
+                } else if (item.getItemId() == R.id.settings) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new SettingsFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
+                } else if (item.getItemId() == R.id.help) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new HelpFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
+                } else if (item.getItemId() == R.id.feedback) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new FeedbackFragment()) // Use your existing fragment instance or create a new one
+                            .commit();
+                } else if (item.getItemId() == R.id.logout) {
+                    Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
                 }
                 // Add more else-if blocks for other menu items if needed
 
@@ -150,7 +172,6 @@ public class map_home extends AppCompatActivity {
             }
         });
     }
-
 
 
     private void toggleButtonColor(Button button, boolean isColor1) {
