@@ -3,61 +3,69 @@ package com.example.geodes_mobile;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class useraccessActivity extends AppCompatActivity {
+    private EditText userNameEditText, userPassEditText;
+    private Button loginButton;
 
-
-
-    public void showMessage(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // You can add code here to handle the OK button click
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-    }
-
+    private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_useraccess);
+        // Initialize Firebase Authentication
+        mAuth = FirebaseAuth.getInstance();
 
-        Button getbtnSign = findViewById(R.id.siButton);
+        userNameEditText = findViewById(R.id.userName);
+        userPassEditText = findViewById(R.id.userPass);
+        loginButton = findViewById(R.id.siButton);
 
-        EditText userName = findViewById(R.id.userName);
-        EditText userPass = findViewById(R.id.userPass);
-
-
-        getbtnSign.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String uName = userName.getText().toString();
-                String uPass = userPass.getText().toString();
-
-                if (uName.equalsIgnoreCase("admin") && uPass.equals("1234")) {
-                    Intent intent = new Intent(useraccessActivity.this, map_home.class);
-                    startActivity(intent);
-                    finish();
-
-                } else if (uName.isEmpty() || uPass.isEmpty()) {
-                    showMessage("Alert", "Incomplete credentials! ");
-                } else {
-                    showMessage("Alert", "Wrong!");
-                }
+                loginUser();
             }
         });
+    }
+    private void loginUser() {
+        String email = userNameEditText.getText().toString().trim();
+        String password = userPassEditText.getText().toString().trim();
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Authenticate the user using Firebase Authentication
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // User login successful
+                            Toast.makeText(useraccessActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+
+                            Intent intent = new Intent(useraccessActivity.this, map_home.class);
+                            startActivity(intent);
+                        } else {
+                            // User login failed
+                            Toast.makeText(useraccessActivity.this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 }

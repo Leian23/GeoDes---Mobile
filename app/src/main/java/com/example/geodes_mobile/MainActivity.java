@@ -7,7 +7,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.pm.ActivityInfo;
 
-
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -20,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         Button getStartedbtn = findViewById(R.id.getstartbtn);
         TextView startSigninText = findViewById(R.id.start_signin);
