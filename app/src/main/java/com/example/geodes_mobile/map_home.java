@@ -51,7 +51,13 @@ public class map_home extends AppCompatActivity {
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
-        mapView.getController().setCenter(new GeoPoint(12.8797, 121.7740));
+        // Enable zoom controls (plus and minus buttons) on the map
+        mapView.setBuiltInZoomControls(true);
+
+        // Enable pinch-to-zoom gestures on the map
+        mapView.setMultiTouchControls(true);
+
+        mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
         mapView.getController().setZoom(12.0);
 
         firstButton = findViewById(R.id.colorChangingButton);
