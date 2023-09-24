@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "454529786746",
+    "project_id": "geodes-d7bfd",
+    "storage_bucket": "geodes-d7bfd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454529786746:android:7246377d12293e7cf5acc3",
+        "android_client_info": {
+          "package_name": "com.example.geodes_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBngb6DFZtzfVvHUvwCGDgOhtlH9oKTn3Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
