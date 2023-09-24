@@ -8,6 +8,11 @@
     android:id="@+id/drawer_layout"
     tools:context=".map_home">
 
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true" />
 
     <FrameLayout
         android:layout_width="match_parent"

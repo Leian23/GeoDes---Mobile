@@ -114,9 +114,6 @@ public class map_home extends AppCompatActivity {
         });
 
 
-
-
-
         //Menu Drawer
         ImageButton menuButton = findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -171,6 +168,7 @@ public class map_home extends AppCompatActivity {
 
             }
         });
+
     }
 
 
@@ -192,4 +190,6 @@ public class map_home extends AppCompatActivity {
         button.setBackground(roundedDrawable);
         button.setTextColor(ContextCompat.getColor(this, textColor));
     }
+
+
 }
