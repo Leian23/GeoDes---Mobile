@@ -2,6 +2,7 @@ package com.example.geodes_mobile;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -84,6 +85,7 @@ public class signupActivity extends AppCompatActivity {
                             databaseReference.child(user.getUid()).setValue(userData);
 
                             Toast.makeText(signupActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(signupActivity.this, map_home.class);
                             // You can redirect to another activity here or perform any other action.
                         } else {
                             Toast.makeText(signupActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
