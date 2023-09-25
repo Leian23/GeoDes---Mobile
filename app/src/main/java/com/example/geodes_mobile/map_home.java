@@ -33,6 +33,17 @@ import android.location.Location;
 import android.location.LocationManager;
 import androidx.core.app.ActivityCompat;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.overlay.Polygon;
+import org.osmdroid.util.GeoPoint;
+import java.util.ArrayList;
+import org.osmdroid.views.overlay.Polyline;
+import android.graphics.Paint;
+import org.osmdroid.views.CustomZoomButtonsController;
+import org.osmdroid.api.IMapController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+
+
 
 public class map_home extends AppCompatActivity {
     //Map View Initialization
@@ -52,6 +63,7 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,11 +73,19 @@ public class map_home extends AppCompatActivity {
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
 
-        // Enable zoom controls (plus and minus buttons) on the map
-        mapView.setBuiltInZoomControls(true);
+        MapView mapView = new MapView(this);
 
         // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
+
+        // Enable rotation gestures
+        RotationGestureOverlay rotationGestureOverlay = new RotationGestureOverlay(mapView);
+        rotationGestureOverlay.setEnabled(true);
+        mapView.getOverlays().add(rotationGestureOverlay);
+
+        // Get the map controller for programmatic control (optional)
+        IMapController mapController = mapView.getController();
+
 
         mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
         mapView.getController().setZoom(12.0);
@@ -234,6 +254,70 @@ public class map_home extends AppCompatActivity {
             mapView.getController().animateTo(startPoint);
             mapView.getController().setZoom(15.0);
         }
+    }
+
+    // Method to add inner and outer circles with the user's location as the center
+    private void addLocationCircles() {
+        // Get the user's last known location
+        Location lastKnownLocation = myLocationOverlay.getLastFix();
+        if (lastKnownLocation != null) {
+            double userLatitude = lastKnownLocation.getLatitude();
+            double userLongitude = lastKnownLocation.getLongitude();
+
+            // Create GeoPoint for the user's location
+            GeoPoint userLocation = new GeoPoint(userLatitude, userLongitude);
+
+            /// Create inner circle with a radius of 300 meters
+            Polygon innerCircle = createCircle(userLocation, 300.0, 0x300000FF, 0x00000000, 0f); // Semi-transparent blue color with no outline
+
+// Create outer circle with a radius of 1000 meters
+            Polygon outerCircle = createCircle(userLocation, 1000.0, 0x3000FF00, 0x00000000, 0f); // Semi-transparent green color with no outline
+
+            // Add circles to the map
+            mapView.getOverlays().add(innerCircle);
+            mapView.getOverlays().add(outerCircle);
+
+            // Refresh the map to show the circles
+            mapView.invalidate();
+        }
+    }
+
+
+    // Method to create a circular polygon with an outline
+    private Polygon createCircle(GeoPoint center, double radiusInMeters, int fillColor, int strokeColor, float strokeWidth) {
+        int numberOfPoints = 360; // Number of points to approximate the circle
+
+        // Create an ArrayList to hold the points of the circle
+        ArrayList<GeoPoint> circlePoints = new ArrayList<>();
+
+        double distanceX = radiusInMeters / 111320.0; // 1 degree of latitude is approximately 111320 meters
+        double distanceY = radiusInMeters / (111320.0 * Math.cos(Math.toRadians(center.getLatitude())));
+
+        for (int i = 0; i < numberOfPoints; i++) {
+            double theta = Math.toRadians(i * 360.0 / numberOfPoints);
+            double x = center.getLatitude() + (distanceX * Math.cos(theta));
+            double y = center.getLongitude() + (distanceY * Math.sin(theta));
+            circlePoints.add(new GeoPoint(x, y));
+        }
+
+        // Create the Polygon with the fill color
+        Polygon circle = new Polygon(mapView);
+        circle.setPoints(circlePoints);
+        circle.getFillPaint().setColor(fillColor); // Set fill color
+
+        // Create a Polyline for the outline
+        Polyline polyline = new Polyline(mapView);
+        polyline.setPoints(circlePoints);
+
+        // Set stroke color and width using the outlinePaint
+        Paint outlinePaint = polyline.getOutlinePaint();
+        outlinePaint.setColor(strokeColor);
+        outlinePaint.setStrokeWidth(strokeWidth);
+
+        // Add the Polyline to the map overlays
+        mapView.getOverlayManager().add(polyline);
+
+        return circle;
     }
     @Override
     protected void onResume() {
