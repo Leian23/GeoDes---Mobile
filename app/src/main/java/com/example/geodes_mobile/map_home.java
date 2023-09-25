@@ -257,7 +257,7 @@ public class map_home extends AppCompatActivity {
     }
 
     // Method to add inner and outer circles with the user's location as the center
-    private void addLocationCircles() {
+    /*private void addLocationCircles() {
         // Get the user's last known location
         Location lastKnownLocation = myLocationOverlay.getLastFix();
         if (lastKnownLocation != null) {
@@ -318,7 +318,7 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlayManager().add(polyline);
 
         return circle;
-    }
+    }*/
     @Override
     protected void onResume() {
         super.onResume();
