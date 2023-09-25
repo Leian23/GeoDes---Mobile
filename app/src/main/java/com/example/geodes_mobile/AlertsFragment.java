@@ -1,5 +1,6 @@
 package com.example.geodes_mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,11 +28,15 @@ public class AlertsFragment extends Fragment {
                 if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.openDrawer(GravityCompat.START);
                 } else {
-                    drawerLayout.closeDrawer(GravityCompat.START);
                 }
             }
         });
 
         return rootView;
     }
+
+
+
+
+
 }

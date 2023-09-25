@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -17,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -221,6 +223,35 @@ public class map_home extends AppCompatActivity {
         button.setBackground(roundedDrawable);
         button.setTextColor(ContextCompat.getColor(this, textColor));
     }
+
+
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+            if (currentFragment instanceof AlertsFragment ||
+                    currentFragment instanceof ScheduleFragment ||
+                    currentFragment instanceof SettingsFragment ||
+                    currentFragment instanceof OfflineMapFragment ||
+                    currentFragment instanceof FeedbackFragment ||
+                    currentFragment instanceof HelpFragment) {
+
+                // You are in one of the specified fragments, navigate back to map_home
+                Intent intent = new Intent(this, map_home.class);
+                startActivity(intent);
+                finish();
+            } else {
+                // Handle the back press as usual
+                super.onBackPressed();
+            }
+        }
+    }
+
 
 
 }
