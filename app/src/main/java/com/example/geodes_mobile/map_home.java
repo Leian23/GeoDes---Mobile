@@ -3,6 +3,7 @@ package com.example.geodes_mobile;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -26,22 +27,12 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import androidx.core.app.ActivityCompat;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
-import android.graphics.Color;
-import org.osmdroid.views.overlay.Polygon;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.views.overlay.MapEventsOverlay;
-import org.osmdroid.views.overlay.Marker;
-import androidx.core.content.res.ResourcesCompat;
-
 
 public class map_home extends AppCompatActivity {
     //Map View Initialization
@@ -58,7 +49,7 @@ public class map_home extends AppCompatActivity {
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
     private MyLocationNewOverlay myLocationOverlay;
-    private List<CustomMarker> markers = new ArrayList<>();
+    private LocationManager locationManager;
 
 
     @Override
@@ -76,41 +67,15 @@ public class map_home extends AppCompatActivity {
         // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
 
-        // Create a new MyLocationNewOverlay to show the user's location
-        myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
-        myLocationOverlay.enableMyLocation();
-        mapView.getOverlays().add(myLocationOverlay);
-
-        // Request location permissions if not granted
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-
-        // Create circles around the user's location
-        createCircles(myLocationOverlay.getMyLocation());
-
-        // Set the initial center to the user's location
-        mapView.getController().setCenter(myLocationOverlay.getMyLocation());
+        mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
         mapView.getController().setZoom(12.0);
 
-
-
-        MapEventsReceiver mapEventsReceiver = new MapEventsReceiver() {
-            @Override
-            public boolean singleTapConfirmedHelper(GeoPoint p) {
-                return false;
-            }
-
-            @Override
-            public boolean longPressHelper(GeoPoint p) {
-                // Handle long press event here
-                addMarkerToMap(p);
-                return true; // Consume the long press event
-            }
-        };
-
-        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(mapEventsReceiver);
-        mapView.getOverlays().add(mapEventsOverlay);
+        // Check and request location permissions if needed
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            enableMyLocationOverlay();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
@@ -244,71 +209,31 @@ public class map_home extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, enable location updates
-                myLocationOverlay.enableMyLocation();
-                mapView.getController().setCenter(myLocationOverlay.getMyLocation());
+                enableMyLocationOverlay();
+            } else {
+                // Handle permission denied
+                Toast.makeText(this, "Location permission denied. Cannot show your location on the map.", Toast.LENGTH_SHORT).show();
             }
         }
     }
+    // Initialize and enable the user's location overlay on the map
+    private void enableMyLocationOverlay() {
+        myLocationOverlay = new MyLocationNewOverlay(mapView);
+        myLocationOverlay.enableMyLocation();
+        mapView.getOverlays().add(myLocationOverlay);
 
-    private void createCircles(GeoPoint userLocation) {
-        // Define circle parameters
-        double innerRadius = 0.003; // 300 meters in degrees (adjust as needed)
-        double outerRadius = 0.01;  // 1000 meters in degrees (adjust as needed)
-
-        // Create circles using Polygon
-        List<GeoPoint> innerCircle = createCircle(userLocation, innerRadius);
-        List<GeoPoint> outerCircle = createCircle(userLocation, outerRadius);
-
-        // Create and add circles to the map with updated fill color
-        Polygon polygon1 = new Polygon();
-        Polygon polygon2 = new Polygon();
-
-        polygon1.setPoints(innerCircle);
-        polygon2.setPoints(outerCircle);
-
-        // Set the fill colors for the circles using getOutlinePaint()
-        polygon1.getOutlinePaint().setColor(Color.argb(50, 0, 0, 255)); // Blue
-        polygon2.getOutlinePaint().setColor(Color.argb(50, 255, 0, 0)); // Red
-
-        mapView.getOverlayManager().add(polygon1);
-        mapView.getOverlayManager().add(polygon2);
-
-        mapView.invalidate(); // Refresh the map to display the circles
-    }
-
-    private List<GeoPoint> createCircle(GeoPoint center, double radius) {
-        List<GeoPoint> circlePoints = new ArrayList<>();
-        int numPoints = 100; // Number of points to create a circle
-
-        for (int i = 0; i < numPoints; i++) {
-            double angle = Math.toRadians((360.0 / numPoints) * i);
-            double latitude = center.getLatitude() + (radius / 111.32) * Math.cos(angle); // 111.32 km is the approximate distance between one degree of latitude
-            double longitude = center.getLongitude() + (radius / (111.32 * Math.cos(Math.toRadians(center.getLatitude())))) * Math.sin(angle);
-            circlePoints.add(new GeoPoint(latitude, longitude));
+        // Center the map on the user's location (if available)
+        Location lastKnownLocation = myLocationOverlay.getLastFix();
+        if (lastKnownLocation != null) {
+            GeoPoint startPoint = new GeoPoint(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+            mapView.getController().animateTo(startPoint);
+            mapView.getController().setZoom(15.0);
         }
-
-        return circlePoints;
-    }
-
-    private void addMarkerToMap(GeoPoint geoPoint) {
-        // Create a marker and add it to the map
-        Marker marker = new Marker(mapView);
-        marker.setPosition(geoPoint);
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.traffic_ic, null)); // Set your custom marker icon
-        mapView.getOverlays().add(marker);
-
-        // Create a custom marker and add it to the list
-        CustomMarker customMarker = new CustomMarker(geoPoint, "Custom Marker");
-        markers.add(customMarker);
-
-        // Refresh the map to display the marker
-        mapView.invalidate();
     }
     @Override
     protected void onResume() {
