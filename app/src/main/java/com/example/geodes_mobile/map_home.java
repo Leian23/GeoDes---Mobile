@@ -3,9 +3,7 @@ package com.example.geodes_mobile;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.DashPathEffect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -31,42 +29,19 @@ import org.osmdroid.util.GeoPoint;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
-import org.osmdroid.views.overlay.simplefastpoint.SimpleFastPointOverlay;
-import org.osmdroid.views.overlay.simplefastpoint.SimplePointTheme;
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PointF;
-import android.location.Location;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Polygon;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.osmdroid.views.overlay.Polygon;
-import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
+import androidx.core.content.res.ResourcesCompat;
+
 
 public class map_home extends AppCompatActivity {
     //Map View Initialization
@@ -83,7 +58,7 @@ public class map_home extends AppCompatActivity {
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
     private MyLocationNewOverlay myLocationOverlay;
-    private SimpleFastPointOverlay circleOverlay;
+    private List<CustomMarker> markers = new ArrayList<>();
 
 
     @Override
@@ -114,11 +89,28 @@ public class map_home extends AppCompatActivity {
         // Create circles around the user's location
         createCircles(myLocationOverlay.getMyLocation());
 
-
-
         // Set the initial center to the user's location
         mapView.getController().setCenter(myLocationOverlay.getMyLocation());
         mapView.getController().setZoom(12.0);
+
+
+
+        MapEventsReceiver mapEventsReceiver = new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                return false;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                // Handle long press event here
+                addMarkerToMap(p);
+                return true; // Consume the long press event
+            }
+        };
+
+        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(mapEventsReceiver);
+        mapView.getOverlays().add(mapEventsOverlay);
 
         firstButton = findViewById(R.id.colorChangingButton);
         secondButton = findViewById(R.id.colorChangingButton2);
@@ -303,6 +295,21 @@ public class map_home extends AppCompatActivity {
         return circlePoints;
     }
 
+    private void addMarkerToMap(GeoPoint geoPoint) {
+        // Create a marker and add it to the map
+        Marker marker = new Marker(mapView);
+        marker.setPosition(geoPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        marker.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.traffic_ic, null)); // Set your custom marker icon
+        mapView.getOverlays().add(marker);
+
+        // Create a custom marker and add it to the list
+        CustomMarker customMarker = new CustomMarker(geoPoint, "Custom Marker");
+        markers.add(customMarker);
+
+        // Refresh the map to display the marker
+        mapView.invalidate();
+    }
     @Override
     protected void onResume() {
         super.onResume();
