@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.DashPathEffect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -28,6 +29,45 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.overlay.simplefastpoint.SimpleFastPointOverlay;
+import org.osmdroid.views.overlay.simplefastpoint.SimplePointTheme;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.location.Location;
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Polygon;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.osmdroid.views.overlay.Polygon;
+import org.osmdroid.views.overlay.Polyline;
+
 public class map_home extends AppCompatActivity {
     //Map View Initialization
     private MapView mapView;
@@ -42,6 +82,8 @@ public class map_home extends AppCompatActivity {
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
+    private MyLocationNewOverlay myLocationOverlay;
+    private SimpleFastPointOverlay circleOverlay;
 
 
     @Override
@@ -59,7 +101,23 @@ public class map_home extends AppCompatActivity {
         // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
 
-        mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
+        // Create a new MyLocationNewOverlay to show the user's location
+        myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), mapView);
+        myLocationOverlay.enableMyLocation();
+        mapView.getOverlays().add(myLocationOverlay);
+
+        // Request location permissions if not granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+        // Create circles around the user's location
+        createCircles(myLocationOverlay.getMyLocation());
+
+
+
+        // Set the initial center to the user's location
+        mapView.getController().setCenter(myLocationOverlay.getMyLocation());
         mapView.getController().setZoom(12.0);
 
         firstButton = findViewById(R.id.colorChangingButton);
@@ -191,6 +249,58 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, enable location updates
+                myLocationOverlay.enableMyLocation();
+                mapView.getController().setCenter(myLocationOverlay.getMyLocation());
+            }
+        }
+    }
+
+    private void createCircles(GeoPoint userLocation) {
+        // Define circle parameters
+        double innerRadius = 0.003; // 300 meters in degrees (adjust as needed)
+        double outerRadius = 0.01;  // 1000 meters in degrees (adjust as needed)
+
+        // Create circles using Polygon
+        List<GeoPoint> innerCircle = createCircle(userLocation, innerRadius);
+        List<GeoPoint> outerCircle = createCircle(userLocation, outerRadius);
+
+        // Create and add circles to the map with updated fill color
+        Polygon polygon1 = new Polygon();
+        Polygon polygon2 = new Polygon();
+
+        polygon1.setPoints(innerCircle);
+        polygon2.setPoints(outerCircle);
+
+        // Set the fill colors for the circles using getOutlinePaint()
+        polygon1.getOutlinePaint().setColor(Color.argb(50, 0, 0, 255)); // Blue
+        polygon2.getOutlinePaint().setColor(Color.argb(50, 255, 0, 0)); // Red
+
+        mapView.getOverlayManager().add(polygon1);
+        mapView.getOverlayManager().add(polygon2);
+
+        mapView.invalidate(); // Refresh the map to display the circles
+    }
+
+    private List<GeoPoint> createCircle(GeoPoint center, double radius) {
+        List<GeoPoint> circlePoints = new ArrayList<>();
+        int numPoints = 100; // Number of points to create a circle
+
+        for (int i = 0; i < numPoints; i++) {
+            double angle = Math.toRadians((360.0 / numPoints) * i);
+            double latitude = center.getLatitude() + (radius / 111.32) * Math.cos(angle); // 111.32 km is the approximate distance between one degree of latitude
+            double longitude = center.getLongitude() + (radius / (111.32 * Math.cos(Math.toRadians(center.getLatitude())))) * Math.sin(angle);
+            circlePoints.add(new GeoPoint(latitude, longitude));
+        }
+
+        return circlePoints;
     }
 
     @Override
