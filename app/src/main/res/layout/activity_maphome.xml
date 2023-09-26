@@ -83,7 +83,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/colorChangingButton2"
+                android:id="@+id/landmarks"
                 android:layout_width="48dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"

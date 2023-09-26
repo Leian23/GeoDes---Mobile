@@ -48,6 +48,8 @@ import android.graphics.Paint;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 
 
+
+
 public class map_home extends AppCompatActivity {
     //Map View Initialization
     private MapView mapView;
@@ -100,7 +102,7 @@ public class map_home extends AppCompatActivity {
         }
 
         firstButton = findViewById(R.id.trafficbtn);
-        secondButton = findViewById(R.id.colorChangingButton2);
+        secondButton = findViewById(R.id.landmarks);
         thirdButton = findViewById(R.id.colorChangingButton3);
         fourthButton = findViewById(R.id.colorChangingButton4);
 
@@ -109,6 +111,8 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(secondButton, R.color.white, R.color.green);
         setRoundedButtonBackground(thirdButton, R.color.white, R.color.green);
         setRoundedButtonBackground(fourthButton, R.color.white, R.color.green);
+
+
         firstButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,10 +126,18 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
                 toggleButtonColor(secondButton, isSecondButtonColor1);
                 isSecondButtonColor1 = !isSecondButtonColor1;
-
-
             }
         });
+
+        Button openDialogButton = findViewById(R.id.landmarks);
+        openDialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this);
+                landmarksDialog.show();
+            }
+        });
+
 
         thirdButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -229,6 +241,7 @@ public class map_home extends AppCompatActivity {
         });
 
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -379,6 +392,7 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
+
 
 
 
