@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout"
-    tools:context=".map_home">
+    tools:context=".main_app.map_home">
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"
@@ -79,8 +79,6 @@
                 android:drawableStart="@drawable/traffic_ic"
                 android:gravity="center_vertical|center_horizontal"
                 android:paddingLeft="11dp"
-                app:layout_constraintEnd_toStartOf="@+id/colorChangingButton2"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -89,12 +87,11 @@
                 android:layout_width="48dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
+                android:layout_marginStart="320dp"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/map_buttons"
                 android:drawableStart="@drawable/landmarks_ic"
                 android:paddingLeft="11dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.906"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

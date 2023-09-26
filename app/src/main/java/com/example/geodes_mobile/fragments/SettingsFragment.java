@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,11 +10,15 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
-public class HelpFragment extends Fragment {
+import com.example.geodes_mobile.R;
+
+public class SettingsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragments_help, container, false);
+        View rootView = inflater.inflate(R.layout.fragments_settings, container, false);
+
+        // Initialize UI elements and handle user interactions here
 
         ImageButton menuButton = rootView.findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);

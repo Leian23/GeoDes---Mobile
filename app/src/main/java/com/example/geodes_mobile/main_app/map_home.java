@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.main_app;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +19,13 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.fragments.AlertsFragment;
+import com.example.geodes_mobile.fragments.FeedbackFragment;
+import com.example.geodes_mobile.fragments.HelpFragment;
+import com.example.geodes_mobile.fragments.OfflineMapFragment;
+import com.example.geodes_mobile.fragments.ScheduleFragment;
+import com.example.geodes_mobile.fragments.SettingsFragment;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
@@ -39,11 +46,6 @@ import org.osmdroid.views.overlay.Polyline;
 import android.graphics.Paint;
 
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.MapStyleOptions;
-
-
 
 
 public class map_home extends AppCompatActivity {

@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.ImageButton;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+
+import com.example.geodes_mobile.R;
 
 public class FeedbackFragment extends Fragment {
 

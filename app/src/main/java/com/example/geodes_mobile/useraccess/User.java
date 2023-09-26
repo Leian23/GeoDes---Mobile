@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.useraccess;
 
 public class User {
     public String firstName;

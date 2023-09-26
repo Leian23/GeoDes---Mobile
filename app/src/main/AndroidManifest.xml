@@ -27,13 +27,13 @@
             android:name=".button_code"
             android:exported="false" />
         <activity
-            android:name=".map_home"
+            android:name=".main_app.map_home"
             android:exported="false" />
         <activity
-            android:name=".signupActivity"
+            android:name=".useraccess.signupActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".useraccess.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,10 +42,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".useraccessActivity"
+            android:name=".useraccess.useraccessActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".main_app.MainActivity"
             android:exported="false" />
     </application>
 

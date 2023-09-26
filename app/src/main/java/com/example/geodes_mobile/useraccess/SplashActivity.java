@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.useraccess;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.example.geodes_mobile.main_app.MainActivity;
+import com.example.geodes_mobile.R;
 
 public class SplashActivity extends AppCompatActivity {
 

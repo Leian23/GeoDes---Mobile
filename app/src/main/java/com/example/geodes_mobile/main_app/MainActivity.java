@@ -1,4 +1,4 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.main_app;
 import android.content.Intent; // For creating an Intent to switch activities
 import android.os.Bundle; // For handling the activity lifecycle and data
 import android.view.View; // For handling user interface elements
@@ -7,6 +7,9 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.pm.ActivityInfo;
 
+import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.useraccess.signupActivity;
+import com.example.geodes_mobile.useraccess.useraccessActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 

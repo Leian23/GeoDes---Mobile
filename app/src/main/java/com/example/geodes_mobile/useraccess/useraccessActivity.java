@@ -1,6 +1,5 @@
-package com.example.geodes_mobile;
+package com.example.geodes_mobile.useraccess;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,8 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.map_home;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
