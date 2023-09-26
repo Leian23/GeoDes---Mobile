@@ -3,7 +3,6 @@ package com.example.geodes_mobile;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -34,14 +33,16 @@ import android.location.LocationManager;
 import androidx.core.app.ActivityCompat;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.overlay.Polygon;
-import org.osmdroid.util.GeoPoint;
+
 import java.util.ArrayList;
 import org.osmdroid.views.overlay.Polyline;
 import android.graphics.Paint;
-import org.osmdroid.views.CustomZoomButtonsController;
-import org.osmdroid.api.IMapController;
-import org.osmdroid.views.MapView;
+
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.MapStyleOptions;
+
 
 
 
@@ -61,6 +62,8 @@ public class map_home extends AppCompatActivity {
     private NavigationView navigationView;
     private MyLocationNewOverlay myLocationOverlay;
     private LocationManager locationManager;
+    private static final double MIN_ZOOM_LEVEL = 4.0; // Adjust the minimum zoom level as needed
+    private static final double MAX_ZOOM_LEVEL = 21.0; // Adjust the maximum zoom level as needed
 
 
 
@@ -81,12 +84,11 @@ public class map_home extends AppCompatActivity {
         rotationGestureOverlay.setEnabled(true);
         mapView.getOverlays().add(rotationGestureOverlay);
 
-        // Get the map controller for programmatic control (optional)
-        IMapController mapController = mapView.getController();
-
-
         mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
         mapView.getController().setZoom(12.0);
+        mapView.setMinZoomLevel(MIN_ZOOM_LEVEL);
+        mapView.setMaxZoomLevel(MAX_ZOOM_LEVEL);
+
 
         // Check and request location permissions if needed
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -95,7 +97,7 @@ public class map_home extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
 
-        firstButton = findViewById(R.id.colorChangingButton);
+        firstButton = findViewById(R.id.trafficbtn);
         secondButton = findViewById(R.id.colorChangingButton2);
         thirdButton = findViewById(R.id.colorChangingButton3);
         fourthButton = findViewById(R.id.colorChangingButton4);
