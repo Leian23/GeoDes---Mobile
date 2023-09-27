@@ -53,20 +53,10 @@ import android.graphics.Paint;
 
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import androidx.fragment.app.FragmentActivity;
-import com.google.android.gms.maps.SupportMapFragment;
 
 
 
-
-
-public class map_home extends FragmentActivity implements OnMapReadyCallback{
+public class map_home extends AppCompatActivity {
     //Map View Initialization
     private MapView mapView;
     private boolean isFirstButtonColor1 = true;
@@ -85,9 +75,6 @@ public class map_home extends FragmentActivity implements OnMapReadyCallback{
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
-    private GoogleMap googleMap;
-    private boolean isTrafficEnabled = false;
-    private SupportMapFragment mapFragment;
 
 
 
@@ -100,10 +87,6 @@ public class map_home extends FragmentActivity implements OnMapReadyCallback{
 
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
-
-        // Obtain the MapFragment and get notified when the map is ready to be used
-        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
@@ -147,7 +130,6 @@ public class map_home extends FragmentActivity implements OnMapReadyCallback{
             public void onClick(View view) {
                 toggleButtonColor(traffic, isFirstButtonColor1);
                 isFirstButtonColor1 = !isFirstButtonColor1;
-                toggleTrafficLayer();
             }
         });
 
@@ -294,22 +276,6 @@ public class map_home extends FragmentActivity implements OnMapReadyCallback{
 
     }
 
-    @Override
-    public void onMapReady(GoogleMap map) {
-        googleMap = map;
-
-        // Enable traffic layer (initially disabled)
-        googleMap.setTrafficEnabled(isTrafficEnabled);
-    }
-    
-
-    // Method to toggle the traffic layer on/off
-    private void toggleTrafficLayer() {
-        isTrafficEnabled = !isTrafficEnabled;
-        if (googleMap != null) {
-            googleMap.setTrafficEnabled(isTrafficEnabled);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
