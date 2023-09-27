@@ -4,13 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -26,6 +29,7 @@ import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
+import com.example.geodes_mobile.main_app.Landmarks_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
@@ -38,6 +42,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentManager;
+
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.overlay.Polygon;
 
@@ -61,6 +67,7 @@ public class map_home extends AppCompatActivity {
     private Button secondButton;
     private Button thirdButton;
     private Button fourthButton;
+    private Button cancelbtn;
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
@@ -76,6 +83,7 @@ public class map_home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Configuration.getInstance().load(getApplicationContext(), getPreferences(MODE_PRIVATE));
         setContentView(R.layout.activity_maphome);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -105,12 +113,16 @@ public class map_home extends AppCompatActivity {
         secondButton = findViewById(R.id.landmarks);
         thirdButton = findViewById(R.id.colorChangingButton3);
         fourthButton = findViewById(R.id.colorChangingButton4);
+        cancelbtn = findViewById(R.id.cancelButton);
 
         // Set the rounded button background with initial colors
         setRoundedButtonBackground(firstButton, R.color.white, R.color.green);
         setRoundedButtonBackground(secondButton, R.color.white, R.color.green);
         setRoundedButtonBackground(thirdButton, R.color.white, R.color.green);
         setRoundedButtonBackground(fourthButton, R.color.white, R.color.green);
+
+
+
 
 
         firstButton.setOnClickListener(new View.OnClickListener() {
@@ -147,13 +159,42 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        fourthButton.setOnClickListener(new View.OnClickListener() {
+
+
+       RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
+         fourthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleButtonColor(fourthButton, isFourthButtonColor1);
-                isFourthButtonColor1 = !isFourthButtonColor1;
+
+                findViewById(R.id.menu_button).setVisibility(View.GONE);
+                findViewById(R.id.search_view1).setVisibility(View.GONE);
+                findViewById(R.id.frame_layout).setVisibility(View.GONE);
+                // Show the overlay
+                overlayLayout.setVisibility(View.VISIBLE);
+
+
             }
         });
+
+
+
+
+        cancelbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                findViewById(R.id.menu_button).setVisibility(View.VISIBLE);
+                findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
+                findViewById(R.id.frame_layout).setVisibility(View.VISIBLE);
+                overlayLayout.setVisibility(View.GONE);
+
+
+
+            }
+        });
+
+
+
 
 
 
@@ -188,7 +229,6 @@ public class map_home extends AppCompatActivity {
         //Menu Drawer
         ImageButton menuButton = findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -207,27 +247,27 @@ public class map_home extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.alerts) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new AlertsFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new AlertsFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.schedules) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new ScheduleFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new ScheduleFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.offline) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new OfflineMapFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new OfflineMapFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.settings) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new SettingsFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new SettingsFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.help) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new HelpFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new HelpFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.feedback) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new FeedbackFragment()) // Use your existing fragment instance or create a new one
+                            .replace(R.id.frame_layout, new FeedbackFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.logout) {
                     Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
@@ -237,8 +277,11 @@ public class map_home extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START); // Close the drawer after an item is selected
                 return true;
 
+
             }
         });
+
+
 
     }
 

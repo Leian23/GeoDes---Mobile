@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/overlayLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:visibility="gone">
+
+    <ImageView
+        android:id="@+id/additionSymbolImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/add_geo" />
+
+
+    <!-- Buttons at the Bottom, Centered -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
+
+        <!-- Add Geofence Button -->
+        <Button
+            android:id="@+id/addGeofenceButton"
+            android:layout_width="180dp"
+            android:layout_height="40dp"
+            android:text="Add Geofence"
+            android:textSize="15dp"
+            android:layout_marginBottom="5dp"
+            android:textColor="@color/white"
+            android:background="@drawable/button_add"/>
+
+        <!-- Cancel Button -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:textSize="15dp"
+                android:text="Cancel"
+                android:background="@drawable/button_cancel"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

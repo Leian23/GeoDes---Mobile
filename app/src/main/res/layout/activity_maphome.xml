@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/drawer_layout"
-    tools:context=".main_app.map_home">
+    tools:context=".main_app.map_home"
+    android:layout_gravity="start">
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"
@@ -14,149 +14,148 @@
         android:layout_height="match_parent"
         android:clickable="true" />
 
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/frame_layout">
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:ignore="ExtraText">
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="240dp"
-            android:layout_height="70dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="14dp"
-            app:cardElevation="2dp"
-            app:cardCornerRadius="25dp"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardUseCompatPadding="true">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/search_view1"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/searchbar"
-                    android:paddingLeft="40dp"
-                    app:iconifiedByDefault="false"
-                    app:queryHint="Search location..."
-                    app:searchIcon="@null" />
-
-                <!-- Replace Button with an ImageButton to use the hamburger menu icon -->
-                <ImageButton
-                    android:id="@+id/menu_button"
-                    android:layout_width="63dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="start"
-                    android:layout_marginLeft="1dp"
-                    android:src="@drawable/menu_ic"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:contentDescription="Menu" />
-            </FrameLayout>
-        </androidx.cardview.widget.CardView>
-
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:id="@+id/frame_layout">
 
-
-            <Button
-                android:id="@+id/trafficbtn"
-                android:layout_width="48dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="264dp"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/map_buttons"
-                android:drawableStart="@drawable/traffic_ic"
-                android:gravity="center_vertical|center_horizontal"
-                android:paddingLeft="11dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <Button
-                android:id="@+id/landmarks"
-                android:layout_width="48dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="320dp"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/map_buttons"
-                android:drawableStart="@drawable/landmarks_ic"
-                android:paddingLeft="11dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/changePos"
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:layout_width="match_parent"
-                android:layout_height="152dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.766"
-                android:layout_marginBottom="8dp"
-                tools:layout_editor_absoluteX="0dp">
+                android:layout_height="match_parent"
+                tools:ignore="ExtraText">
 
-                <Button
-                    android:id="@+id/colorChangingButton3"
-                    android:layout_width="48dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="40dp"
-                    android:background="@drawable/map_buttons"
-                    android:drawableStart="@drawable/current_loc"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:paddingLeft="11dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.947"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="240dp"
+                    android:layout_height="70dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="14dp"
+                    app:cardElevation="2dp"
+                    app:cardCornerRadius="25dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardUseCompatPadding="true">
 
-                <Button
-                    android:id="@+id/colorChangingButton4"
-                    android:layout_width="48dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="100dp"
-                    android:background="@drawable/map_buttons"
-                    android:drawableStart="@drawable/add_loc"
-                    android:paddingLeft="11dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.947"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                        <androidx.appcompat.widget.SearchView
+                            android:id="@+id/search_view1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/searchbar"
+                            android:paddingLeft="40dp"
+                            app:iconifiedByDefault="false"
+                            app:queryHint="Search location..."
+                            app:searchIcon="@null" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <include layout="@layout/bottom_sheet"/>
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    </FrameLayout>
-
-    <com.google.android.material.navigation.NavigationView
-
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        app:headerLayout="@menu/header_layout"
-        app:menu="@menu/nav_menu"
-        android:id="@+id/nav_view"
-        android:layout_gravity="start"
-        app:itemIconTint="@color/black"
-        app:itemTextColor="@color/black"
-       >
+                        <!-- Replace Button with an ImageButton to use the hamburger menu icon -->
+                        <ImageButton
+                            android:id="@+id/menu_button"
+                            android:layout_width="63dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="start"
+                            android:layout_marginLeft="1dp"
+                            android:src="@drawable/menu_ic"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:contentDescription="Menu" />
+                    </FrameLayout>
+                </androidx.cardview.widget.CardView>
 
 
-    </com.google.android.material.navigation.NavigationView>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+
+                    <Button
+                        android:id="@+id/trafficbtn"
+                        android:layout_width="48dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="264dp"
+                        android:layout_marginTop="24dp"
+                        android:background="@drawable/map_buttons"
+                        android:drawableStart="@drawable/traffic_ic"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:paddingLeft="11dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Button
+                        android:id="@+id/landmarks"
+                        android:layout_width="48dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="320dp"
+                        android:layout_marginTop="24dp"
+                        android:background="@drawable/map_buttons"
+                        android:drawableStart="@drawable/landmarks_ic"
+                        android:paddingLeft="11dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/changePos"
+                        android:layout_width="match_parent"
+                        android:layout_height="152dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.766"
+                        android:layout_marginBottom="8dp"
+                        tools:layout_editor_absoluteX="0dp">
+
+                        <Button
+                            android:id="@+id/colorChangingButton3"
+                            android:layout_width="48dp"
+                            android:layout_height="50dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="40dp"
+                            android:background="@drawable/map_buttons"
+                            android:drawableStart="@drawable/current_loc"
+                            android:gravity="center_vertical|center_horizontal"
+                            android:paddingLeft="11dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.947"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <Button
+                            android:id="@+id/colorChangingButton4"
+                            android:layout_width="48dp"
+                            android:layout_height="50dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="100dp"
+                            android:background="@drawable/map_buttons"
+                            android:drawableStart="@drawable/add_loc"
+                            android:paddingLeft="11dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.947"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                <include layout="@layout/bottom_sheet"/>
+
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        </FrameLayout>
+    <include layout="@layout/add_geofence"/>
+
+        <com.google.android.material.navigation.NavigationView
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:headerLayout="@menu/header_layout"
+            app:menu="@menu/nav_menu"
+            android:id="@+id/nav_view"
+            android:layout_gravity="start"
+            app:itemIconTint="@color/black"
+            app:itemTextColor="@color/black"
+            >
+        </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
