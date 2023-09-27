@@ -62,11 +62,11 @@ public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
-    private boolean isFourthButtonColor1 = true;
-    private Button firstButton;
-    private Button secondButton;
-    private Button thirdButton;
-    private Button fourthButton;
+
+    private Button traffic;
+    private Button landmarks;
+    private Button userloc;
+    private Button add_geofence;
     private Button cancelbtn;
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
@@ -109,34 +109,34 @@ public class map_home extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
 
-        firstButton = findViewById(R.id.trafficbtn);
-        secondButton = findViewById(R.id.landmarks);
-        thirdButton = findViewById(R.id.colorChangingButton3);
-        fourthButton = findViewById(R.id.colorChangingButton4);
+        traffic = findViewById(R.id.trafficbtn);
+        landmarks = findViewById(R.id.landmarks);
+        userloc = findViewById(R.id.colorChangingButton3);
+        add_geofence = findViewById(R.id.colorChangingButton4);
         cancelbtn = findViewById(R.id.cancelButton);
 
         // Set the rounded button background with initial colors
-        setRoundedButtonBackground(firstButton, R.color.white, R.color.green);
-        setRoundedButtonBackground(secondButton, R.color.white, R.color.green);
-        setRoundedButtonBackground(thirdButton, R.color.white, R.color.green);
-        setRoundedButtonBackground(fourthButton, R.color.white, R.color.green);
+        setRoundedButtonBackground(traffic, R.color.white, R.color.green);
+        setRoundedButtonBackground(landmarks, R.color.white, R.color.green);
+        setRoundedButtonBackground(userloc, R.color.white, R.color.green);
+        setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
 
 
 
-        firstButton.setOnClickListener(new View.OnClickListener() {
+        traffic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleButtonColor(firstButton, isFirstButtonColor1);
+                toggleButtonColor(traffic, isFirstButtonColor1);
                 isFirstButtonColor1 = !isFirstButtonColor1;
             }
         });
 
-        secondButton.setOnClickListener(new View.OnClickListener() {
+        landmarks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleButtonColor(secondButton, isSecondButtonColor1);
+                toggleButtonColor(landmarks, isSecondButtonColor1);
                 isSecondButtonColor1 = !isSecondButtonColor1;
             }
         });
@@ -151,18 +151,17 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        thirdButton.setOnClickListener(new View.OnClickListener() {
+        userloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleButtonColor(thirdButton, isThirdButtonColor1);
-                isThirdButtonColor1 = !isThirdButtonColor1;
+                Toast.makeText(map_home.this, "Button for locating users current loc", Toast.LENGTH_SHORT).show();
             }
         });
 
 
 
        RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
-         fourthButton.setOnClickListener(new View.OnClickListener() {
+         add_geofence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
