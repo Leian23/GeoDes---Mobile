@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -34,6 +35,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
@@ -52,7 +54,9 @@ import org.osmdroid.views.overlay.Polyline;
 import android.graphics.Paint;
 
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-
+import org.osmdroid.views.overlay.TilesOverlay;
+import org.osmdroid.tileprovider.tilesource.ITileSource;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 
 
 
@@ -75,6 +79,8 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
+    private TilesOverlay trafficOverlay;
+    private boolean isTrafficVisible = false;
 
 
 
@@ -87,6 +93,12 @@ public class map_home extends AppCompatActivity {
 
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
+        ITileSource trafficTileSource = TileSourceFactory.MAPNIK; // You can use other tile sources for traffic data
+        trafficOverlay = new TilesOverlay((MapTileProviderBase) trafficTileSource, this);
+        trafficOverlay.setLoadingBackgroundColor(Color.TRANSPARENT);
+        trafficOverlay.setLoadingLineColor(Color.TRANSPARENT);
+        mapView.getOverlayManager().add(trafficOverlay);
+        trafficOverlay.setEnabled(isTrafficVisible);
 
         // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
@@ -130,6 +142,7 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
                 toggleButtonColor(traffic, isFirstButtonColor1);
                 isFirstButtonColor1 = !isFirstButtonColor1;
+                toggleTrafficLayer();
             }
         });
 
@@ -276,6 +289,12 @@ public class map_home extends AppCompatActivity {
 
     }
 
+    // Add a new method to toggle the traffic layer
+    private void toggleTrafficLayer() {
+        isTrafficVisible = !isTrafficVisible;
+        trafficOverlay.setEnabled(isTrafficVisible);
+        mapView.invalidate(); // Refresh the map
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
