@@ -1,11 +1,13 @@
 package com.example.geodes_mobile.main_app;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -23,32 +28,24 @@ import androidx.fragment.app.Fragment;
 
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.AlertsFragment;
-import com.example.geodes_mobile.fragments.SettingsFragment;
 import com.example.geodes_mobile.fragments.FeedbackFragment;
 import com.example.geodes_mobile.fragments.HelpFragment;
-import com.example.geodes_mobile.fragments.MyPreferenceFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
+import com.example.geodes_mobile.fragments.SettingsFragment;
 import com.example.geodes_mobile.main_app.Landmarks_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import androidx.core.app.ActivityCompat;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Polygon;
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
-
-
 import org.osmdroid.views.overlay.Polyline;
-import android.graphics.Paint;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
 import java.util.ArrayList;
 
 
@@ -121,7 +118,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-
+        LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
 
         traffic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,6 +149,7 @@ public class map_home extends AppCompatActivity {
         userloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
                 Toast.makeText(map_home.this, "Button for locating users current loc", Toast.LENGTH_SHORT).show();
             }
         });

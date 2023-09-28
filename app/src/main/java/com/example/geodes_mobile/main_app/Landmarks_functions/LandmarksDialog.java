@@ -10,8 +10,10 @@ import android.widget.Toast;
 
 import com.example.geodes_mobile.R;
 
-public class LandmarksDialog extends Dialog {
+import org.osmdroid.views.MapView;
 
+public class LandmarksDialog extends Dialog {
+    private MapView mapView;
     private CheckBox checkBoxRestaurants;
     private CheckBox checkBoxTerminals;
     private CheckBox checkBoxHotels;
@@ -53,12 +55,15 @@ public class LandmarksDialog extends Dialog {
                 if (isChecked) {
                     // Perform some action when Restaurants checkbox is checked
                     Toast.makeText(getContext(), "Restaurants checkbox checked", Toast.LENGTH_SHORT).show();
+
                 } else {
-                    // Perform some action when Restaurants checkbox is unchecked
+                    // Clear restaurant markers from the map
                     Toast.makeText(getContext(), "Restaurants checkbox unchecked", Toast.LENGTH_SHORT).show();
+                    // Clear or hide restaurant markers from the map
                 }
             }
         });
+
 
         checkBoxTerminals.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
