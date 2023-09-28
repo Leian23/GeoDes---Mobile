@@ -1,0 +1,84 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- Map Category -->
+    <PreferenceCategory
+        android:title="Map">
+
+        <ListPreference
+            android:key="distance_unit"
+            android:title="Distance Unit"
+            android:summary="Select distance unit"
+            android:dialogTitle="Select Distance Unit"
+            android:entries="@array/distance_units"
+            android:entryValues="@array/distance_units_values"
+            android:defaultValue="kilometers" />
+
+    </PreferenceCategory>
+
+    <!-- Alerts Category -->
+    <PreferenceCategory
+        android:title="Alerts">
+
+        <Preference
+            android:key="ringtone"
+            android:title="Ringtone"
+            android:summary="Select custom ringtone">
+        </Preference>
+
+        <SeekBarPreference
+            android:key="volume"
+            android:title="Volume"
+            android:summary="Adjust volume"
+            android:defaultValue="50"
+            android:max="100" />
+
+        <CheckBoxPreference
+            android:key="vibration"
+            android:title="Vibration"
+            android:summary="Enable vibration"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="alert_type"
+            android:title="Alert Type"
+            android:summary="Select alert type"
+            android:dialogTitle="Select Alert Type"
+            android:entries="@array/alert_types"
+            android:entryValues="@array/alert_types_values"
+            android:defaultValue="1" />
+
+        <ListPreference
+            android:key="audio_output"
+            android:title="Audio Output"
+            android:summary="Select audio output"
+            android:dialogTitle="Select Audio Output"
+            android:entries="@array/audio_outputs_values"
+            android:entryValues="@array/audio_outputs_values"
+            android:defaultValue="speaker" />
+
+    </PreferenceCategory>
+
+    <!-- Emergency Category -->
+    <PreferenceCategory
+        android:title="Emergency">
+
+        <EditTextPreference
+            android:key="contact_person"
+            android:title="Contact Person"
+            android:summary="Enter contact person's name" />
+
+        <EditTextPreference
+            android:key="contact_number"
+            android:title="Contact Number"
+            android:summary="Enter contact person's number"
+            android:inputType="phone" />
+
+        <SwitchPreferenceCompat
+            android:key="emergency_sos"
+            android:title="Emergency and SOS"
+            android:summary="Enable emergency and SOS alerts"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

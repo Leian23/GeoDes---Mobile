@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="300dp"
-             android:padding="20dp"
-             android:background="#9BEFCD"
-             android:gravity="bottom">
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="#86CDB1"
+    android:gravity="bottom"
+    android:padding="20dp">
 
     <TextView
         android:layout_width="wrap_content"
@@ -12,7 +12,6 @@
         android:text="GeoDes"
         android:textColor="@color/black"
         android:textSize="36dp"
-        android:textStyle="bold">
-    </TextView>
+        android:textStyle="bold"></TextView>
 
 </LinearLayout>

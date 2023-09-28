@@ -3,4 +3,44 @@
     <dimen name="custom_height">160dp</dimen>
     <dimen name="btn_height">200dp</dimen>
 
+
+    <string-array name="distance_units">
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
+
+    <string-array name="distance_units_values">
+        <item>kilometers</item>
+        <item>miles</item>
+    </string-array>
+
+    <string-array name="alert_types">
+        <item>Type 1</item>
+        <item>Type 2</item>
+        <item>Type 3</item>
+    </string-array>
+
+    <string-array name="alert_types_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="audio_outputs">
+        <item>Speaker</item>
+        <item>Headphones</item>
+        <item>Both Speaker and Headphones</item>
+    </string-array>
+
+    <string-array name="audio_outputs_values">
+        <item>speaker</item>
+        <item>headphones</item>
+        <item>both speaker and headphones</item>
+    </string-array>
+
+    <string-array name="ringtones_array">
+        <item>Ringtone 1</item>
+        <item>Ringtone 2</item>
+        <item>Ringtone 3</item>
+    </string-array>
 </resources>

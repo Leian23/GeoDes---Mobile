@@ -8,4 +8,8 @@
         <item name="android:background">@color/green</item>
     </style>
 
+    <style name="PreferenceScreenStyle">
+        <item name="android:paddingLeft">50dp</item>
+    </style>
+
 </resources>
