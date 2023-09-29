@@ -20,13 +20,14 @@ import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
-import org.osmdroid.views.overlay.Marker;
+
 
 public class LocationHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final long MIN_TIME_BETWEEN_UPDATES = 5000;
     private static final float MIN_DISTANCE_BETWEEN_UPDATES = 10;
+    private boolean isFirstLocationUpdate = true;
 
     private Context context;
     private MapView mapView;
@@ -69,6 +70,12 @@ public class LocationHandler {
         }
     }
 
+    private void stopLocationUpdates() {
+        // Unregister the location listener to stop updates
+        if (locationManager != null && locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+    }
     private void initializeLocationUpdates() {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -77,6 +84,9 @@ public class LocationHandler {
                 if (location.getAccuracy() <= MIN_DISTANCE_BETWEEN_UPDATES) {
                     GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
                     updateLocationOnMap(userLocation);
+
+                    stopLocationUpdates();
+                    isFirstLocationUpdate = false;
                 }
             }
 
@@ -98,7 +108,6 @@ public class LocationHandler {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
 
-            // Fetch the last known location if available
             Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (lastKnownLocation != null) {
                 GeoPoint userLocation = new GeoPoint(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
@@ -111,13 +120,6 @@ public class LocationHandler {
         mapController.setCenter(geoPoint);
     }
 
-    private void addMarker(GeoPoint geoPoint) {
-        Marker userMarker = new Marker(mapView);
-        userMarker.setPosition(geoPoint);
-        userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        mapView.getOverlays().add(userMarker);
-        mapView.invalidate();
-    }
 
     private void showToast(final String message) {
         new Handler(Looper.getMainLooper()).post(() -> {

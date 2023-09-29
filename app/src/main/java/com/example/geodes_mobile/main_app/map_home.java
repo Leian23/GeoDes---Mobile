@@ -33,7 +33,7 @@ import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
-import com.example.geodes_mobile.main_app.Landmarks_functions.LandmarksDialog;
+import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
@@ -72,7 +72,6 @@ public class map_home extends AppCompatActivity {
     private static final double MAX_ZOOM_LEVEL = 21.0;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,11 +81,9 @@ public class map_home extends AppCompatActivity {
 
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
-
-        // Enable pinch-to-zoom gestures on the map
         mapView.setMultiTouchControls(true);
 
-        // Enable rotation gestures
+
         RotationGestureOverlay rotationGestureOverlay = new RotationGestureOverlay(mapView);
         rotationGestureOverlay.setEnabled(true);
         mapView.getOverlays().add(rotationGestureOverlay);
@@ -115,7 +112,6 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(landmarks, R.color.white, R.color.green);
         setRoundedButtonBackground(userloc, R.color.white, R.color.green);
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
-
 
 
         LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
@@ -149,15 +145,13 @@ public class map_home extends AppCompatActivity {
         userloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
-                Toast.makeText(map_home.this, "Button for locating users current loc", Toast.LENGTH_SHORT).show();
+                locateUser();
             }
         });
 
 
-
-       RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
-         add_geofence.setOnClickListener(new View.OnClickListener() {
+        RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
+        add_geofence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -166,7 +160,6 @@ public class map_home extends AppCompatActivity {
                 findViewById(R.id.frame_layout).setVisibility(View.GONE);
                 // Show the overlay
                 overlayLayout.setVisibility(View.VISIBLE);
-
 
 
             }
@@ -269,7 +262,6 @@ public class map_home extends AppCompatActivity {
         });
 
 
-
     }
 
 
@@ -286,6 +278,7 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
+
     // Initialize and enable the user's location overlay on the map
     private void enableMyLocationOverlay() {
         myLocationOverlay = new MyLocationNewOverlay(mapView);
@@ -332,7 +325,6 @@ public class map_home extends AppCompatActivity {
     private Polygon createCircle(GeoPoint center, double radiusInMeters, int fillColor, int strokeColor, float strokeWidth) {
         int numberOfPoints = 360; // Number of points to approximate the circle
 
-        // Create an ArrayList to hold the points of the circle
         ArrayList<GeoPoint> circlePoints = new ArrayList<>();
 
         double distanceX = radiusInMeters / 111320.0; // 1 degree of latitude is approximately 111320 meters
@@ -345,7 +337,6 @@ public class map_home extends AppCompatActivity {
             circlePoints.add(new GeoPoint(x, y));
         }
 
-        // Create the Polygon with the fill color
         Polygon circle = new Polygon(mapView);
         circle.setPoints(circlePoints);
         circle.getFillPaint().setColor(fillColor); // Set fill color
@@ -364,6 +355,7 @@ public class map_home extends AppCompatActivity {
 
         return circle;
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -396,7 +388,6 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -423,7 +414,16 @@ public class map_home extends AppCompatActivity {
         }
     }
 
+    private void locateUser() {
+        if (myLocationOverlay != null) {
+            Location lastKnownLocation = myLocationOverlay.getLastFix();
+            if (lastKnownLocation != null) {
+                GeoPoint userLocation = new GeoPoint(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                mapView.getController().animateTo(userLocation);
+                mapView.getController().setZoom(15.0);
+            }
+        }
 
 
-
+    }
 }

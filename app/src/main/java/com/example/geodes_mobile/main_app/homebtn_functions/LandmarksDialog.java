@@ -1,4 +1,4 @@
-package com.example.geodes_mobile.main_app.Landmarks_functions;
+package com.example.geodes_mobile.main_app.homebtn_functions;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -38,14 +38,14 @@ public class LandmarksDialog extends Dialog {
         checkBoxMuseum = findViewById(R.id.checkBoxMuseum);
         checkBoxParks = findViewById(R.id.checkBoxParks);
 
-        // Restore the state of the checkboxes from SharedPreferences
+        // Restoring the state of the checkboxes from SharedPreferences
         checkBoxRestaurants.setChecked(sharedPreferences.getBoolean("restaurants", false));
         checkBoxTerminals.setChecked(sharedPreferences.getBoolean("terminals", false));
         checkBoxHotels.setChecked(sharedPreferences.getBoolean("hotels", false));
         checkBoxMuseum.setChecked(sharedPreferences.getBoolean("museum", false));
         checkBoxParks.setChecked(sharedPreferences.getBoolean("parks", false));
 
-        // Set an OnCheckedChangeListener for each CheckBox to save their state
+
         checkBoxRestaurants.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -116,14 +116,12 @@ public class LandmarksDialog extends Dialog {
         checkBoxParks.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // Save the state of the Parks checkbox
+
                 sharedPreferences.edit().putBoolean("parks", isChecked).apply();
 
                 if (isChecked) {
-                    // Perform some action when Parks checkbox is checked
                     Toast.makeText(getContext(), "Parks checkbox checked", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Perform some action when Parks checkbox is unchecked
                     Toast.makeText(getContext(), "Parks checkbox unchecked", Toast.LENGTH_SHORT).show();
                 }
             }
