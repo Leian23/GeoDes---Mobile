@@ -302,24 +302,20 @@ public class map_home extends AppCompatActivity {
             double userLatitude = lastKnownLocation.getLatitude();
             double userLongitude = lastKnownLocation.getLongitude();
 
-            // Create GeoPoint for the user's location
+
             GeoPoint userLocation = new GeoPoint(userLatitude, userLongitude);
 
-            /// Create inner circle with a radius of 300 meters
-            Polygon innerCircle = createCircle(userLocation, 300.0, 0x300000FF, 0x00000000, 0f); // Semi-transparent blue color with no outline
 
-// Create outer circle with a radius of 1000 meters
+            Polygon innerCircle = createCircle(userLocation, 300.0, 0x300000FF, 0x00000000, 0f); // Semi-transparent blue color with no outline
             Polygon outerCircle = createCircle(userLocation, 1000.0, 0x3000FF00, 0x00000000, 0f); // Semi-transparent green color with no outline
 
-            // Add circles to the map
+
             mapView.getOverlays().add(innerCircle);
             mapView.getOverlays().add(outerCircle);
 
-            // Refresh the map to show the circles
             mapView.invalidate();
         }
     }
-
 
     // Method to create a circular polygon with an outline
     private Polygon createCircle(GeoPoint center, double radiusInMeters, int fillColor, int strokeColor, float strokeWidth) {

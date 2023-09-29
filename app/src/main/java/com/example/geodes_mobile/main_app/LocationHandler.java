@@ -21,19 +21,20 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 
-
 public class LocationHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
-    private static final long MIN_TIME_BETWEEN_UPDATES = 5000;
+    private static final long MIN_TIME_BETWEEN_UPDATES = 0; // 500 milliseconds
     private static final float MIN_DISTANCE_BETWEEN_UPDATES = 10;
-    private boolean isFirstLocationUpdate = true;
+    private static final int FASTEST_UPDATE_INTERVAL = 0; // milliseconds
 
     private Context context;
     private MapView mapView;
     private IMapController mapController;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private boolean isGpsProviderEnabled = true;
+    private boolean isLocationUpdateRequested = false;
 
     public LocationHandler(Context context, MapView mapView) {
         this.context = context;
@@ -42,7 +43,7 @@ public class LocationHandler {
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
 
         mapController = mapView.getController();
-        mapController.setZoom(15.0);
+        mapController.setZoom(17.0); // Adjust the zoom level based on your requirements
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
@@ -59,35 +60,34 @@ public class LocationHandler {
         });
         mapView.getOverlays().add(0, mapEventsOverlay);
 
-        if (Build.VERSION.SDK_INT >= 23) {
+        // Check and request location permissions at runtime
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions((MainActivity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
-            } else {
-                initializeLocationUpdates();
             }
-        } else {
+        }
+
+        initializeLocationUpdates();
+    }
+
+    public void requestLocationUpdate() {
+        // Check if a location update is already requested
+        if (!isLocationUpdateRequested) {
             initializeLocationUpdates();
+            isLocationUpdateRequested = true;
         }
     }
 
-    private void stopLocationUpdates() {
-        // Unregister the location listener to stop updates
-        if (locationManager != null && locationListener != null) {
-            locationManager.removeUpdates(locationListener);
-        }
-    }
     private void initializeLocationUpdates() {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if (location.getAccuracy() <= MIN_DISTANCE_BETWEEN_UPDATES) {
-                    GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-                    updateLocationOnMap(userLocation);
+                GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+                updateLocationOnMap(userLocation);
 
-                    stopLocationUpdates();
-                    isFirstLocationUpdate = false;
-                }
+                // Stop location updates after the first update
+                stopLocationUpdates();
             }
 
             @Override
@@ -96,23 +96,33 @@ public class LocationHandler {
 
             @Override
             public void onProviderEnabled(String provider) {
+                if (!isGpsProviderEnabled) {
+                    isGpsProviderEnabled = true;
+                    requestLocationUpdates(); // Request new location updates when GPS is enabled again
+                }
             }
 
             @Override
             public void onProviderDisabled(String provider) {
                 showToast("GPS provider is disabled. Please enable it.");
+                isGpsProviderEnabled = false;
             }
         };
 
         // Request location updates
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
+        requestLocationUpdates();
+    }
 
-            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastKnownLocation != null) {
-                GeoPoint userLocation = new GeoPoint(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                updateLocationOnMap(userLocation);
-            }
+    private void requestLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.removeUpdates(locationListener); // Remove previous updates
+
+            // Request new location updates from both GPS and NETWORK providers with faster intervals
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
+
+            // Fetch the last known location if available using a faster interval
+
         }
     }
 
@@ -120,10 +130,17 @@ public class LocationHandler {
         mapController.setCenter(geoPoint);
     }
 
-
     private void showToast(final String message) {
         new Handler(Looper.getMainLooper()).post(() -> {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         });
+    }
+
+    // Properly release location updates when they are no longer needed
+    public void stopLocationUpdates() {
+        if (locationManager != null && locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+            isLocationUpdateRequested = false; // Reset the flag when updates are stopped
+        }
     }
 }
