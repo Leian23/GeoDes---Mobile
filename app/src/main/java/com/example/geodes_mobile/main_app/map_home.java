@@ -33,6 +33,7 @@ import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
+import com.example.geodes_mobile.main_app.create_geofence_functions.MapManager;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -47,8 +48,6 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
-
-
 
 
 public class map_home extends AppCompatActivity {
@@ -70,6 +69,8 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
+    private MapManager mapManager;
+
 
 
     @Override
@@ -116,13 +117,22 @@ public class map_home extends AppCompatActivity {
 
         LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
 
+        mapView = findViewById(R.id.map);
+        mapManager = new MapManager(map_home.this, mapView);
+        mapManager.addMarkerWithGeofences(14.5343, 120.9795, 200, 100);
+
+
+        // Assuming you have a button named traffic
         traffic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggleButtonColor(traffic, isFirstButtonColor1);
                 isFirstButtonColor1 = !isFirstButtonColor1;
-            }
+                }
         });
+
+
+
 
         landmarks.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,6 +273,16 @@ public class map_home extends AppCompatActivity {
 
 
     }
+
+
+
+
+
+
+
+
+
+
 
 
     @Override

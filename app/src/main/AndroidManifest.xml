@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-feature android:name="android.hardware.location.gps" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+
 
 
     <application
@@ -51,6 +54,11 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBe7HcxnUuttO7GD1sAp6Ae2xhTnYiBrtc" />
+
+        <receiver android:name=".GeofenceBroadcastReceiver"/>
+
     </application>
 
+
 </manifest>
+
