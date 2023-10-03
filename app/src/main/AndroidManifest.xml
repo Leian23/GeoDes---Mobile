@@ -24,7 +24,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoDes_Mobile"
         tools:targetApi="31">
-        <activity
+
+
+
+    <activity
             android:name=".fragment_alerts"
             android:exported="false" />
         <activity
@@ -32,7 +35,9 @@
             android:exported="false" />
         <activity
             android:name=".main_app.map_home"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+
         <activity
             android:name=".useraccess.signupActivity"
             android:exported="false" />
@@ -56,6 +61,8 @@
             android:value="AIzaSyBe7HcxnUuttO7GD1sAp6Ae2xhTnYiBrtc" />
 
         <receiver android:name=".GeofenceBroadcastReceiver"/>
+
+
 
     </application>
 
