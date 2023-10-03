@@ -4,9 +4,14 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/userprof"
+            android:icon="@drawable/alert_ic"
+            android:title="Account">
+        </item>
+        <item
             android:id="@+id/alerts"
             android:icon="@drawable/alert_ic"
-            android:title="Alerts" >
+            android:title="Alerts">
         </item>
         <item android:id="@+id/schedules"
             android:icon="@drawable/schedule_ic"
@@ -32,6 +37,5 @@
             android:icon="@drawable/logout_ic"
             android:title="Log out" >
         </item>
-
     </group>
 </menu>

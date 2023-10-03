@@ -7,15 +7,12 @@ import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +24,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +35,7 @@ import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
+import com.example.geodes_mobile.fragments.UserProfile_Fragment;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Adapter;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
@@ -69,6 +68,7 @@ public class map_home extends AppCompatActivity {
     private Button userloc;
     private Button add_geofence;
     private Button cancelbtn;
+    private Button viewProfile;
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
@@ -113,6 +113,7 @@ public class map_home extends AppCompatActivity {
         userloc = findViewById(R.id.colorChangingButton3);
         add_geofence = findViewById(R.id.colorChangingButton4);
         cancelbtn = findViewById(R.id.cancelButton);
+
 
         // Set the rounded button background with initial colors
         setRoundedButtonBackground(traffic, R.color.white, R.color.green);
@@ -216,9 +217,19 @@ public class map_home extends AppCompatActivity {
 
         //dito maglalagay ng ng list of active alerts
         List<DataModel> data = new ArrayList<>();
-        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
-        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
-        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
+        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no noteeddwdwdwdwdwdwdwswdiiuiuiuiuiuiuisadsdsadsade", R.drawable.pinalerts));
+        data.add(new DataModel("5246 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
+        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
+        data.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
+        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
+        data.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
+
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -227,9 +238,10 @@ public class map_home extends AppCompatActivity {
 
         //dito maglalagay ng list of active schedules
         List<DataModel2> data1 = new ArrayList<>();
-        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
 
         RecyclerView recyclerVieww = findViewById(R.id.recyclerVieww);
         recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -254,6 +266,8 @@ public class map_home extends AppCompatActivity {
         });
 
         navigationView = findViewById(R.id.nav_view); // Make sure to initialize your NavigationView
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -282,7 +296,11 @@ public class map_home extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.frame_layout, new FeedbackFragment())
                             .commit();
-                } else if (item.getItemId() == R.id.logout) {
+                } else if (item.getItemId() == R.id.userprof) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new UserProfile_Fragment())
+                            .commit();
+                }else if (item.getItemId() == R.id.logout) {
                     Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
                 }
 
@@ -290,6 +308,10 @@ public class map_home extends AppCompatActivity {
                 return true;
             }
         });
+
+
+
+
     }
 
 
@@ -388,8 +410,6 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
-
     private void locateUser() {
         if (myLocationOverlay != null) {
             Location lastKnownLocation = myLocationOverlay.getLastFix();
@@ -401,37 +421,16 @@ public class map_home extends AppCompatActivity {
         }
     }
 
-    class MyRvAdapter extends RecyclerView.Adapter<MyRvAdapter.MyHolder> {
-        ArrayList<String> data;
-
-        public MyRvAdapter(ArrayList<String> data) {
-            this.data = data;
-        }
-
-        @NonNull
-        @Override
-        public MyHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.alert_item, parent, false);
-            return new MyHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull MyHolder holder, int position) {
-            holder.alertTitle.setText(data.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
-        class MyHolder extends RecyclerView.ViewHolder {
-            TextView alertTitle;
-
-            public MyHolder(@NonNull View itemView) {
-                super(itemView);
-                alertTitle = itemView.findViewById(R.id.alertTitle);
-            }
-        }
+    public void navigateToFirstLayout() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.frame_layout, new UserProfile_Fragment());
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
+
+
+
+
+
 }
