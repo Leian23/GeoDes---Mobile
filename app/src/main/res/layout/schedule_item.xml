@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="212dp"
+    android:layout_height="95dp"
+    android:layout_margin="1.5dp"
+    app:cardBackgroundColor="#F3F3F3"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="0dp"
+    app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="11:03 PM"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/schedImage"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+
+        <TextView
+            android:id="@+id/repeat_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sat, Mon, Tue"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/schedImage"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.826"></TextView>
+
+        <TextView
+            android:id="@+id/alertlists"
+            android:layout_width="38dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="4dp"
+            android:text="Alert1 Alert2 Alert3 ..."
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+
+        <TextView
+            android:id="@+id/SchedTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:alpha="0.7"
+            android:text="Work"
+            android:textColor="@color/black"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+
+        <ImageView
+            android:id="@+id/schedImage"
+            android:layout_width="20dp"
+            android:layout_height="17dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/SchedTitle"
+            app:srcCompat="@drawable/clock_ic" />
+
+        <ImageView
+            android:id="@+id/calendarImage"
+            android:layout_width="19dp"
+            android:layout_height="17dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/schedImage"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/calendar_ic" />
+
+        <ImageView
+            android:id="@+id/alarm"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginEnd="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/alertlists"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/alarm_ic" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

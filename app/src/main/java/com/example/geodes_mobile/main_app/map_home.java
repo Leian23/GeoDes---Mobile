@@ -1,20 +1,21 @@
 package com.example.geodes_mobile.main_app;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.AlertsFragment;
@@ -33,6 +37,11 @@ import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Adapter;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
+import com.example.geodes_mobile.main_app.create_geofence_functions.LocationHandler;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapManager;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -42,12 +51,11 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Polygon;
-import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class map_home extends AppCompatActivity {
@@ -56,7 +64,6 @@ public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
-
     private Button traffic;
     private Button landmarks;
     private Button userloc;
@@ -70,7 +77,6 @@ public class map_home extends AppCompatActivity {
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
     private MapManager mapManager;
-
 
 
     @Override
@@ -122,16 +128,13 @@ public class map_home extends AppCompatActivity {
         mapManager.addMarkerWithGeofences(14.5343, 120.9795, 200, 100);
 
 
-        // Assuming you have a button named traffic
         traffic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggleButtonColor(traffic, isFirstButtonColor1);
                 isFirstButtonColor1 = !isFirstButtonColor1;
-                }
+            }
         });
-
-
 
 
         landmarks.setOnClickListener(new View.OnClickListener() {
@@ -171,7 +174,6 @@ public class map_home extends AppCompatActivity {
                 // Show the overlay
                 overlayLayout.setVisibility(View.VISIBLE);
 
-
             }
         });
 
@@ -186,7 +188,7 @@ public class map_home extends AppCompatActivity {
 
             }
         });
-
+        //add geofence on back press
 
         //Bottom Sheet
         LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
@@ -196,8 +198,6 @@ public class map_home extends AppCompatActivity {
         int customHeight = getResources().getDimensionPixelSize(R.dimen.custom_height);
 
         bottomSheetBehavior.setPeekHeight(customHeight);
-
-
         changePosLayout = findViewById(R.id.changePos);
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -205,15 +205,38 @@ public class map_home extends AppCompatActivity {
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 // Handle state changes if needed
             }
-
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 // Update the vertical position of the ConstraintLayout with buttons
                 int layoutHeight = changePosLayout.getHeight();
-                int offset = (int) ((slideOffset * 1.55 * layoutHeight));
+                int offset = (int) ((slideOffset * 0.90 * layoutHeight));
                 changePosLayout.setTranslationY(-offset);
             }
         });
+
+        //dito maglalagay ng ng list of active alerts
+        List<DataModel> data = new ArrayList<>();
+        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
+        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
+        data.add(new DataModel("5 km", R.drawable.get_in, "Alert#1", "no note", R.drawable.pinalerts));
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        Adapter adapter = new Adapter(data, this);
+        recyclerView.setAdapter(adapter);
+
+        //dito maglalagay ng list of active schedules
+        List<DataModel2> data1 = new ArrayList<>();
+        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        data1.add(new DataModel2("Schedule 1", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+
+        RecyclerView recyclerVieww = findViewById(R.id.recyclerVieww);
+        recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        Adapter2 adapter1 = new Adapter2(data1, this);
+        recyclerVieww.setAdapter(adapter1);
+
+
 
 
         //Menu Drawer
@@ -262,27 +285,12 @@ public class map_home extends AppCompatActivity {
                 } else if (item.getItemId() == R.id.logout) {
                     Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
                 }
-                // Add more else-if blocks for other menu items if needed
 
                 drawerLayout.closeDrawer(GravityCompat.START); // Close the drawer after an item is selected
                 return true;
-
-
             }
         });
-
-
     }
-
-
-
-
-
-
-
-
-
-
 
 
     @Override
@@ -314,63 +322,6 @@ public class map_home extends AppCompatActivity {
         }
     }
 
-    // Method to add inner and outer circles with the user's location as the center
-    private void addLocationCircles() {
-        // Get the user's last known location
-        Location lastKnownLocation = myLocationOverlay.getLastFix();
-        if (lastKnownLocation != null) {
-            double userLatitude = lastKnownLocation.getLatitude();
-            double userLongitude = lastKnownLocation.getLongitude();
-
-
-            GeoPoint userLocation = new GeoPoint(userLatitude, userLongitude);
-
-
-            Polygon innerCircle = createCircle(userLocation, 300.0, 0x300000FF, 0x00000000, 0f); // Semi-transparent blue color with no outline
-            Polygon outerCircle = createCircle(userLocation, 1000.0, 0x3000FF00, 0x00000000, 0f); // Semi-transparent green color with no outline
-
-
-            mapView.getOverlays().add(innerCircle);
-            mapView.getOverlays().add(outerCircle);
-
-            mapView.invalidate();
-        }
-    }
-
-    // Method to create a circular polygon with an outline
-    private Polygon createCircle(GeoPoint center, double radiusInMeters, int fillColor, int strokeColor, float strokeWidth) {
-        int numberOfPoints = 360; // Number of points to approximate the circle
-
-        ArrayList<GeoPoint> circlePoints = new ArrayList<>();
-
-        double distanceX = radiusInMeters / 111320.0; // 1 degree of latitude is approximately 111320 meters
-        double distanceY = radiusInMeters / (111320.0 * Math.cos(Math.toRadians(center.getLatitude())));
-
-        for (int i = 0; i < numberOfPoints; i++) {
-            double theta = Math.toRadians(i * 360.0 / numberOfPoints);
-            double x = center.getLatitude() + (distanceX * Math.cos(theta));
-            double y = center.getLongitude() + (distanceY * Math.sin(theta));
-            circlePoints.add(new GeoPoint(x, y));
-        }
-
-        Polygon circle = new Polygon(mapView);
-        circle.setPoints(circlePoints);
-        circle.getFillPaint().setColor(fillColor); // Set fill color
-
-        // Create a Polyline for the outline
-        Polyline polyline = new Polyline(mapView);
-        polyline.setPoints(circlePoints);
-
-        // Set stroke color and width using the outlinePaint
-        Paint outlinePaint = polyline.getOutlinePaint();
-        outlinePaint.setColor(strokeColor);
-        outlinePaint.setStrokeWidth(strokeWidth);
-
-        // Add the Polyline to the map overlays
-        mapView.getOverlayManager().add(polyline);
-
-        return circle;
-    }
 
     @Override
     protected void onResume() {
@@ -410,25 +361,34 @@ public class map_home extends AppCompatActivity {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+            RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
 
-            if (currentFragment instanceof AlertsFragment ||
-                    currentFragment instanceof ScheduleFragment ||
-                    currentFragment instanceof SettingsFragment ||
-                    currentFragment instanceof OfflineMapFragment ||
-                    currentFragment instanceof FeedbackFragment ||
-                    currentFragment instanceof HelpFragment) {
-
-                // You are in one of the specified fragments, navigate back to map_home
-                Intent intent = new Intent(this, map_home.class);
-                startActivity(intent);
-                finish();
+            if (overlayLayout.getVisibility() == View.VISIBLE) {
+                findViewById(R.id.menu_button).setVisibility(View.VISIBLE);
+                findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
+                findViewById(R.id.frame_layout).setVisibility(View.VISIBLE);
+                overlayLayout.setVisibility(View.GONE);
             } else {
-                // Handle the back press as usual
-                super.onBackPressed();
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+                if (currentFragment instanceof AlertsFragment ||
+                        currentFragment instanceof ScheduleFragment ||
+                        currentFragment instanceof SettingsFragment ||
+                        currentFragment instanceof OfflineMapFragment ||
+                        currentFragment instanceof FeedbackFragment ||
+                        currentFragment instanceof HelpFragment) {
+
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction().remove(currentFragment).commit();
+                } else {
+                    super.onBackPressed();
+                }
             }
         }
     }
+
+
+
 
     private void locateUser() {
         if (myLocationOverlay != null) {
@@ -439,7 +399,39 @@ public class map_home extends AppCompatActivity {
                 mapView.getController().setZoom(15.0);
             }
         }
+    }
 
+    class MyRvAdapter extends RecyclerView.Adapter<MyRvAdapter.MyHolder> {
+        ArrayList<String> data;
 
+        public MyRvAdapter(ArrayList<String> data) {
+            this.data = data;
+        }
+
+        @NonNull
+        @Override
+        public MyHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.alert_item, parent, false);
+            return new MyHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MyHolder holder, int position) {
+            holder.alertTitle.setText(data.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
+
+        class MyHolder extends RecyclerView.ViewHolder {
+            TextView alertTitle;
+
+            public MyHolder(@NonNull View itemView) {
+                super(itemView);
+                alertTitle = itemView.findViewById(R.id.alertTitle);
+            }
+        }
     }
 }

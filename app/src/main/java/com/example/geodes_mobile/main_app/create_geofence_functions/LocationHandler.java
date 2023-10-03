@@ -1,4 +1,4 @@
-package com.example.geodes_mobile.main_app;
+package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.Manifest;
 import android.content.Context;
@@ -14,19 +14,22 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
+import com.example.geodes_mobile.main_app.MainActivity;
+
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polygon;
 
 public class LocationHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final long MIN_TIME_BETWEEN_UPDATES = 0; // 500 milliseconds
     private static final float MIN_DISTANCE_BETWEEN_UPDATES = 10;
-    private static final int FASTEST_UPDATE_INTERVAL = 0; // milliseconds
 
     private Context context;
     private MapView mapView;
@@ -35,27 +38,28 @@ public class LocationHandler {
     private LocationListener locationListener;
     private boolean isGpsProviderEnabled = true;
     private boolean isLocationUpdateRequested = false;
+    private Marker mapMarker;
+
+    private MapManager mapManager;
 
     public LocationHandler(Context context, MapView mapView) {
         this.context = context;
         this.mapView = mapView;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-
         mapController = mapView.getController();
-        mapController.setZoom(17.0); // Adjust the zoom level based on your requirements
+        mapController.setZoom(17.0);
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint geoPoint) {
-                showToast("Tapped on the map at: " + geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
                 return false;
             }
 
             @Override
             public boolean longPressHelper(GeoPoint geoPoint) {
-                showToast("Long pressed on the map at: " + geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
-                return false;
+                dropPinOnMap(geoPoint);
+                return true;
             }
         });
         mapView.getOverlays().add(0, mapEventsOverlay);
@@ -64,10 +68,14 @@ public class LocationHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions((MainActivity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            } else {
+                // Permission is already granted, initialize location updates
+                initializeLocationUpdates();
             }
+        } else {
+            // For devices running versions below Marshmallow, no need to check permissions, just initialize location updates
+            initializeLocationUpdates();
         }
-
-        initializeLocationUpdates();
     }
 
     public void requestLocationUpdate() {
@@ -85,9 +93,7 @@ public class LocationHandler {
             public void onLocationChanged(Location location) {
                 GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
                 updateLocationOnMap(userLocation);
-
-                // Stop location updates after the first update
-                stopLocationUpdates();
+                // Consider whether you really need to stop updates here
             }
 
             @Override
@@ -122,7 +128,6 @@ public class LocationHandler {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
 
             // Fetch the last known location if available using a faster interval
-
         }
     }
 
@@ -134,6 +139,39 @@ public class LocationHandler {
         new Handler(Looper.getMainLooper()).post(() -> {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void dropPinOnMap(GeoPoint geoPoint) {
+        // Clear existing marker and geofences
+        clearMarkerAndGeofences();
+
+        // Add a new marker at the long-pressed location
+        mapMarker = new Marker(mapView);
+        mapMarker.setPosition(geoPoint);
+        mapView.getOverlays().add(mapMarker);
+
+        // Add a new marker with geofences
+        if (mapManager == null) {
+            mapManager = new MapManager(context, mapView);
+        }
+        mapManager.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), 200, 100);
+
+        // Force the map to redraw immediately
+        mapView.invalidate();
+
+        // Center the map on the new marker location
+        mapView.getController().animateTo(geoPoint);
+    }
+
+
+    private void clearMarkerAndGeofences() {
+        // Remove existing marker and geofences
+        mapView.getOverlays().remove(mapMarker);
+        mapView.getOverlayManager().removeIf(overlay ->
+                overlay instanceof Polygon || overlay instanceof Marker);
+
+        // Force the map to redraw
+        mapView.invalidate();
     }
 
     // Properly release location updates when they are no longer needed

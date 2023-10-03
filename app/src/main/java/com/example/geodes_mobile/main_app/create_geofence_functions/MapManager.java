@@ -1,4 +1,5 @@
-package com.example.geodes_mobile.main_app.create_geofence_functions;// MapManager.java
+// MapManager.java
+package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -46,12 +47,5 @@ public class MapManager {
         marker.setInfoWindow(null);
         mapView.getOverlays().add(marker);
 
-        // Center the map on the marker
-        //mapView.getController().setCenter(new GeoPoint(latitude, longitude));
-        mapView.getController().setZoom(15.0);
-
     }
-
-
-
 }

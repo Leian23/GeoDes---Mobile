@@ -29,47 +29,78 @@
         app:cardElevation="8dp"
         android:layout_marginBottom="-20dp">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="23dp"
+            android:paddingLeft="17dp"
+            android:text="Alerts"
+            android:textStyle="bold"
+            android:textSize="16dp">
+
+        </TextView>
+
+
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_height="300dp"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingTop="12dp">
 
             <View
                 android:layout_width="45dp"
                 android:layout_height="8dp"
                 android:layout_gravity="center"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="13dp"
                 android:background="@drawable/view_rounded"
-
                 ></View>
 
-            <TextView
-                style="@style/TextAppearance.AppCompat.Headline"
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Android chuchu"
-                android:textColor="@color/black"
-                android:textStyle="bold" />
+                android:layout_gravity="center">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="8dp"
+                    android:orientation="horizontal"/>
+            </HorizontalScrollView>
 
             <TextView
-                style="@style/TextAppearance.AppCompat.Medium"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_marginTop="15dp"
-                android:text="Hello Everyone"
-                android:textColor="@color/black" />
-
-            <TextView
-                style="@style/TextAppearance.AppCompat.Medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:text="Hello everyone"
-                android:textColor="#C85252">
+                android:paddingTop="5dp"
+                android:paddingLeft="17dp"
+                android:layout_marginBottom="-2dp"
+                android:text="Schedules"
+                android:textStyle="bold"
+                android:textSize="16dp">
 
             </TextView>
+
+
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollVieww"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerVieww"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="10dp"
+                android:orientation="horizontal"/>
+            </HorizontalScrollView>
 
 
         </LinearLayout>

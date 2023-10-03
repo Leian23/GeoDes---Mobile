@@ -6,5 +6,4 @@
     <color name="normal_color">#0000FF</color>
     <dimen name="corner_radius">16dp</dimen>
     <color name="blue">#7FA9FD</color>
-
 </resources>
