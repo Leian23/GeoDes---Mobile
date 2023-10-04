@@ -24,7 +24,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -68,6 +67,7 @@ public class map_home extends AppCompatActivity {
     private Button userloc;
     private Button add_geofence;
     private Button cancelbtn;
+    private Button btnDiscard;
     private Button viewProfile;
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
@@ -113,6 +113,7 @@ public class map_home extends AppCompatActivity {
         userloc = findViewById(R.id.colorChangingButton3);
         add_geofence = findViewById(R.id.colorChangingButton4);
         cancelbtn = findViewById(R.id.cancelButton);
+        btnDiscard = findViewById(R.id.btnDiscard);
 
 
         // Set the rounded button background with initial colors
@@ -123,11 +124,6 @@ public class map_home extends AppCompatActivity {
 
 
         LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
-
-        mapView = findViewById(R.id.map);
-        mapManager = new MapManager(map_home.this, mapView);
-        mapManager.addMarkerWithGeofences(14.5343, 120.9795, 200, 100);
-
 
         traffic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,7 +185,18 @@ public class map_home extends AppCompatActivity {
 
             }
         });
-        //add geofence on back press
+
+        btnDiscard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showElements();
+
+                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
+                locationHandler.clearMarkerAndGeofences();
+            }
+        });
+
+
 
         //Bottom Sheet
         LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
@@ -308,10 +315,6 @@ public class map_home extends AppCompatActivity {
                 return true;
             }
         });
-
-
-
-
     }
 
 
@@ -384,12 +387,18 @@ public class map_home extends AppCompatActivity {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             RelativeLayout overlayLayout = findViewById(R.id.overlayLayout);
-
+            LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
             if (overlayLayout.getVisibility() == View.VISIBLE) {
                 findViewById(R.id.menu_button).setVisibility(View.VISIBLE);
                 findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
                 findViewById(R.id.frame_layout).setVisibility(View.VISIBLE);
                 overlayLayout.setVisibility(View.GONE);
+            } else if (overlayLayoutt.getVisibility() == View.VISIBLE) {
+                showElements();
+                overlayLayoutt.setVisibility(View.GONE);
+
+                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
+                locationHandler.clearMarkerAndGeofences();
             } else {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
 
@@ -398,16 +407,19 @@ public class map_home extends AppCompatActivity {
                         currentFragment instanceof SettingsFragment ||
                         currentFragment instanceof OfflineMapFragment ||
                         currentFragment instanceof FeedbackFragment ||
-                        currentFragment instanceof HelpFragment) {
+                        currentFragment instanceof HelpFragment ||
+                        currentFragment instanceof UserProfile_Fragment) {
 
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction().remove(currentFragment).commit();
+
                 } else {
                     super.onBackPressed();
                 }
             }
         }
     }
+
 
 
     private void locateUser() {
@@ -420,15 +432,58 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
+    public void hideElements() {
+        //hide all the elements when adding geofence (this is where ui for addding geofence is implemented)
+        LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
+        findViewById(R.id.menu_button).setVisibility(View.GONE);
+        findViewById(R.id.search_view1).setVisibility(View.GONE);
+        findViewById(R.id.design_bottom_sheet).setVisibility(View.GONE);
+        findViewById(R.id.trafficbtn).setVisibility(View.GONE);
+        findViewById(R.id.landmarks).setVisibility(View.GONE);
+        findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
+        findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
+        findViewById(R.id.search_view1).setVisibility(View.GONE);
 
-    public void navigateToFirstLayout() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frame_layout, new UserProfile_Fragment());
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        overlayLayoutt.setVisibility(View.VISIBLE);
+
+        LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
+        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        bottomSheetBehavior.setHideable(false);
+
+        int customHeight = getResources().getDimensionPixelSize(R.dimen.height_btm_add);
+
+        bottomSheetBehavior.setPeekHeight(customHeight);
+        changePosLayout = findViewById(R.id.changePos);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                // Handle state changes if needed
+            }
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Update the vertical position of the ConstraintLayout with buttons
+                int layoutHeight = changePosLayout.getHeight();
+                int offset = (int) ((slideOffset * 0.90 * layoutHeight));
+                changePosLayout.setTranslationY(-offset);
+            }
+        });
     }
 
+
+    public void showElements() {
+        findViewById(R.id.menu_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
+        findViewById(R.id.design_bottom_sheet).setVisibility(View.VISIBLE);
+        findViewById(R.id.trafficbtn).setVisibility(View.VISIBLE);
+        findViewById(R.id.landmarks).setVisibility(View.VISIBLE);
+        findViewById(R.id.colorChangingButton4).setVisibility(View.VISIBLE);
+        findViewById(R.id.colorChangingButton3).setVisibility(View.VISIBLE);
+        findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
+
+        LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
+        overlayLayoutt.setVisibility(View.GONE);
+    }
 
 
 

@@ -13,6 +13,17 @@
         android:layout_height="match_parent"
         >
 
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="484dp"
+            android:text="Change Password"
+            android:textSize="13dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageButton
             android:id="@+id/menu_button"
             android:layout_width="60dp"
@@ -40,6 +51,8 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
+
+
         <ImageView
             android:id="@+id/profileImageView"
             android:layout_width="120dp"
@@ -53,45 +66,79 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
+            android:id="@+id/confirmPasswordEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:paddingLeft="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
+
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:paddingLeft="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/confirmPasswordEditText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/emailEditText"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <EditText
+            android:id="@+id/lastNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Last Name"
+            android:paddingLeft="12dp"
+            android:text="Existing Last Name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/firstNameEditText" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="276dp"
+            android:text="General Information"
+            android:textSize="13dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
             android:id="@+id/emailEditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:hint="Email"
+            android:paddingLeft="12dp"
+            android:text="Existing Email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/lastNameEditText" />
 
         <EditText
-            android:id="@+id/confirmPasswordEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
-
-        <EditText
-            android:id="@+id/lastNameEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:hint="Last Name"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/firstNameEditText" />
-
-        <EditText
             android:id="@+id/firstNameEditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="60dp"
             android:hint="First Name"
+            android:textSize="18dp"
+            android:paddingLeft="12dp"
+            android:text="Existing First Name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,28 +146,35 @@
 
         <Button
             android:id="@+id/changeProfileButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="223dp"
+            android:layout_height="39dp"
             android:layout_marginTop="12dp"
+            android:background="@drawable/rounded_corner"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:text="Change Profile Picture"
+            android:textSize="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profileImageView" />
 
-        <EditText
-            android:id="@+id/passwordEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Password"
-            android:inputType="textPassword"
+        <Button
+            android:id="@+id/applyChangesButton"
+            android:layout_width="148dp"
+            android:layout_height="37dp"
+            android:layout_marginTop="68dp"
+            android:background="@drawable/rounded_corner_nav"
+            android:text="Apply Changes"
+            android:textSize="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.06"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/emailEditText" />
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

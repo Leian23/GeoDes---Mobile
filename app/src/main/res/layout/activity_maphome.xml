@@ -26,6 +26,7 @@
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="240dp"
+                    android:id="@id/search_view1"
                     android:layout_height="70dp"
                     android:layout_marginLeft="20dp"
                     android:layout_marginTop="14dp"
@@ -139,11 +140,13 @@
 
 
                 <include layout="@layout/bottom_sheet"/>
+                <include layout="@layout/bottom_sheet_add"
+                    android:visibility="gone"/>
 
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
         </FrameLayout>
     <include layout="@layout/add_geofence"/>
+
 
         <com.google.android.material.navigation.NavigationView
 

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
 import com.example.geodes_mobile.main_app.MainActivity;
+import com.example.geodes_mobile.main_app.map_home;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -37,7 +38,7 @@ public class LocationHandler {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private boolean isGpsProviderEnabled = true;
-    private boolean isLocationUpdateRequested = false;
+    private boolean isLocationUpdatesInitialized = false;
     private Marker mapMarker;
 
     private MapManager mapManager;
@@ -47,8 +48,12 @@ public class LocationHandler {
         this.mapView = mapView;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-        mapController = mapView.getController();
-        mapController.setZoom(17.0);
+
+        // Check if mapController is already initialized
+        if (mapController == null) {
+            mapController = mapView.getController();
+            mapController.setZoom(17.0);
+        }
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
@@ -79,10 +84,17 @@ public class LocationHandler {
     }
 
     public void requestLocationUpdate() {
-        // Check if a location update is already requested
-        if (!isLocationUpdateRequested) {
+        // Check if location updates are already initialized
+        if (!isLocationUpdatesInitialized) {
             initializeLocationUpdates();
-            isLocationUpdateRequested = true;
+            isLocationUpdatesInitialized = true;
+        }
+    }
+
+    public void stopLocationUpdates() {
+        if (locationManager != null && locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+            isLocationUpdatesInitialized = false; // Reset the flag when updates are stopped
         }
     }
 
@@ -161,10 +173,14 @@ public class LocationHandler {
 
         // Center the map on the new marker location
         mapView.getController().animateTo(geoPoint);
+
+        // Hide the search button
+        ((map_home) context).hideElements();
+
+        // Hide the bottom sh
     }
 
-
-    private void clearMarkerAndGeofences() {
+    public void clearMarkerAndGeofences() {
         // Remove existing marker and geofences
         mapView.getOverlays().remove(mapMarker);
         mapView.getOverlayManager().removeIf(overlay ->
@@ -172,13 +188,5 @@ public class LocationHandler {
 
         // Force the map to redraw
         mapView.invalidate();
-    }
-
-    // Properly release location updates when they are no longer needed
-    public void stopLocationUpdates() {
-        if (locationManager != null && locationListener != null) {
-            locationManager.removeUpdates(locationListener);
-            isLocationUpdateRequested = false; // Reset the flag when updates are stopped
-        }
     }
 }

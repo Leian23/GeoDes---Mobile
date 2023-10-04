@@ -1,0 +1,21 @@
+<!-- custom_seekbar.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background -->
+    <item android:id="@android:id/background">
+        <shape>
+            <solid android:color="#F4F4F4" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- Level Indicator -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <solid android:color="#4199BF" />
+                <corners android:radius="10dp" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>
