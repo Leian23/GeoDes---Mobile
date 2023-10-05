@@ -40,8 +40,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Ad
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
-import com.example.geodes_mobile.main_app.create_geofence_functions.LocationHandler;
-import com.example.geodes_mobile.main_app.create_geofence_functions.MapManager;
+import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -77,10 +76,10 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
-    private MapManager mapManager;
+
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
-    private LocationHandler locationHandler;
+    private MapFunctionHandler locationHandler;
 
 
     @Override
@@ -134,7 +133,7 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
-        locationHandler = new LocationHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
+        locationHandler = new MapFunctionHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
 
 
         traffic.setOnClickListener(new View.OnClickListener() {
@@ -487,6 +486,7 @@ public class map_home extends AppCompatActivity {
         findViewById(R.id.colorChangingButton4).setVisibility(View.VISIBLE);
         findViewById(R.id.colorChangingButton3).setVisibility(View.VISIBLE);
         findViewById(R.id.search_view1).setVisibility(View.VISIBLE);
+
 
         LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
         overlayLayoutt.setVisibility(View.GONE);

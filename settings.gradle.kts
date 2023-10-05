@@ -17,4 +17,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "GeoDes_Mobile"
 include(":app")
- 
