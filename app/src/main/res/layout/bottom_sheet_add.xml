@@ -264,7 +264,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="136dp"
                 android:text="ToggleButton"
-                android:checked="false"
+                android:checked="true"
                 android:background="@drawable/custom_radio_background"
                 android:textOn="Entry"
                 android:textOff="Exit"

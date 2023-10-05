@@ -12,22 +12,25 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.SeekBar;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.core.app.ActivityCompat;
 
+import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.MainActivity;
 import com.example.geodes_mobile.main_app.map_home;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
-public class LocationHandler {
+public class MapFunctionHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final long MIN_TIME_BETWEEN_UPDATES = 0; // 500 milliseconds
@@ -42,11 +45,14 @@ public class LocationHandler {
     private boolean isLocationUpdatesInitialized = false;
     private Marker mapMarker;
 
-    private MapManager mapManager;
+    private GeofenceSetup geofenceSetup;
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
+    private boolean isEntryMode = true;
 
-    public LocationHandler(Context context, MapView mapView, SeekBar outerSeekBar, SeekBar innerSeekBar) {
+
+
+    public MapFunctionHandler(Context context, MapView mapView, SeekBar outerSeekBar, SeekBar innerSeekBar) {
         this.context = context;
         this.mapView = mapView;
         this.outerSeekBar = outerSeekBar;
@@ -83,6 +89,7 @@ public class LocationHandler {
 
         // Set up SeekBar listeners
         setupSeekBarListeners();
+        updateInnerSeekBarState();
     }
 
     private void setupSeekBarListeners() {
@@ -107,6 +114,8 @@ public class LocationHandler {
         });
 
         innerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 double innerRadius = progress + 0;
@@ -125,22 +134,19 @@ public class LocationHandler {
 
         });
 
+
+        // Inside setupSeekBarListeners method
+        ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
+        toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isEntryMode = isChecked;
+            updateInnerSeekBarState();
+        });
+
+
+
+
     }
 
-    public void requestLocationUpdate() {
-        // Check if location updates are already initialized
-        if (!isLocationUpdatesInitialized) {
-            initializeLocationUpdates();
-            isLocationUpdatesInitialized = true;
-        }
-    }
-
-    public void stopLocationUpdates() {
-        if (locationManager != null && locationListener != null) {
-            locationManager.removeUpdates(locationListener);
-            isLocationUpdatesInitialized = false;
-        }
-    }
 
     private void initializeLocationUpdates() {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -178,11 +184,9 @@ public class LocationHandler {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.removeUpdates(locationListener); // Remove previous updates
 
-            // Request new location updates from both GPS and NETWORK providers with faster intervals
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
 
-            // Fetch the last known location if available using a faster interval
         }
     }
 
@@ -205,29 +209,45 @@ public class LocationHandler {
         mapMarker.setPosition(geoPoint);
         mapView.getOverlays().add(mapMarker);
 
-        // Add a new marker with geofences
-        if (mapManager == null) {
-            mapManager = new MapManager(context, mapView);
+        if (geofenceSetup == null) {
+            geofenceSetup = new GeofenceSetup(context, mapView);
         }
 
-        double outerRadius = outerSeekBar.getProgress() + 20; // Example: starting from 50 and increasing
-        double innerRadius = innerSeekBar.getProgress() + 30; // Example: starting from 50 and increasing
+        double outerRadius = 50; // Set your desired default outer radius
+        double innerRadius = isEntryMode ? 20 : 0; // Set your desired default inner radius
 
-        outerSeekBar.setProgress((int) innerRadius);
-        innerSeekBar.setProgress((int) outerRadius);
+        outerSeekBar.setProgress((int) outerRadius);
+        innerSeekBar.setProgress((int) innerRadius);
 
+        geofenceSetup.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
 
+        // Calculate bounding box
+        BoundingBox boundingBox = calculateBoundingBox(geoPoint, outerRadius);
 
-        mapManager.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
+        // Animate the map to the bounding box
+        mapView.zoomToBoundingBox(boundingBox, true);
 
         mapView.invalidate();
 
-        mapView.getController().animateTo(geoPoint);
-
         // Hide the search button
         ((map_home) context).hideElements();
-
     }
+
+    private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
+        double halfDistanceInMeters = radius * 1.5; // Adjust as needed for better visibility
+        double latPerMeter = 1.0 / 111319.9; // Approximate value for latitude degrees per meter
+
+        double deltaLat = halfDistanceInMeters * latPerMeter;
+        double deltaLon = halfDistanceInMeters / (111319.9 * Math.cos(Math.toRadians(center.getLatitude())));
+
+        double minLat = center.getLatitude() - deltaLat ;  // Adding 0.01 to move the bounding box to the top
+        double maxLat = center.getLatitude() + deltaLat;
+        double minLon = center.getLongitude() - deltaLon;
+        double maxLon = center.getLongitude() + deltaLon;
+
+        return new BoundingBox(maxLat, maxLon, minLat, minLon);
+    }
+
 
 
     public void clearMarkerAndGeofences() {
@@ -246,14 +266,34 @@ public class LocationHandler {
 
     private void updateGeofences(double outerRadius, double innerRadius) {
         // Update geofences based on SeekBar values
-        if (mapManager != null && mapMarker != null) {
+        if (geofenceSetup != null && mapMarker != null) {
             GeoPoint markerPosition = mapMarker.getPosition();
 
             // Assuming the geofences are stored in MapManager, update them directly
-            mapManager.updateGeofences(markerPosition, outerRadius, innerRadius);
+            geofenceSetup.updateGeofences(markerPosition, outerRadius, innerRadius);
 
             mapView.invalidate();
         }
     }
+
+    // Inside MapFunctionHandler class
+    private void updateInnerSeekBarState() {
+        if (isEntryMode) {
+            innerSeekBar.setEnabled(true);
+            innerSeekBar.setProgress(calculateInnerSeekBarProgress());
+        } else {
+            innerSeekBar.setEnabled(false);
+            innerSeekBar.setProgress(0);
+        }
+    }
+
+
+
+
+    private int calculateInnerSeekBarProgress() {
+        return 20;
+    }
+
+
 
 }

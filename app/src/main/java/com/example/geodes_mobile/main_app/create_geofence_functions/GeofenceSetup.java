@@ -10,13 +10,14 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
-public class MapManager {
+public class GeofenceSetup {
     private MapView mapView;
     private Polygon outerGeofence;
     private Polygon innerGeofence;
     private Marker marker;
 
-    public MapManager(Context context, MapView mapView) {
+
+    public GeofenceSetup(Context context, MapView mapView) {
         Configuration.getInstance().setUserAgentValue(context.getPackageName());
         this.mapView = mapView;
         this.mapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -68,4 +69,6 @@ public class MapManager {
 
         mapView.invalidate();
     }
+
+
 }
