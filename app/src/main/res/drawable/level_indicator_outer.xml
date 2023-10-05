@@ -1,0 +1,24 @@
+<!-- custom_seekbar.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="#F4F4F4" />
+            <corners android:radius="10dp" />
+            <!-- Set the size of the background shape -->
+            <size android:height="30dp" />
+        </shape>
+    </item>
+
+    <!-- Level Indicator -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <solid android:color="#4199BF" />
+                <corners android:radius="10dp" />
+                <!-- Set the size of the progress shape -->
+                <size android:height="30dp" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>

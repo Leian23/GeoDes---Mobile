@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -77,6 +78,9 @@ public class map_home extends AppCompatActivity {
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
     private MapManager mapManager;
+    private SeekBar outerSeekBar;
+    private SeekBar innerSeekBar;
+    private LocationHandler locationHandler;
 
 
     @Override
@@ -95,10 +99,15 @@ public class map_home extends AppCompatActivity {
         rotationGestureOverlay.setEnabled(true);
         mapView.getOverlays().add(rotationGestureOverlay);
 
+
         mapView.getController().setCenter(new org.osmdroid.util.GeoPoint(13.41, 122.56));
-        mapView.getController().setZoom(12.0);
+        mapView.getController().setZoom(8.0);
         mapView.setMinZoomLevel(MIN_ZOOM_LEVEL);
         mapView.setMaxZoomLevel(MAX_ZOOM_LEVEL);
+
+
+
+
 
 
         // Check and request location permissions if needed
@@ -114,6 +123,8 @@ public class map_home extends AppCompatActivity {
         add_geofence = findViewById(R.id.colorChangingButton4);
         cancelbtn = findViewById(R.id.cancelButton);
         btnDiscard = findViewById(R.id.btnDiscard);
+        outerSeekBar = findViewById(R.id.levelSeekBar);
+        innerSeekBar = findViewById(R.id.levelSeekBar2);
 
 
         // Set the rounded button background with initial colors
@@ -123,7 +134,8 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
-        LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
+        locationHandler = new LocationHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
+
 
         traffic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,8 +202,6 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showElements();
-
-                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
                 locationHandler.clearMarkerAndGeofences();
             }
         });
@@ -396,8 +406,6 @@ public class map_home extends AppCompatActivity {
             } else if (overlayLayoutt.getVisibility() == View.VISIBLE) {
                 showElements();
                 overlayLayoutt.setVisibility(View.GONE);
-
-                LocationHandler locationHandler = new LocationHandler(map_home.this, mapView);
                 locationHandler.clearMarkerAndGeofences();
             } else {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
@@ -419,7 +427,6 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
-
 
 
     private void locateUser() {

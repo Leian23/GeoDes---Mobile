@@ -56,13 +56,11 @@
                 android:focusable="true"
                 android:text="Discard"
                 android:textColor="#888888"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Box Below Discard -->
 
-            <!-- Coordinates TextViews -->
             <View
                 android:id="@+id/colorBox"
                 android:layout_width="180dp"
@@ -96,11 +94,11 @@
                 android:id="@+id/coordinatesLabel2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="12dp"
                 android:text="Outer fence"
                 android:textColor="#888888"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/colorBox" />
@@ -109,11 +107,11 @@
                 android:id="@+id/coordinatesLabel3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginTop="84dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="80dp"
                 android:text="Inner Fence"
                 android:textColor="#888888"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/colorBox" />
@@ -135,8 +133,8 @@
                 android:id="@+id/coordinatesValue3"
                 android:layout_width="103dp"
                 android:layout_height="22dp"
-                android:layout_marginStart="80dp"
-                android:layout_marginTop="112dp"
+                android:layout_marginStart="72dp"
+                android:layout_marginTop="107dp"
                 android:text="5.0 mi"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -148,8 +146,8 @@
                 android:id="@+id/coordinatesValue5"
                 android:layout_width="103dp"
                 android:layout_height="22dp"
-                android:layout_marginStart="80dp"
-                android:layout_marginTop="188dp"
+                android:layout_marginStart="72dp"
+                android:layout_marginTop="179dp"
                 android:text="5.0 mi"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -179,68 +177,64 @@
                 android:focusable="true"
                 android:text="Start"
                 android:textColor="#888888"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnSave1"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.044" />
 
+
             <Button
                 android:id="@+id/btnSave1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="82dp"
+                android:layout_height="46dp"
                 android:layout_marginEnd="32dp"
+                android:layout_marginBottom="-35dp"
                 android:background="@drawable/bottom_round"
                 android:text="Save"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.044" />
+                app:layout_constraintVertical_bias="0.041" />
 
-            <!-- Your existing layout -->
-
-            <!-- SeekBar -->
 
             <SeekBar
                 android:id="@+id/levelSeekBar"
-                android:layout_width="250dp"
+                android:layout_width="270dp"
                 android:layout_height="30dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/seekbar"
-                android:progressDrawable="@drawable/level_indicator"
+                android:progressDrawable="@drawable/level_indicator_outer"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.223"
+                app:layout_constraintHorizontal_bias="0.13"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel2" />
 
             <SeekBar
                 android:id="@+id/levelSeekBar2"
-                android:layout_width="250dp"
+                android:layout_width="270dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="44dp"
-                android:padding="0dp"
-                android:background="@drawable/seekbar"
-                android:progressDrawable="@drawable/level_indicator"
+                android:layout_marginTop="40dp"
+                android:progressDrawable="@drawable/level_indicator_inner"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.227"
+                app:layout_constraintHorizontal_bias="0.13"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/levelSeekBar" />
-
 
             <EditText
                 android:id="@+id/textBox"
                 android:layout_width="213dp"
                 android:layout_height="43dp"
-                android:layout_marginTop="56dp"
+                android:layout_marginTop="64dp"
                 android:background="@drawable/round_alert_title"
                 android:hint="Alert Title"
-                android:padding="8dp"
+                android:padding="10dp"
+
                 android:textColor="#888888"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -255,7 +249,7 @@
                 android:layout_marginTop="80dp"
                 android:background="@drawable/round_alert_title"
                 android:hint="Notes"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:textColor="#888888"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -263,15 +257,37 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/levelSeekBar2" />
 
-            <!-- Existing code... -->
+            <!-- Your layout XML -->
+            <ToggleButton
+                android:id="@+id/toggleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="136dp"
+                android:text="ToggleButton"
+                android:checked="false"
+                android:background="@drawable/custom_radio_background"
+                android:textOn="Entry"
+                android:textOff="Exit"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.433"
+                app:layout_constraintStart_toEndOf="@+id/textBox" />
+
+
+
+
+
+            <!-- res/layout/your_layout.xml -->
+
+
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Your existing layout -->
-
-        <!-- SeekBar -->
-
 
     </androidx.cardview.widget.CardView>
+
+
+
+
 </LinearLayout>

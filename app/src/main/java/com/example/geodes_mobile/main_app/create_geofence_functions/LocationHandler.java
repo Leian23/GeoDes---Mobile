@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -42,18 +43,16 @@ public class LocationHandler {
     private Marker mapMarker;
 
     private MapManager mapManager;
+    private SeekBar outerSeekBar;
+    private SeekBar innerSeekBar;
 
-    public LocationHandler(Context context, MapView mapView) {
+    public LocationHandler(Context context, MapView mapView, SeekBar outerSeekBar, SeekBar innerSeekBar) {
         this.context = context;
         this.mapView = mapView;
+        this.outerSeekBar = outerSeekBar;
+        this.innerSeekBar = innerSeekBar;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-
-        // Check if mapController is already initialized
-        if (mapController == null) {
-            mapController = mapView.getController();
-            mapController.setZoom(17.0);
-        }
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
@@ -81,6 +80,51 @@ public class LocationHandler {
             // For devices running versions below Marshmallow, no need to check permissions, just initialize location updates
             initializeLocationUpdates();
         }
+
+        // Set up SeekBar listeners
+        setupSeekBarListeners();
+    }
+
+    private void setupSeekBarListeners() {
+        outerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                double outerRadius = progress + 0;
+                updateGeofences(outerRadius, innerSeekBar.getProgress());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            // Other methods...
+        });
+
+        innerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                double innerRadius = progress + 0;
+                updateGeofences(outerSeekBar.getProgress(), innerRadius);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+        });
+
     }
 
     public void requestLocationUpdate() {
@@ -94,7 +138,7 @@ public class LocationHandler {
     public void stopLocationUpdates() {
         if (locationManager != null && locationListener != null) {
             locationManager.removeUpdates(locationListener);
-            isLocationUpdatesInitialized = false; // Reset the flag when updates are stopped
+            isLocationUpdatesInitialized = false;
         }
     }
 
@@ -104,7 +148,6 @@ public class LocationHandler {
             @Override
             public void onLocationChanged(Location location) {
                 GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-                updateLocationOnMap(userLocation);
                 // Consider whether you really need to stop updates here
             }
 
@@ -166,19 +209,26 @@ public class LocationHandler {
         if (mapManager == null) {
             mapManager = new MapManager(context, mapView);
         }
-        mapManager.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), 200, 100);
 
-        // Force the map to redraw immediately
+        double outerRadius = outerSeekBar.getProgress() + 20; // Example: starting from 50 and increasing
+        double innerRadius = innerSeekBar.getProgress() + 30; // Example: starting from 50 and increasing
+
+        outerSeekBar.setProgress((int) innerRadius);
+        innerSeekBar.setProgress((int) outerRadius);
+
+
+
+        mapManager.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
+
         mapView.invalidate();
 
-        // Center the map on the new marker location
         mapView.getController().animateTo(geoPoint);
 
         // Hide the search button
         ((map_home) context).hideElements();
 
-        // Hide the bottom sh
     }
+
 
     public void clearMarkerAndGeofences() {
         // Remove existing marker and geofences
@@ -186,7 +236,24 @@ public class LocationHandler {
         mapView.getOverlayManager().removeIf(overlay ->
                 overlay instanceof Polygon || overlay instanceof Marker);
 
-        // Force the map to redraw
+        // Clear SeekBar progress and set default values
+        outerSeekBar.setProgress(0);  // Set default progress for outerSeekBar
+        innerSeekBar.setProgress(0);  // Set default progress for innerSeekBar
+
         mapView.invalidate();
     }
+
+
+    private void updateGeofences(double outerRadius, double innerRadius) {
+        // Update geofences based on SeekBar values
+        if (mapManager != null && mapMarker != null) {
+            GeoPoint markerPosition = mapMarker.getPosition();
+
+            // Assuming the geofences are stored in MapManager, update them directly
+            mapManager.updateGeofences(markerPosition, outerRadius, innerRadius);
+
+            mapView.invalidate();
+        }
+    }
+
 }

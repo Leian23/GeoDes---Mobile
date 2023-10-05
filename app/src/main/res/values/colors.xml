@@ -6,4 +6,11 @@
     <color name="normal_color">#0000FF</color>
     <dimen name="corner_radius">16dp</dimen>
     <color name="blue">#7FA9FD</color>
+    <color name="entry_color">#89F2DF</color>
+    <color name="exit_color">#F1D99A</color>
+
+
+    <color name="leftSectionColor">#FF0000</color> <!-- Change to your desired color -->
+    <color name="rightSectionColor">#00FF00</color> <!-- Change to your desired color -->
+
 </resources>
