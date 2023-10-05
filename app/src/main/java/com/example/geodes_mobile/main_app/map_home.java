@@ -40,8 +40,8 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Ad
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
-import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
-import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceSetup;
+import com.example.geodes_mobile.main_app.create_geofence_functions.LocationHandler;
+import com.example.geodes_mobile.main_app.create_geofence_functions.MapManager;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -77,10 +77,10 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
-    private GeofenceSetup geofenceSetup;
+    private MapManager mapManager;
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
-    private MapFunctionHandler locationHandler;
+    private LocationHandler locationHandler;
 
 
     @Override
@@ -127,7 +127,6 @@ public class map_home extends AppCompatActivity {
         innerSeekBar = findViewById(R.id.levelSeekBar2);
 
 
-
         // Set the rounded button background with initial colors
         setRoundedButtonBackground(traffic, R.color.white, R.color.green);
         setRoundedButtonBackground(landmarks, R.color.white, R.color.green);
@@ -135,7 +134,7 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
-        locationHandler = new MapFunctionHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
+        locationHandler = new LocationHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
 
 
         traffic.setOnClickListener(new View.OnClickListener() {

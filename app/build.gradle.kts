@@ -80,6 +80,9 @@ dependencies {
 
     implementation ("com.google.android.material:material:1.4.0")
 
+    implementation ("org.osmdroid:osmdroid-geopackage:6.1.8")
+    implementation ("mil.nga.geopackage.map:geopackage-android-map:6.7.1")
+    implementation ("com.github.MKergall:osmbonuspack:6.9.0")
 
 
 
