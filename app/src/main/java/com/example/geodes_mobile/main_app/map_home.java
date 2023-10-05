@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Da
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
 import com.example.geodes_mobile.main_app.create_geofence_functions.LocationHandler;
+import com.example.geodes_mobile.main_app.create_geofence_functions.LocationSearch;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapManager;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -82,6 +84,9 @@ public class map_home extends AppCompatActivity {
     private SeekBar innerSeekBar;
     private LocationHandler locationHandler;
 
+    private SearchView searchView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,9 +110,11 @@ public class map_home extends AppCompatActivity {
         mapView.setMinZoomLevel(MIN_ZOOM_LEVEL);
         mapView.setMaxZoomLevel(MAX_ZOOM_LEVEL);
 
+        // Initialize the SearchView
+        searchView = findViewById(R.id.search_view1);
 
-
-
+        // Initialize the LocationSearchUtil and set up the search functionality
+        LocationSearch.setupLocationSearch(this, mapView, searchView);
 
 
         // Check and request location permissions if needed
