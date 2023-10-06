@@ -14,6 +14,17 @@
         android:layout_height="match_parent"
         android:clickable="true" />
 
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:paddingTop="80dp"
+        android:visibility="gone"/>
+
+
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -26,8 +37,8 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="240dp"
-                android:id="@id/search_view1"
                 android:layout_height="70dp"
+                android:id="@+id/search_card"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="14dp"
                 app:cardElevation="2dp"
@@ -39,15 +50,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
+
                     <androidx.appcompat.widget.SearchView
-                        android:id="@+id/search_view1"
+                        android:id="@+id/search_func"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@drawable/searchbar"
                         android:paddingLeft="40dp"
                         app:iconifiedByDefault="false"
                         app:queryHint="Search location..."
-                        app:searchIcon="@null" />
+                        app:searchIcon="@null">
+                    </androidx.appcompat.widget.SearchView>
 
                     <!-- Replace Button with an ImageButton to use the hamburger menu icon -->
                     <ImageButton
@@ -60,7 +73,11 @@
                         android:background="?android:attr/selectableItemBackground"
                         android:contentDescription="Menu" />
                 </FrameLayout>
+
             </androidx.cardview.widget.CardView>
+
+
+
 
 
             <androidx.constraintlayout.widget.ConstraintLayout

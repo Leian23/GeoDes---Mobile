@@ -52,6 +52,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.8.1")
     implementation("com.google.firebase:firebase-inappmessaging:20.3.5")
     implementation ("androidx.preference:preference:1.1.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -82,10 +83,7 @@ dependencies {
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-
-
-
-
-
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation ("com.loopj.android:android-async-http:1.4.11")
 
 }
