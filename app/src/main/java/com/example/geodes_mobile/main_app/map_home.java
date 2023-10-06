@@ -286,37 +286,42 @@ public class map_home extends AppCompatActivity {
         });
 
         //dito maglalagay ng ng list of active alerts
-        List<DataModel> data = new ArrayList<>();
-        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no noteeddwdwdwdwdwdwdwswdiiuiuiuiuiuiuisadsdsadsade", R.drawable.pinalerts));
-        data.add(new DataModel("5246 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
-        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
-        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
-        data.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
-        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
-        data.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
-        data.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        data.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
-        data.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
+        List<DataModel> dataForAlerts = new ArrayList<>();
+        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no noteeddwdwdwdwdwdwdwswdiiuiuiuiuiuiuisadsdsadsade", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("5246 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
+        dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
 
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.alerts_recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        Adapter adapter4 = new Adapter(data, this);
+        Adapter adapter4 = new Adapter(dataForAlerts, this);
         recyclerView.setAdapter(adapter4);
 
         //dito maglalagay ng list of active schedules
-        List<DataModel2> data1 = new ArrayList<>();
-        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        data1.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        List<DataModel2> dataForSched = new ArrayList<>();
+        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
+        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
 
-        RecyclerView recyclerVieww = findViewById(R.id.recyclerVieww);
+        RecyclerView recyclerVieww = findViewById(R.id.sched_recyclerView);
         recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        Adapter2 adapter1 = new Adapter2(data1, this);
+        Adapter2 adapter1 = new Adapter2(dataForSched, this);
         recyclerVieww.setAdapter(adapter1);
+
+
+
+
+
+
 
 
 

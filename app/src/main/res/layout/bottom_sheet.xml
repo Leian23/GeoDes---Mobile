@@ -63,7 +63,7 @@
                 android:layout_gravity="center">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
+                    android:id="@+id/alerts_recyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="10dp"
@@ -94,7 +94,7 @@
                 android:layout_gravity="center">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerVieww"
+                android:id="@+id/sched_recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
