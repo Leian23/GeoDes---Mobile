@@ -179,10 +179,10 @@ public class map_home extends AppCompatActivity {
                 // Perform search as the user types
                 if (newText.length() > 2) {
                     new NominatimTask().execute(newText);
-                    findViewById(R.id.recyclerViewSearchResults).setVisibility(View.VISIBLE);
+                    findViewById(R.id.search_res_view).setVisibility(View.VISIBLE);
                 } else {
                     adapter.clear();
-                    findViewById(R.id.recyclerViewSearchResults).setVisibility(View.GONE);
+                    findViewById(R.id.search_res_view).setVisibility(View.GONE);
                 }
                 return true;
             }
@@ -629,6 +629,4 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
-
-
 }
