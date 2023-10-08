@@ -8,16 +8,13 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,6 +44,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
+import com.example.geodes_mobile.main_app.search_location.SearchResultsAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
@@ -70,7 +68,7 @@ import okhttp3.Response;
 
 
 public class map_home extends AppCompatActivity {
-    //Map View Initialization
+
     private MapView mapView;
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
@@ -81,7 +79,6 @@ public class map_home extends AppCompatActivity {
     private Button add_geofence;
     private Button cancelbtn;
     private Button btnDiscard;
-    private Button viewProfile;
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
@@ -89,7 +86,6 @@ public class map_home extends AppCompatActivity {
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
-
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
     private MapFunctionHandler locationHandler;
@@ -112,18 +108,14 @@ public class map_home extends AppCompatActivity {
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setMultiTouchControls(true);
 
-
         RotationGestureOverlay rotationGestureOverlay = new RotationGestureOverlay(mapView);
         rotationGestureOverlay.setEnabled(true);
         mapView.getOverlays().add(rotationGestureOverlay);
-
 
         mapView.getController().setCenter(new GeoPoint(13.41, 122.56));
         mapView.getController().setZoom(8.0);
         mapView.setMinZoomLevel(MIN_ZOOM_LEVEL);
         mapView.setMaxZoomLevel(MAX_ZOOM_LEVEL);
-
-
 
 
 
@@ -153,7 +145,6 @@ public class map_home extends AppCompatActivity {
 
 
         locationHandler = new MapFunctionHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
-
 
 
         recyclerViewSearchResults = findViewById(R.id.recyclerViewSearchResults);
@@ -316,13 +307,6 @@ public class map_home extends AppCompatActivity {
         recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         Adapter2 adapter1 = new Adapter2(dataForSched, this);
         recyclerVieww.setAdapter(adapter1);
-
-
-
-
-
-
-
 
 
 
@@ -590,48 +574,5 @@ public class map_home extends AppCompatActivity {
         }
     }
 
-    private static class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.ViewHolder> {
-        private ArrayList<String> data;
 
-        public SearchResultsAdapter() {
-            data = new ArrayList<>();
-        }
-
-        public void setData(ArrayList<String> newData) {
-            data.clear();
-            data.addAll(newData);
-        }
-
-        public void clear() {
-            data.clear();
-            notifyDataSetChanged();
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_search_result, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            String result = data.get(position);
-            holder.textViewResult.setText(result);
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
-        public static class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView textViewResult;
-
-            public ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                textViewResult = itemView.findViewById(R.id.textViewResult);
-            }
-        }
-    }
 }

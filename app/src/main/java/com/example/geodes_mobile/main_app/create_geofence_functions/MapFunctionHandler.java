@@ -227,26 +227,34 @@ public class MapFunctionHandler {
         // Animate the map to the bounding box
         mapView.zoomToBoundingBox(boundingBox, true);
 
+        // Reset map orientation
+        mapView.setMapOrientation(0);
+
         mapView.invalidate();
 
         // Hide the search button
         ((map_home) context).hideElements();
     }
 
+
+
     private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
         double halfDistanceInMeters = radius * 1.5; // Adjust as needed for better visibility
         double latPerMeter = 1.0 / 111319.9; // Approximate value for latitude degrees per meter
 
-        double deltaLat = halfDistanceInMeters * latPerMeter;
+        double deltaLat = halfDistanceInMeters * latPerMeter * - 2; // Adjust to move the pin further to the top
         double deltaLon = halfDistanceInMeters / (111319.9 * Math.cos(Math.toRadians(center.getLatitude())));
 
-        double minLat = center.getLatitude() - deltaLat ;  // Adding 0.01 to move the bounding box to the top
-        double maxLat = center.getLatitude() + deltaLat;
-        double minLon = center.getLongitude() - deltaLon;
-        double maxLon = center.getLongitude() + deltaLon;
+        // Set latitude to the maximum latitude for the pin to be further at the top
+        double pinLatitude = center.getLatitude() + deltaLat;
 
-        return new BoundingBox(maxLat, maxLon, minLat, minLon);
+        double minLon = center.getLongitude() - deltaLon ; // Adjust to center the bounding box
+        double maxLon = center.getLongitude() + deltaLon ; // Adjust to center the bounding box
+
+        return new BoundingBox(pinLatitude, maxLon, center.getLatitude(), minLon);
     }
+
+
 
 
 
@@ -256,43 +264,41 @@ public class MapFunctionHandler {
         mapView.getOverlayManager().removeIf(overlay ->
                 overlay instanceof Polygon || overlay instanceof Marker);
 
-        // Clear SeekBar progress and set default values
-        outerSeekBar.setProgress(0);  // Set default progress for outerSeekBar
-        innerSeekBar.setProgress(0);  // Set default progress for innerSeekBar
-
         mapView.invalidate();
     }
 
 
     private void updateGeofences(double outerRadius, double innerRadius) {
-        // Update geofences based on SeekBar values
         if (geofenceSetup != null && mapMarker != null) {
             GeoPoint markerPosition = mapMarker.getPosition();
 
             // Assuming the geofences are stored in MapManager, update them directly
             geofenceSetup.updateGeofences(markerPosition, outerRadius, innerRadius);
 
+            // Calculate bounding box
+            BoundingBox boundingBox = calculateBoundingBox(markerPosition, outerRadius);
+
+            // Animate the map to the new bounding box
+                mapView.zoomToBoundingBox(boundingBox, true);
+
             mapView.invalidate();
         }
     }
+
+
+
 
     // Inside MapFunctionHandler class
     private void updateInnerSeekBarState() {
         if (isEntryMode) {
             innerSeekBar.setEnabled(true);
-            innerSeekBar.setProgress(calculateInnerSeekBarProgress());
+            innerSeekBar.setProgress(20);
         } else {
             innerSeekBar.setEnabled(false);
             innerSeekBar.setProgress(0);
         }
     }
 
-
-
-
-    private int calculateInnerSeekBarProgress() {
-        return 20;
-    }
 
 
 

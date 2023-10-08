@@ -29,10 +29,6 @@ public class ScheduleFragment extends Fragment {
         ImageButton menuButton = rootView.findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
 
-
-
-
-
         List<DataModel4> data = new ArrayList<>();
 
 
@@ -46,9 +42,6 @@ public class ScheduleFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)); // Changed the LinearLayoutManager constructor
         Adapter4 adapter = new Adapter4(data, getContext());
         recyclerView.setAdapter(adapter);
-
-
-
 
 
         menuButton.setOnClickListener(new View.OnClickListener() {

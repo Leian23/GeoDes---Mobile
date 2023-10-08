@@ -24,7 +24,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="5 km"
-            android:textSize="18dp"
+            android:textSize="16dp"
             app:layout_constraintBottom_toTopOf="@+id/ScheduleSched"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -37,7 +37,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="5 km"
-            android:textSize="18dp"
+            android:textSize="16dp"
             app:layout_constraintBottom_toTopOf="@+id/ScheduleSched"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -50,7 +50,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="No Schedule"
-            android:textSize="18dp"
+            android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

@@ -20,9 +20,8 @@
                 android:orientation="vertical"
                 android:paddingLeft="30dp"
                 android:scrollbars="vertical" />
-
-
         </LinearLayout>
+
 
 
 
