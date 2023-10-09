@@ -233,7 +233,7 @@ public class MapFunctionHandler {
         mapView.invalidate();
 
         // Hide the search button
-        ((map_home) context).hideElements();
+        ((map_home) context).BottomSheetRadii();
     }
 
 

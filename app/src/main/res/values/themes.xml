@@ -9,5 +9,17 @@
 
     <style name="Theme.GeoDes_Mobile" parent="Base.Theme.GeoDes_Mobile" />
 
+    <style name="CircleToggleButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/circle_button_selector</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_width">45dp</item>
+        <item name="android:layout_height">45dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+
+
+
 
 </resources>

@@ -1,0 +1,5 @@
+<!-- res/drawable/circle_button_unselected.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#CCCCCC"/> <!-- Change this color to the unselected color -->
+</shape>

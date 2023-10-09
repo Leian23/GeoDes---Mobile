@@ -38,6 +38,9 @@ import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
 import com.example.geodes_mobile.fragments.UserProfile_Fragment;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.addingSchedule.add_sched_dialog;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.adding_alerts_sched.Adapter5;
+import com.example.geodes_mobile.main_app.bottom_sheet_content.adding_alerts_sched.DataModel5;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Adapter;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
@@ -92,6 +95,9 @@ public class map_home extends AppCompatActivity {
     private SearchView searchView;
 
     private RecyclerView recyclerViewSearchResults;
+
+    FragmentManager fragmentManager = getSupportFragmentManager();
+
 
 
 
@@ -190,13 +196,7 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        landmarks.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleButtonColor(landmarks, isSecondButtonColor1);
-                isSecondButtonColor1 = !isSecondButtonColor1;
-            }
-        });
+
 
         Button openDialogButton = findViewById(R.id.landmarks);
         openDialogButton.setOnClickListener(new View.OnClickListener() {
@@ -206,6 +206,17 @@ public class map_home extends AppCompatActivity {
                 landmarksDialog.show();
             }
         });
+
+
+        ImageButton openAddAlertButton = findViewById(R.id.addAlerts);
+        openAddAlertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                add_sched_dialog alertsAddDialog = new add_sched_dialog(map_home.this);
+                alertsAddDialog.show();
+            }
+        });
+
 
 
         userloc.setOnClickListener(new View.OnClickListener() {
@@ -249,6 +260,7 @@ public class map_home extends AppCompatActivity {
                 locationHandler.clearMarkerAndGeofences();
             }
         });
+
 
 
 
@@ -307,6 +319,26 @@ public class map_home extends AppCompatActivity {
         recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         Adapter2 adapter1 = new Adapter2(dataForSched, this);
         recyclerVieww.setAdapter(adapter1);
+
+
+
+        //dito yung list of selected alerts sa schedules
+
+        List<DataModel5> dataList = new ArrayList<>();
+
+        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+
+        RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
+        recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        Adapter5 adapterSched = new Adapter5(dataList, this);
+        recyclerViewSched.setAdapter(adapterSched);
+
+
 
 
 
@@ -451,7 +483,6 @@ public class map_home extends AppCompatActivity {
                 locationHandler.clearMarkerAndGeofences();
             } else {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
-
                 if (currentFragment instanceof AlertsFragment ||
                         currentFragment instanceof ScheduleFragment ||
                         currentFragment instanceof SettingsFragment ||
@@ -460,15 +491,23 @@ public class map_home extends AppCompatActivity {
                         currentFragment instanceof HelpFragment ||
                         currentFragment instanceof UserProfile_Fragment) {
 
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    fragmentManager.beginTransaction().remove(currentFragment).commit();
-
+                    // If the ScheduleFragment is hidden, show it
+                    if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()) {
+                        getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                    } else {
+                        // If it's another fragment, remove it
+                        LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
+                        overlayLayouttt.setVisibility(View.GONE);
+                        showElements();
+                        fragmentManager.beginTransaction().remove(currentFragment).commit();
+                    }
                 } else {
                     super.onBackPressed();
                 }
             }
         }
     }
+
 
 
     private void locateUser() {
@@ -481,19 +520,10 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
-    public void hideElements() {
-        //hide all the elements when adding geofence (this is where ui for addding geofence is implemented)
-        LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
-        findViewById(R.id.menu_button).setVisibility(View.GONE);
-        findViewById(R.id.search_card).setVisibility(View.GONE);
-        findViewById(R.id.design_bottom_sheet).setVisibility(View.GONE);
-        findViewById(R.id.trafficbtn).setVisibility(View.GONE);
-        findViewById(R.id.landmarks).setVisibility(View.GONE);
-        findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
-        findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
-        findViewById(R.id.search_card).setVisibility(View.GONE);
+    public void BottomSheetRadii() {
 
-        overlayLayoutt.setVisibility(View.VISIBLE);
+        hideElements(false);
+
 
         LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
@@ -518,6 +548,45 @@ public class map_home extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+    public void BottomSheetAddSched() {
+
+        LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
+        overlayLayouttt.setVisibility(View.VISIBLE);
+
+        LinearLayout linearLayout = findViewById(R.id.add_schedule);
+
+
+
+
+        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        bottomSheetBehavior.setHideable(false);
+
+        int customHeight = getResources().getDimensionPixelSize(R.dimen.height_btm_add);
+
+        bottomSheetBehavior.setPeekHeight(customHeight);
+        changePosLayout = findViewById(R.id.changePos);
+
+
+    }
+
+    public void hideElements(boolean hideOverlayLayoutt) {
+        findViewById(R.id.menu_button).setVisibility(View.GONE);
+        findViewById(R.id.search_card).setVisibility(View.GONE);
+        findViewById(R.id.design_bottom_sheet).setVisibility(View.GONE);
+        findViewById(R.id.trafficbtn).setVisibility(View.GONE);
+        findViewById(R.id.landmarks).setVisibility(View.GONE);
+        findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
+        findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
+        findViewById(R.id.search_card).setVisibility(View.GONE);
+
+        LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
+        overlayLayoutt.setVisibility(hideOverlayLayoutt ? View.GONE : View.VISIBLE);
+    }
+
 
 
     public void showElements() {

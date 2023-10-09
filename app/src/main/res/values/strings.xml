@@ -45,5 +45,7 @@
         <item>Ringtone 3</item>
     </string-array>
 
+
+
     <string name="mapbox_access_token">pk.eyJ1IjoibGVhbjIzIiwiYSI6ImNsbjF3MXBmbTAydDcyanIzODJpMTBzNWwifQ.OXSDLVAWX9HS2Bos3k6Igw</string>
 </resources>
