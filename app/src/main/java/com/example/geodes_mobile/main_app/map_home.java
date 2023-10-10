@@ -192,37 +192,6 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        TextView txtTimePicker = findViewById(R.id.txtTimePicker);
-
-        txtTimePicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar currentTime = Calendar.getInstance();
-                int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = currentTime.get(Calendar.MINUTE);
-
-                TimePickerDialog timePickerDialog = new TimePickerDialog(
-                        map_home.this,
-                        new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(android.widget.TimePicker view, int selectedHour, int selectedMinute) {
-                                // Convert 24-hour format to 12-hour format
-                                int hourOfDay = selectedHour % 12;
-                                String amPm = (selectedHour >= 12) ? "PM" : "AM";
-
-                                // Handle the selected time, e.g., update the TextView
-                                txtTimePicker.setText(String.format(Locale.getDefault(), "%02d:%02d %s", hourOfDay, selectedMinute, amPm));
-                            }
-                        },
-                        hour,
-                        minute,
-                        false // Set to false to use 12-hour format
-                );
-
-                timePickerDialog.show();
-            }
-        });
-
 
 
 
@@ -300,16 +269,51 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        dicardAddSched.setOnClickListener(new View.OnClickListener() {
+
+
+
+        //time picker in addsched bottom sheet
+        TextView txtTimePicker = findViewById(R.id.txtTimePicker);
+        txtTimePicker.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
-                overlayLayouttt.setVisibility(View.GONE);
-                showElements();
+            public void onClick(View v) {
+                Calendar currentTime = Calendar.getInstance();
+                int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = currentTime.get(Calendar.MINUTE);
+
+                TimePickerDialog timePickerDialog = new TimePickerDialog(
+                        map_home.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(android.widget.TimePicker view, int selectedHour, int selectedMinute) {
+                                // Convert 24-hour format to 12-hour format
+                                int hourOfDay = selectedHour % 12;
+                                String amPm = (selectedHour >= 12) ? "PM" : "AM";
+
+                                // Handle the selected time, e.g., update the TextView
+                                txtTimePicker.setText(String.format(Locale.getDefault(), "%02d:%02d %s", hourOfDay, selectedMinute, amPm));
+                            }
+                        },
+                        hour,
+                        minute,
+                        false // Set to false to use 12-hour format
+                );
+
+                timePickerDialog.show();
             }
         });
 
 
+
+        //discard button on addsched bottomsheet
+        dicardAddSched.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+                getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                showElements();
+            }
+        });
 
 
 
