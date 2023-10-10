@@ -141,10 +141,6 @@ public class MapFunctionHandler {
             isEntryMode = isChecked;
             updateInnerSeekBarState();
         });
-
-
-
-
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.main_app;
 
 import android.Manifest;
+import android.app.TimePickerDialog;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
@@ -15,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,7 +65,9 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -72,7 +76,7 @@ import okhttp3.Response;
 
 public class map_home extends AppCompatActivity {
 
-    private MapView mapView;
+    MapView mapView;
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
@@ -85,7 +89,7 @@ public class map_home extends AppCompatActivity {
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
-    private MyLocationNewOverlay myLocationOverlay;
+    MyLocationNewOverlay myLocationOverlay;
     private LocationManager locationManager;
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
@@ -93,6 +97,8 @@ public class map_home extends AppCompatActivity {
     private SeekBar innerSeekBar;
     private MapFunctionHandler locationHandler;
     private SearchView searchView;
+
+    private Button dicardAddSched;
 
     private RecyclerView recyclerViewSearchResults;
 
@@ -141,6 +147,7 @@ public class map_home extends AppCompatActivity {
         btnDiscard = findViewById(R.id.btnDiscard);
         outerSeekBar = findViewById(R.id.levelSeekBar);
         innerSeekBar = findViewById(R.id.levelSeekBar2);
+        dicardAddSched = findViewById(R.id.discardSched);
 
 
         // Set the rounded button background with initial colors
@@ -184,6 +191,38 @@ public class map_home extends AppCompatActivity {
                 return true;
             }
         });
+
+        TextView txtTimePicker = findViewById(R.id.txtTimePicker);
+
+        txtTimePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar currentTime = Calendar.getInstance();
+                int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = currentTime.get(Calendar.MINUTE);
+
+                TimePickerDialog timePickerDialog = new TimePickerDialog(
+                        map_home.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(android.widget.TimePicker view, int selectedHour, int selectedMinute) {
+                                // Convert 24-hour format to 12-hour format
+                                int hourOfDay = selectedHour % 12;
+                                String amPm = (selectedHour >= 12) ? "PM" : "AM";
+
+                                // Handle the selected time, e.g., update the TextView
+                                txtTimePicker.setText(String.format(Locale.getDefault(), "%02d:%02d %s", hourOfDay, selectedMinute, amPm));
+                            }
+                        },
+                        hour,
+                        minute,
+                        false // Set to false to use 12-hour format
+                );
+
+                timePickerDialog.show();
+            }
+        });
+
 
 
 
@@ -260,6 +299,16 @@ public class map_home extends AppCompatActivity {
                 locationHandler.clearMarkerAndGeofences();
             }
         });
+
+        dicardAddSched.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
+                overlayLayouttt.setVisibility(View.GONE);
+                showElements();
+            }
+        });
+
 
 
 
@@ -509,7 +558,6 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
     private void locateUser() {
         if (myLocationOverlay != null) {
             Location lastKnownLocation = myLocationOverlay.getLastFix();
@@ -551,16 +599,12 @@ public class map_home extends AppCompatActivity {
 
 
 
-
     public void BottomSheetAddSched() {
 
         LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
         overlayLayouttt.setVisibility(View.VISIBLE);
 
         LinearLayout linearLayout = findViewById(R.id.add_schedule);
-
-
-
 
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
@@ -569,9 +613,10 @@ public class map_home extends AppCompatActivity {
 
         bottomSheetBehavior.setPeekHeight(customHeight);
         changePosLayout = findViewById(R.id.changePos);
-
-
     }
+
+
+
 
     public void hideElements(boolean hideOverlayLayoutt) {
         findViewById(R.id.menu_button).setVisibility(View.GONE);
@@ -582,11 +627,9 @@ public class map_home extends AppCompatActivity {
         findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
         findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
         findViewById(R.id.search_card).setVisibility(View.GONE);
-
         LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
         overlayLayoutt.setVisibility(hideOverlayLayoutt ? View.GONE : View.VISIBLE);
     }
-
 
 
     public void showElements() {
