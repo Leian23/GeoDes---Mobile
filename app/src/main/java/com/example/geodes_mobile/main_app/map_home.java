@@ -75,7 +75,6 @@ import okhttp3.Response;
 
 
 public class map_home extends AppCompatActivity {
-
     MapView mapView;
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
@@ -99,6 +98,9 @@ public class map_home extends AppCompatActivity {
     private SearchView searchView;
 
     private Button dicardAddSched;
+
+    private ImageButton closeAlerts;
+    private ImageButton closeSched;
 
     private RecyclerView recyclerViewSearchResults;
 
@@ -148,6 +150,8 @@ public class map_home extends AppCompatActivity {
         outerSeekBar = findViewById(R.id.levelSeekBar);
         innerSeekBar = findViewById(R.id.levelSeekBar2);
         dicardAddSched = findViewById(R.id.discardSched);
+        closeAlerts = findViewById(R.id.CloseAlert);
+        closeSched = findViewById(R.id.closeSchedule);
 
 
         // Set the rounded button background with initial colors
@@ -261,6 +265,7 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+        //discard creating geofence
         btnDiscard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -305,11 +310,43 @@ public class map_home extends AppCompatActivity {
 
 
 
-        //discard button on addsched bottomsheet
+        //discrd adding schdule (bottom sheet)
         dicardAddSched.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                findViewById(R.id.add_schedule).setVisibility(View.GONE);
+
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+                getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                showElements();
+            }
+        });
+
+        //close alerts ng view alerts layout (bottomsheet)
+        closeAlerts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                findViewById(R.id.viewAlert).setVisibility(View.GONE);
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+                getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                showElements();
+            }
+        });
+
+        //close alerts ng view schedule layout(bottom sheet)
+        closeSched.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                findViewById(R.id.viewSchedule).setVisibility(View.GONE);
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                 showElements();
             }
@@ -317,7 +354,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-        //Bottom Sheet
+        // Bottom Sheet
         LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
@@ -327,11 +364,19 @@ public class map_home extends AppCompatActivity {
         bottomSheetBehavior.setPeekHeight(customHeight);
         changePosLayout = findViewById(R.id.changePos);
 
+        linearLayout.setTranslationY(customHeight);
+
+        linearLayout.animate()
+                .translationY(0)  // Animate to the original position
+                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .start();
+
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 // Handle state changes if needed
             }
+
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 // Update the vertical position of the ConstraintLayout with buttons
@@ -340,6 +385,7 @@ public class map_home extends AppCompatActivity {
                 changePosLayout.setTranslationY(-offset);
             }
         });
+
 
         //dito maglalagay ng ng list of active alerts
         List<DataModel> dataForAlerts = new ArrayList<>();
@@ -545,8 +591,12 @@ public class map_home extends AppCompatActivity {
                         currentFragment instanceof UserProfile_Fragment) {
 
                     // If the ScheduleFragment is hidden, show it
-                    if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()) {
+                    if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()
+                       || currentFragment instanceof AlertsFragment && currentFragment.isHidden()) {
                         getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                        findViewById(R.id.add_schedule).setVisibility(View.GONE);
+                        findViewById(R.id.viewSchedule).setVisibility(View.GONE);
+                        findViewById(R.id.viewAlert).setVisibility(View.GONE);
                     } else {
                         // If it's another fragment, remove it
                         LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
@@ -572,25 +622,35 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
-    public void BottomSheetRadii() {
 
+    public void BottomSheetRadii() {
         hideElements(false);
 
-
-        LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
+        final LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
 
         int customHeight = getResources().getDimensionPixelSize(R.dimen.height_btm_add);
-
         bottomSheetBehavior.setPeekHeight(customHeight);
+
         changePosLayout = findViewById(R.id.changePos);
+
+        linearLayout.setTranslationY(customHeight);
+
+        // Animate the bottom sheet to slide up
+        linearLayout.animate()
+                .translationY(0)
+                .setDuration(500)
+                .start();
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED); // Reset the state
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 // Handle state changes if needed
             }
+
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 // Update the vertical position of the ConstraintLayout with buttons
@@ -603,13 +663,14 @@ public class map_home extends AppCompatActivity {
 
 
 
-    public void BottomSheetAddSched() {
 
+
+
+    public void BottomSheetAddSched() {
         LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
         overlayLayouttt.setVisibility(View.VISIBLE);
 
         LinearLayout linearLayout = findViewById(R.id.add_schedule);
-
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
 
@@ -617,6 +678,80 @@ public class map_home extends AppCompatActivity {
 
         bottomSheetBehavior.setPeekHeight(customHeight);
         changePosLayout = findViewById(R.id.changePos);
+
+        // Initially hide the bottom sheet off-screen
+        linearLayout.setTranslationY(customHeight);
+
+        // Animate the appearance of the bottom sheet
+        linearLayout.animate()
+                .translationY(0)  // Animate to the original position
+                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .start();
+
+        // Set the BottomSheet callback
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                // Handle state changes if needed
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Update the vertical position of the ConstraintLayout with buttons
+                int layoutHeight = changePosLayout.getHeight();
+                int offset = (int) ((slideOffset * 0.90 * layoutHeight));
+                changePosLayout.setTranslationY(-offset);
+            }
+        });
+    }
+
+
+    public void ViewSched() {
+        RelativeLayout overlayLayouttt = findViewById(R.id.viewSchedule);
+        overlayLayouttt.setVisibility(View.VISIBLE);
+
+        RelativeLayout linearLayout = findViewById(R.id.viewSchedule);
+        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        bottomSheetBehavior.setHideable(false);
+
+        int customHeight = getResources().getDimensionPixelSize(R.dimen.height_btm_add);
+
+        bottomSheetBehavior.setPeekHeight(customHeight);
+        changePosLayout = findViewById(R.id.changePos);
+
+        // Initially hide the bottom sheet off-screen
+        linearLayout.setTranslationY(customHeight);
+
+        // Animate the appearance of the bottom sheet
+        linearLayout.animate()
+                .translationY(0)  // Animate to the original position
+                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .start();
+    }
+
+    public void ViewAlerts() {
+        RelativeLayout overlayLayouttt = findViewById(R.id.viewAlert);
+        overlayLayouttt.setVisibility(View.VISIBLE);
+
+        RelativeLayout linearLayout = findViewById(R.id.viewAlert);
+        bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        bottomSheetBehavior.setHideable(false);
+
+        int customHeight = getResources().getDimensionPixelSize(R.dimen.height_btm_add);
+
+        bottomSheetBehavior.setPeekHeight(customHeight);
+        changePosLayout = findViewById(R.id.changePos);
+
+        // Initially hide the bottom sheet off-screen
+        linearLayout.setTranslationY(customHeight);
+
+        // Animate the appearance of the bottom sheet
+        linearLayout.animate()
+                .translationY(0)  // Animate to the original position
+                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .start();
+
+
     }
 
 
@@ -689,6 +824,8 @@ public class map_home extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+
+
 
 
 }

@@ -15,11 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.Adapter3;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.DataModel3;
+import com.example.geodes_mobile.main_app.map_home;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlertsFragment extends Fragment {
+public class AlertsFragment extends Fragment implements Adapter3.OnItemClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,10 +47,10 @@ public class AlertsFragment extends Fragment {
 
 
 
-
         RecyclerView recyclerView = rootView.findViewById(R.id.settingsAlert);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false)); // Changed the LinearLayoutManager constructor
         Adapter3 adapter = new Adapter3(data, getContext());
+        adapter.setOnItemClickListener(this); // Set the listener
         recyclerView.setAdapter(adapter);
 
         menuButton.setOnClickListener(new View.OnClickListener() {
@@ -62,5 +63,16 @@ public class AlertsFragment extends Fragment {
         });
 
         return rootView;
+
     }
+
+    //ito yung function pag pinindot yung item na galing sa adapter
+    @Override
+    public void onItemClick(DataModel3 data) {
+        getParentFragmentManager().beginTransaction().hide(this).commit();
+        // Assuming map_home has a hideElements method
+        ((map_home) requireActivity()).hideElements(true);
+        ((map_home) requireActivity()).ViewAlerts();
+    }
+
 }

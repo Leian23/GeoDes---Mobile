@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,10 +21,13 @@ import java.util.List;
 public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
     private List<DataModel4> dataList;
     private Context context;
+    private OnItemClickListener listener;
+
 
     public Adapter4(List<DataModel4> dataList, Context context) {
         this.dataList = dataList;
         this.context = context;
+
     }
 
     @NonNull
@@ -44,7 +48,22 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
         holder.entryImageImageView.setImageResource(data.getEntryImage());
         holder.iconMarkerImageView.setImageResource(data.getIconMarker());
         holder.alertSwitch.setChecked(data.isAlertSwitchOn());
-        // Populate other views as needed
+
+
+
+        // Set an OnClickListener for the entire item view
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Handle item click here
+                Toast.makeText(context, "Clicked: " + data.getSchedTitle(), Toast.LENGTH_SHORT).show();
+
+                if (listener != null) {
+                    listener.onItemClick(data);
+                }
+            }
+        });
+
 
         // You may need to handle onClickListeners for switches or other interactive elements
     }
@@ -74,5 +93,13 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
             alertSwitch = itemView.findViewById(R.id.AlertSwitch);
             // Initialize other views as needed
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(DataModel4 data);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 }

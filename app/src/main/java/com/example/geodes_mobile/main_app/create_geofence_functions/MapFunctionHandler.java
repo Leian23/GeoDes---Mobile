@@ -200,6 +200,7 @@ public class MapFunctionHandler {
         // Clear existing marker and geofences
         clearMarkerAndGeofences();
 
+
         // Add a new marker at the long-pressed location
         mapMarker = new Marker(mapView);
         mapMarker.setPosition(geoPoint);
@@ -230,6 +231,8 @@ public class MapFunctionHandler {
 
         // Hide the search button
         ((map_home) context).BottomSheetRadii();
+
+
     }
 
 

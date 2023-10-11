@@ -155,6 +155,11 @@
                 android:visibility="gone"/>
             <include layout="@layout/bottom_sheet_sched"
                 android:visibility="gone"/>
+            <include layout="@layout/bottom_sheet_sched_view"
+                android:visibility="gone"/>
+            <include layout="@layout/bottom_sheet_alert_view"
+                android:visibility="gone"/>
+
 
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
