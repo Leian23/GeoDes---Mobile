@@ -52,6 +52,7 @@ public class MapFunctionHandler {
 
 
 
+
     public MapFunctionHandler(Context context, MapView mapView, SeekBar outerSeekBar, SeekBar innerSeekBar) {
         this.context = context;
         this.mapView = mapView;
@@ -137,9 +138,15 @@ public class MapFunctionHandler {
 
         // Inside setupSeekBarListeners method
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
+
         toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isEntryMode = isChecked;
             updateInnerSeekBarState();
+
+            // Call the method to update the color of the outer geofence based on the toggle button state
+            if (geofenceSetup != null) {
+                geofenceSetup.updateOuterGeofenceColor(!isChecked);
+            }
         });
     }
 
@@ -200,7 +207,6 @@ public class MapFunctionHandler {
         // Clear existing marker and geofences
         clearMarkerAndGeofences();
 
-
         // Add a new marker at the long-pressed location
         mapMarker = new Marker(mapView);
         mapMarker.setPosition(geoPoint);
@@ -232,8 +238,11 @@ public class MapFunctionHandler {
         // Hide the search button
         ((map_home) context).BottomSheetRadii();
 
-
+        // Set the toggle button to true
+        ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
+        toggleButton.setChecked(true);
     }
+
 
 
 
@@ -285,8 +294,6 @@ public class MapFunctionHandler {
     }
 
 
-
-
     // Inside MapFunctionHandler class
     private void updateInnerSeekBarState() {
         if (isEntryMode) {
@@ -297,8 +304,5 @@ public class MapFunctionHandler {
             innerSeekBar.setProgress(0);
         }
     }
-
-
-
 
 }

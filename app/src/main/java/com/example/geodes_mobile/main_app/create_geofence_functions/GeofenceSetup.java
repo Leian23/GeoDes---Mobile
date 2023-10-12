@@ -69,6 +69,25 @@ public class GeofenceSetup {
 
         mapView.invalidate();
     }
+    public void updateOuterGeofenceColor(boolean isExitMode) {
+        if (outerGeofence != null) {
+            int fillColor;
+            int strokeColor;
+            if (isExitMode) {
+                // Set the color to F1D99A with 40% opacity for exit mode
+                fillColor = Color.argb(102, 241, 217, 154);
+                strokeColor = Color.argb(255, 180, 158, 80);
+
+            } else {
+                // Set the original color for entry mode
+                fillColor = Color.argb(102, 154, 220, 241);
+                strokeColor = Color.rgb(80, 156, 180);
+            }
+            outerGeofence.setFillColor(fillColor);
+            outerGeofence.setStrokeColor(strokeColor);
+            mapView.invalidate();
+        }
+    }
 
 
 }

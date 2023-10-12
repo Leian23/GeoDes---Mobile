@@ -1,18 +1,19 @@
 package com.example.geodes_mobile.useraccess;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.map_home;
+import com.example.geodes_mobile.useraccess.forgotPassword.forgot_password;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -21,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class useraccessActivity extends AppCompatActivity {
     private EditText userNameEditText, userPassEditText;
     private Button loginButton;
+    private TextView forgotPassword;
 
     private FirebaseAuth mAuth;
     @Override
@@ -33,6 +35,8 @@ public class useraccessActivity extends AppCompatActivity {
         userNameEditText = findViewById(R.id.userName);
         userPassEditText = findViewById(R.id.userPass);
         loginButton = findViewById(R.id.siButton);
+        forgotPassword = findViewById(R.id.forgot_pass);
+
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,7 +44,16 @@ public class useraccessActivity extends AppCompatActivity {
                 loginUser();
             }
         });
+
+        forgotPassword.setOnClickListener(view -> {
+            Intent intent = new Intent(useraccessActivity.this, forgot_password.class);
+            startActivity(intent);
+        });
+
     }
+
+
+
     private void loginUser() {
         String email = userNameEditText.getText().toString().trim();
         String password = userPassEditText.getText().toString().trim();

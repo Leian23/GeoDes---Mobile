@@ -37,6 +37,17 @@
             android:name=".main_app.map_home"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".useraccess.forgotPassword.forgot_password"
+            android:exported="false" />
+
+        <activity
+            android:name=".useraccess.forgotPassword.forgot_password_changePass"
+            android:exported="false" />
+
+        <activity
+            android:name=".useraccess.forgotPassword.forgot_password_enterPin"
+            android:exported="false" />
 
         <activity
             android:name=".useraccess.signupActivity"

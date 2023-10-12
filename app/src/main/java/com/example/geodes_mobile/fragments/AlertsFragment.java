@@ -69,6 +69,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
     //ito yung function pag pinindot yung item na galing sa adapter
     @Override
     public void onItemClick(DataModel3 data) {
+
         getParentFragmentManager().beginTransaction().hide(this).commit();
         // Assuming map_home has a hideElements method
         ((map_home) requireActivity()).hideElements(true);

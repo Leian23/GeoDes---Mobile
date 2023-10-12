@@ -134,6 +134,7 @@ public class map_home extends AppCompatActivity {
 
 
 
+
         // Check and request location permissions if needed
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             enableMyLocationOverlay();
@@ -271,6 +272,7 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
                 showElements();
                 locationHandler.clearMarkerAndGeofences();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED); // Reset the state
             }
         });
 
@@ -321,6 +323,7 @@ public class map_home extends AppCompatActivity {
 
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                 showElements();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
 
@@ -349,6 +352,7 @@ public class map_home extends AppCompatActivity {
 
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                 showElements();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
 
@@ -643,8 +647,6 @@ public class map_home extends AppCompatActivity {
                 .setDuration(500)
                 .start();
 
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED); // Reset the state
-
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -654,8 +656,8 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 // Update the vertical position of the ConstraintLayout with buttons
-                int layoutHeight = changePosLayout.getHeight();
-                int offset = (int) ((slideOffset * 0.90 * layoutHeight));
+
+                int offset = (int) ((slideOffset));
                 changePosLayout.setTranslationY(-offset);
             }
         });
@@ -824,7 +826,6 @@ public class map_home extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
-
 
 
 
