@@ -74,6 +74,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         // Assuming map_home has a hideElements method
         ((map_home) requireActivity()).hideElements(true);
         ((map_home) requireActivity()).ViewAlerts();
+        ((map_home) requireActivity()).setLongPressEnabled(false);
     }
 
 }

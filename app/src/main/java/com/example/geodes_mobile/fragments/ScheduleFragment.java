@@ -5,12 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.map_home;
 import com.example.geodes_mobile.main_app.schedule_settings_adaptor.Adapter4;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickListener {
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,5 +82,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         ((map_home) requireActivity()).hideElements(true);
 
         ((map_home) requireActivity()).ViewSched();
+        ((map_home) requireActivity()).setLongPressEnabled(false);
     }
 }

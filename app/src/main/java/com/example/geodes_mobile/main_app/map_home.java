@@ -322,8 +322,9 @@ public class map_home extends AppCompatActivity {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
 
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
-                showElements();
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                setLongPressEnabled(true);
+                showElements();
             }
         });
 
@@ -333,10 +334,10 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
 
                 findViewById(R.id.viewAlert).setVisibility(View.GONE);
-
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
-
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                setLongPressEnabled(true);
                 showElements();
             }
         });
@@ -351,8 +352,9 @@ public class map_home extends AppCompatActivity {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
 
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
-                showElements();
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                setLongPressEnabled(true);
+                showElements();
             }
         });
 
@@ -598,6 +600,7 @@ public class map_home extends AppCompatActivity {
                     if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()
                        || currentFragment instanceof AlertsFragment && currentFragment.isHidden()) {
                         getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                        locationHandler.setLongPressEnabled(true);
                         findViewById(R.id.add_schedule).setVisibility(View.GONE);
                         findViewById(R.id.viewSchedule).setVisibility(View.GONE);
                         findViewById(R.id.viewAlert).setVisibility(View.GONE);
@@ -672,6 +675,7 @@ public class map_home extends AppCompatActivity {
         LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
         overlayLayouttt.setVisibility(View.VISIBLE);
 
+        locationHandler.setLongPressEnabled(false);
         LinearLayout linearLayout = findViewById(R.id.add_schedule);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
@@ -827,6 +831,7 @@ public class map_home extends AppCompatActivity {
         }
     }
 
-
-
+    public void setLongPressEnabled(boolean enabled) {
+        locationHandler.setLongPressEnabled(enabled);
+    }
 }

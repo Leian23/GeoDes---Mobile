@@ -48,6 +48,7 @@ public class MapFunctionHandler {
     private GeofenceSetup geofenceSetup;
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
+    private boolean isLongPressEnabled = true;
     private boolean isEntryMode = true;
 
 
@@ -69,8 +70,12 @@ public class MapFunctionHandler {
 
             @Override
             public boolean longPressHelper(GeoPoint geoPoint) {
-                dropPinOnMap(geoPoint);
-                return true;
+                if (isLongPressEnabled) {
+                    dropPinOnMap(geoPoint);
+                    return true;
+                } else {
+                    return false; // Long press is disabled
+                }
             }
         });
         mapView.getOverlays().add(0, mapEventsOverlay);
@@ -244,8 +249,6 @@ public class MapFunctionHandler {
     }
 
 
-
-
     private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
         double halfDistanceInMeters = radius * 1.5; // Adjust as needed for better visibility
         double latPerMeter = 1.0 / 111319.9; // Approximate value for latitude degrees per meter
@@ -305,4 +308,7 @@ public class MapFunctionHandler {
         }
     }
 
+    public void setLongPressEnabled(boolean enabled) {
+        isLongPressEnabled = enabled;
+    }
 }
