@@ -19,19 +19,21 @@ public class SettingsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragments_settings, container, false);
 
         ImageButton menuButton = rootView.findViewById(R.id.menu_button);
-        DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
 
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.openDrawer(GravityCompat.START);
-                } else {
-                    drawerLayout.closeDrawer(GravityCompat.START);
+        if (menuButton != null) {
+            DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+
+            menuButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    } else {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    }
                 }
-            }
-        });
-
+            });
+        }
         return rootView;
     }
 }

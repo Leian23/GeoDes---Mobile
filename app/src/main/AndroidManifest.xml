@@ -71,7 +71,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBe7HcxnUuttO7GD1sAp6Ae2xhTnYiBrtc" />
 
-        <receiver android:name=".GeofenceBroadcastReceiver"/>
+        <receiver android:name=".GeofenceBroadcastReceiver"></receiver>
 
 
 

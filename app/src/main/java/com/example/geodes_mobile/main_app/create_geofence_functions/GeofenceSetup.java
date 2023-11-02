@@ -1,7 +1,13 @@
 package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
+import com.example.geodes_mobile.R;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -23,7 +29,7 @@ public class GeofenceSetup {
         this.mapView.setTileSource(TileSourceFactory.MAPNIK);
     }
 
-    public void addMarkerWithGeofences(double latitude, double longitude, double outerGeofenceRadius, double innerGeofenceRadius) {
+    public void addMarkerWithGeofences(Context context, double latitude, double longitude, double outerGeofenceRadius, double innerGeofenceRadius) {
         clearGeofencesAndMarker();
 
         GeoPoint markerPoint = new GeoPoint(latitude, longitude);
@@ -42,14 +48,25 @@ public class GeofenceSetup {
         innerGeofence.setStrokeWidth(3.0f);
         mapView.getOverlayManager().add(innerGeofence);
 
+
         marker = new Marker(mapView);
         marker.setPosition(markerPoint);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setInfoWindow(null);
-        mapView.getOverlays().add(marker);
 
+        // Load a new custom Bitmap or image resource for the marker
+        Bitmap customBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_loc);
+
+        // Create a Drawable from the custom Bitmap
+        Drawable customDrawable = new BitmapDrawable(context.getResources(), customBitmap);
+
+        // Set the custom Drawable as the icon for the marker
+        marker.setIcon(customDrawable);
+
+        mapView.getOverlays().add(marker);
         mapView.invalidate();
     }
+
 
     public void updateGeofences(GeoPoint markerPoint, double outerGeofenceRadius, double innerGeofenceRadius) {
         if (outerGeofence != null && innerGeofence != null && marker != null) {
@@ -69,6 +86,8 @@ public class GeofenceSetup {
 
         mapView.invalidate();
     }
+
+
     public void updateOuterGeofenceColor(boolean isExitMode) {
         if (outerGeofence != null) {
             int fillColor;
@@ -88,6 +107,4 @@ public class GeofenceSetup {
             mapView.invalidate();
         }
     }
-
-
 }

@@ -1,12 +1,13 @@
 package com.example.geodes_mobile.main_app;
 
+
 import android.Manifest;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -49,6 +50,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
+import com.example.geodes_mobile.main_app.search_location.LocationResult;
 import com.example.geodes_mobile.main_app.search_location.SearchResultsAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -60,6 +62,7 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -72,6 +75,8 @@ import java.util.Locale;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+
 
 
 public class map_home extends AppCompatActivity {
@@ -89,7 +94,7 @@ public class map_home extends AppCompatActivity {
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
     MyLocationNewOverlay myLocationOverlay;
-    private LocationManager locationManager;
+
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
     private SeekBar outerSeekBar;
@@ -103,11 +108,15 @@ public class map_home extends AppCompatActivity {
     private ImageButton closeSched;
 
     private RecyclerView recyclerViewSearchResults;
+    private Polygon polygon;
 
-    FragmentManager fragmentManager = getSupportFragmentManager();
+    private Button addRadius;
+    private Context context = this;
 
+    private FragmentManager fragmentManager = getSupportFragmentManager();
 
-
+    private Button addGeo;
+    private String errorMessage;
 
 
     @Override
@@ -116,6 +125,7 @@ public class map_home extends AppCompatActivity {
         Configuration.getInstance().load(getApplicationContext(), getPreferences(MODE_PRIVATE));
         setContentView(R.layout.activity_maphome);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
 
 
         mapView = findViewById(R.id.map);
@@ -130,8 +140,6 @@ public class map_home extends AppCompatActivity {
         mapView.getController().setZoom(8.0);
         mapView.setMinZoomLevel(MIN_ZOOM_LEVEL);
         mapView.setMaxZoomLevel(MAX_ZOOM_LEVEL);
-
-
 
 
 
@@ -153,6 +161,10 @@ public class map_home extends AppCompatActivity {
         dicardAddSched = findViewById(R.id.discardSched);
         closeAlerts = findViewById(R.id.CloseAlert);
         closeSched = findViewById(R.id.closeSchedule);
+        addRadius = findViewById(R.id.btnSave1);
+        searchView = findViewById(R.id.search_func);
+        addGeo = findViewById(R.id.addGeofenceButton);
+
 
 
         // Set the rounded button background with initial colors
@@ -166,7 +178,7 @@ public class map_home extends AppCompatActivity {
 
 
         recyclerViewSearchResults = findViewById(R.id.recyclerViewSearchResults);
-        searchView = findViewById(R.id.search_func);
+
 
         // Set up RecyclerView
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -176,27 +188,55 @@ public class map_home extends AppCompatActivity {
         SearchResultsAdapter adapter = new SearchResultsAdapter();
         recyclerViewSearchResults.setAdapter(adapter);
 
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Handle search submission if needed
-                return false;
+
+
+                // Check if the query is in the format of coordinates (e.g., "12.345,67.890")
+                if (isValidCoordinates(query)) {
+                    try {
+                        // Handle as coordinates
+                        String[] parts = query.split(",");
+                        double latitude = Double.parseDouble(parts[0]);
+                        double longitude = Double.parseDouble(parts[1]);
+
+                        GeoPoint point = new GeoPoint(latitude, longitude);
+                        locationHandler.dropPinOnMap(point);
+                        findViewById(R.id.noRes).setVisibility(View.GONE);
+                        findViewById(R.id.search_res_view).setVisibility(View.GONE);
+
+                    } catch (NumberFormatException e) {
+                        // Display a toast message for invalid coordinates
+                        Toast.makeText(getApplicationContext(), "Invalid coordinate format", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+
+
                 // Perform search as the user types
                 if (newText.length() > 2) {
                     new NominatimTask().execute(newText);
                     findViewById(R.id.search_res_view).setVisibility(View.VISIBLE);
+                    findViewById(R.id.noRes).setVisibility(View.GONE); // Hide "no results" message
                 } else {
                     adapter.clear();
                     findViewById(R.id.search_res_view).setVisibility(View.GONE);
+                    findViewById(R.id.noRes).setVisibility(View.GONE); // Hide "no results" message
+
                 }
                 return true;
             }
-        });
 
+        });
 
 
 
@@ -209,16 +249,17 @@ public class map_home extends AppCompatActivity {
         });
 
 
-
-
         Button openDialogButton = findViewById(R.id.landmarks);
         openDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this);
+                // Pass the context of the current activity (e.g., map_home.this) to the dialog
+                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView);
                 landmarksDialog.show();
+
             }
         });
+
 
 
         ImageButton openAddAlertButton = findViewById(R.id.addAlerts);
@@ -244,7 +285,7 @@ public class map_home extends AppCompatActivity {
         add_geofence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                setLongPressEnabled(false);
                 findViewById(R.id.menu_button).setVisibility(View.GONE);
                 findViewById(R.id.search_card).setVisibility(View.GONE);
                 findViewById(R.id.frame_layout).setVisibility(View.GONE);
@@ -262,6 +303,7 @@ public class map_home extends AppCompatActivity {
                 findViewById(R.id.search_card).setVisibility(View.VISIBLE);
                 findViewById(R.id.frame_layout).setVisibility(View.VISIBLE);
                 overlayLayout.setVisibility(View.GONE);
+                setLongPressEnabled(true);
 
             }
         });
@@ -276,6 +318,30 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+        //add geofence button from crosshair image
+
+        addGeo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Get the center point of the currently displayed map area
+
+                GeoPoint centerPoint = (GeoPoint) mapView.getMapCenter();
+                locationHandler.dropPinOnMap(centerPoint);
+                setLongPressEnabled(true);
+                onBackPressed();
+                findViewById(R.id.search_card).setVisibility(View.GONE);
+            }
+        });
+
+
+        //add geofence button from BottomsheetRadii
+
+        addRadius.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
 
 
@@ -461,7 +527,7 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        navigationView = findViewById(R.id.nav_view); // Make sure to initialize your NavigationView
+        navigationView = findViewById(R.id.nav_view);
 
         NavigationView navigationView = findViewById(R.id.nav_view);
 
@@ -598,7 +664,7 @@ public class map_home extends AppCompatActivity {
 
                     // If the ScheduleFragment is hidden, show it
                     if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()
-                       || currentFragment instanceof AlertsFragment && currentFragment.isHidden()) {
+                            || currentFragment instanceof AlertsFragment && currentFragment.isHidden()) {
                         getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                         locationHandler.setLongPressEnabled(true);
                         findViewById(R.id.add_schedule).setVisibility(View.GONE);
@@ -665,9 +731,6 @@ public class map_home extends AppCompatActivity {
             }
         });
     }
-
-
-
 
 
 
@@ -756,11 +819,7 @@ public class map_home extends AppCompatActivity {
                 .translationY(0)  // Animate to the original position
                 .setDuration(500)  // Set the duration of the animation in milliseconds
                 .start();
-
-
     }
-
-
 
 
     public void hideElements(boolean hideOverlayLayoutt) {
@@ -772,6 +831,8 @@ public class map_home extends AppCompatActivity {
         findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
         findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
         findViewById(R.id.search_card).setVisibility(View.GONE);
+
+
         LinearLayout overlayLayoutt = findViewById(R.id.add_geo_btm);
         overlayLayoutt.setVisibility(hideOverlayLayoutt ? View.GONE : View.VISIBLE);
     }
@@ -792,10 +853,13 @@ public class map_home extends AppCompatActivity {
         overlayLayoutt.setVisibility(View.GONE);
     }
 
-    private class NominatimTask extends AsyncTask<String, Void, ArrayList<String>> {
+
+
+
+    private class NominatimTask extends AsyncTask<String, Void, ArrayList<LocationResult>> {
         @Override
-        protected ArrayList<String> doInBackground(String... params) {
-            ArrayList<String> results = new ArrayList<>();
+        protected ArrayList<LocationResult> doInBackground(String... params) {
+            ArrayList<LocationResult> results = new ArrayList<>();
             OkHttpClient client = new OkHttpClient();
 
             String url = "https://nominatim.openstreetmap.org/search?q=" + params[0] + "&format=json";
@@ -811,27 +875,80 @@ public class map_home extends AppCompatActivity {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     String displayName = jsonObject.optString("display_name", "");
-                    results.add(displayName);
+                    double latitude = jsonObject.optDouble("lat", 0);
+                    double longitude = jsonObject.optDouble("lon", 0);
+                    results.add(new LocationResult(displayName, latitude, longitude));
                 }
-
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
             return results;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> results) {
+        protected void onPostExecute(ArrayList<LocationResult> results) {
             super.onPostExecute(results);
-            // Update the RecyclerView with search results
+
+
             SearchResultsAdapter adapter = (SearchResultsAdapter) recyclerViewSearchResults.getAdapter();
             adapter.setData(results);
-            adapter.notifyDataSetChanged();
+
+            if (results.isEmpty() && !searchView.getQuery().toString().isEmpty()) {
+                // Show "no results" message if the results list is empty and the search query is not empty
+                findViewById(R.id.noRes).setVisibility(View.VISIBLE);
+                findViewById(R.id.search_res_view).setVisibility(View.GONE);
+            } else {
+                // Hide "no results" message if there are search results or the search query is empty
+                findViewById(R.id.noRes).setVisibility(View.GONE);
+            }
+
+
+            // Set the click listener for the search results
+            adapter.setOnItemClickListener(locationResult -> {
+                // Handle the click action here, display coordinates as a toast
+
+                GeoPoint point = new GeoPoint(locationResult.getLatitude(),locationResult.getLongitude());
+                locationHandler.dropPinOnMap(point);
+
+                findViewById(R.id.search_res_view).setVisibility(View.GONE);
+
+                showToast( locationResult.getLatitude()  + ", " + locationResult.getLongitude());
+            });
+        }
+
+        private void showToast(String message) {
+            // Display toast message
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    private boolean isValidCoordinates(String input) {
+
+        String[] parts = input.split(",");
+
+        if (parts.length != 2) {
+            return false;
+        }
+
+
+        try {
+            double latitude = Double.parseDouble(parts[0]);
+            double longitude = Double.parseDouble(parts[1]);
+            // You can add more specific validation rules here if needed
+
+            if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
+                return false; // Coordinates are out of valid range
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
     public void setLongPressEnabled(boolean enabled) {
         locationHandler.setLongPressEnabled(enabled);
     }
+
+
 }

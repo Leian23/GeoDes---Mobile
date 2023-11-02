@@ -78,6 +78,7 @@ public class MapFunctionHandler {
                 }
             }
         });
+
         mapView.getOverlays().add(0, mapEventsOverlay);
 
         // Check and request location permissions at runtime
@@ -130,7 +131,6 @@ public class MapFunctionHandler {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
@@ -208,13 +208,14 @@ public class MapFunctionHandler {
         });
     }
 
-    private void dropPinOnMap(GeoPoint geoPoint) {
+    public void dropPinOnMap(GeoPoint geoPoint) {
         // Clear existing marker and geofences
         clearMarkerAndGeofences();
 
         // Add a new marker at the long-pressed location
         mapMarker = new Marker(mapView);
         mapMarker.setPosition(geoPoint);
+        mapMarker.setVisible(false);
         mapView.getOverlays().add(mapMarker);
 
         if (geofenceSetup == null) {
@@ -227,7 +228,7 @@ public class MapFunctionHandler {
         outerSeekBar.setProgress((int) outerRadius);
         innerSeekBar.setProgress((int) innerRadius);
 
-        geofenceSetup.addMarkerWithGeofences(geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
+        geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
 
         // Calculate bounding box
         BoundingBox boundingBox = calculateBoundingBox(geoPoint, outerRadius);
@@ -240,13 +241,18 @@ public class MapFunctionHandler {
 
         mapView.invalidate();
 
-        // Hide the search button
+
+
+
+        // enable the bottomsheet for geofence configuration
         ((map_home) context).BottomSheetRadii();
 
         // Set the toggle button to true
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
         toggleButton.setChecked(true);
     }
+
+
 
 
     private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
@@ -311,4 +317,7 @@ public class MapFunctionHandler {
     public void setLongPressEnabled(boolean enabled) {
         isLongPressEnabled = enabled;
     }
+
+
+
 }

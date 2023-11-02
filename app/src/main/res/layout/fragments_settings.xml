@@ -46,20 +46,13 @@
         </RelativeLayout>
 
         <!-- Settings Fragment -->
-        <FrameLayout
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/frag"
+            android:name="com.example.geodes_mobile.fragments.MyPreferenceFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/menuBarLayout"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <!-- Your PreferenceFragment goes here -->
-            <fragment
-                android:id="@+id/settingsFragment"
-                android:name="com.example.geodes_mobile.fragments.MyPreferenceFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </FrameLayout>
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

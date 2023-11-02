@@ -16,6 +16,8 @@
 
 
     <include layout="@layout/result_window"/>
+    <include layout="@layout/result_window_offline"/>
+    <include layout="@layout/landmarks_layout"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -40,6 +42,7 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
+                    android:id="@+id/emee"
                     android:layout_height="match_parent">
 
 
