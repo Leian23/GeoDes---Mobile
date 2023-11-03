@@ -50,6 +50,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
+import com.example.geodes_mobile.main_app.homebtn_functions.TilesLayout;
 import com.example.geodes_mobile.main_app.search_location.LocationResult;
 import com.example.geodes_mobile.main_app.search_location.SearchResultsAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -62,7 +63,6 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -84,7 +84,7 @@ public class map_home extends AppCompatActivity {
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
-    private Button traffic;
+    private Button maptile;
     private Button landmarks;
     private Button userloc;
     private Button add_geofence;
@@ -108,7 +108,6 @@ public class map_home extends AppCompatActivity {
     private ImageButton closeSched;
 
     private RecyclerView recyclerViewSearchResults;
-    private Polygon polygon;
 
     private Button addRadius;
     private Context context = this;
@@ -150,7 +149,7 @@ public class map_home extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
 
-        traffic = findViewById(R.id.trafficbtn);
+        maptile = findViewById(R.id.maptiles);
         landmarks = findViewById(R.id.landmarks);
         userloc = findViewById(R.id.colorChangingButton3);
         add_geofence = findViewById(R.id.colorChangingButton4);
@@ -168,10 +167,11 @@ public class map_home extends AppCompatActivity {
 
 
         // Set the rounded button background with initial colors
-        setRoundedButtonBackground(traffic, R.color.white, R.color.green);
+        setRoundedButtonBackground(maptile, R.color.white, R.color.green);
         setRoundedButtonBackground(landmarks, R.color.white, R.color.green);
         setRoundedButtonBackground(userloc, R.color.white, R.color.green);
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
+
 
 
         locationHandler = new MapFunctionHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
@@ -240,11 +240,13 @@ public class map_home extends AppCompatActivity {
 
 
 
-        traffic.setOnClickListener(new View.OnClickListener() {
+        maptile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleButtonColor(traffic, isFirstButtonColor1);
-                isFirstButtonColor1 = !isFirstButtonColor1;
+                TilesLayout tilesLayout = new TilesLayout(map_home.this, mapView);
+                tilesLayout.show();
+                mapView.invalidate();
+
             }
         });
 
@@ -615,14 +617,6 @@ public class map_home extends AppCompatActivity {
         mapView.onPause();
     }
 
-    private void toggleButtonColor(Button button, boolean isColor1) {
-        if (isColor1) {
-            setRoundedButtonBackground(button, R.color.green, R.color.white);
-        } else {
-            setRoundedButtonBackground(button, R.color.white, R.color.green);
-        }
-    }
-
 
     private void setRoundedButtonBackground(Button button, int backgroundColor, int textColor) {
         GradientDrawable roundedDrawable = new GradientDrawable();
@@ -826,7 +820,7 @@ public class map_home extends AppCompatActivity {
         findViewById(R.id.menu_button).setVisibility(View.GONE);
         findViewById(R.id.search_card).setVisibility(View.GONE);
         findViewById(R.id.design_bottom_sheet).setVisibility(View.GONE);
-        findViewById(R.id.trafficbtn).setVisibility(View.GONE);
+        findViewById(R.id.maptiles).setVisibility(View.GONE);
         findViewById(R.id.landmarks).setVisibility(View.GONE);
         findViewById(R.id.colorChangingButton4).setVisibility(View.GONE);
         findViewById(R.id.colorChangingButton3).setVisibility(View.GONE);
@@ -842,7 +836,7 @@ public class map_home extends AppCompatActivity {
         findViewById(R.id.menu_button).setVisibility(View.VISIBLE);
         findViewById(R.id.search_card).setVisibility(View.VISIBLE);
         findViewById(R.id.design_bottom_sheet).setVisibility(View.VISIBLE);
-        findViewById(R.id.trafficbtn).setVisibility(View.VISIBLE);
+        findViewById(R.id.maptiles).setVisibility(View.VISIBLE);
         findViewById(R.id.landmarks).setVisibility(View.VISIBLE);
         findViewById(R.id.colorChangingButton4).setVisibility(View.VISIBLE);
         findViewById(R.id.colorChangingButton3).setVisibility(View.VISIBLE);

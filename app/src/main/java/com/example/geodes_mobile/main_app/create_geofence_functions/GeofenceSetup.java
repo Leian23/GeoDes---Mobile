@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import com.example.geodes_mobile.R;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -26,7 +25,6 @@ public class GeofenceSetup {
     public GeofenceSetup(Context context, MapView mapView) {
         Configuration.getInstance().setUserAgentValue(context.getPackageName());
         this.mapView = mapView;
-        this.mapView.setTileSource(TileSourceFactory.MAPNIK);
     }
 
     public void addMarkerWithGeofences(Context context, double latitude, double longitude, double outerGeofenceRadius, double innerGeofenceRadius) {

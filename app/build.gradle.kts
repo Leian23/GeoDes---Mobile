@@ -3,9 +3,17 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
 android {
+
     namespace = "com.example.geodes_mobile"
     compileSdk = 33
+
+    packagingOptions {
+        jniLibs.pickFirsts.add("lib/**/libc++_shared.so")
+    }   //
+
+
 
     defaultConfig {
         applicationId = "com.example.geodes_mobile"
@@ -35,9 +43,6 @@ android {
             }
         }
     }
-
-
-
 }
 
 
@@ -85,5 +90,11 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
     implementation ("com.loopj.android:android-async-http:1.4.11")
+
+
+
+
+
+
 
 }

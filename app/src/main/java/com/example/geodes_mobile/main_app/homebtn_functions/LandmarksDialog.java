@@ -61,7 +61,7 @@ public class LandmarksDialog extends Dialog {
         checkBoxMuseum = findViewById(R.id.checkBoxMuseum);
         checkBoxParks = findViewById(R.id.checkBoxParks);
 
-        checkBoxRestaurants.setChecked(sharedPreferences.getBoolean("fast food", false));
+        checkBoxRestaurants.setChecked(sharedPreferences.getBoolean("Jollibee", false));
         checkBoxTerminals.setChecked(sharedPreferences.getBoolean("terminal", false));
         checkBoxHotels.setChecked(sharedPreferences.getBoolean("hotel", false));
         checkBoxMuseum.setChecked(sharedPreferences.getBoolean("museum", false));
@@ -73,10 +73,10 @@ public class LandmarksDialog extends Dialog {
         checkBoxRestaurants.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("fast food", isChecked).apply();
+                sharedPreferences.edit().putBoolean("Jollibee", isChecked).apply();
 
                 if (isChecked) {
-                    fetchAndDisplayMarkers("fast food");
+                    fetchAndDisplayMarkers("Jollibee");
                     Toast.makeText(getContext(), "Restaurants checkbox checked", Toast.LENGTH_SHORT).show();
                 } else {
 
@@ -224,7 +224,7 @@ public class LandmarksDialog extends Dialog {
                     mapView.getOverlays().add(marker);
 
                     // Customize the marker for "Parks"
-                    if (category.equals("park")) {
+                    if (category.equals("Jollibee")) {
                         // Replace 'R.drawable.park_marker' with the actual resource ID of your park marker icon
                         Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.marker_loc); // Load your custom Bitmap here
                         Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
@@ -246,7 +246,7 @@ public class LandmarksDialog extends Dialog {
 
 
     private String getOverpassQuery(String category) {
-        return "[out:json];node[amenity=" + category + "];out;";
+        return "[out:json];node[name=" + category + "];out;";
     }
 
     private List<Marker> parseOverpassResponse(String response) {

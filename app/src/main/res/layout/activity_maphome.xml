@@ -17,7 +17,7 @@
 
     <include layout="@layout/result_window"/>
     <include layout="@layout/result_window_offline"/>
-    <include layout="@layout/landmarks_layout"/>
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -84,7 +84,7 @@
 
 
                 <Button
-                    android:id="@+id/trafficbtn"
+                    android:id="@+id/maptiles"
                     android:layout_width="48dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center"

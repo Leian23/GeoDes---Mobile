@@ -11,9 +11,13 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         mavenLocal()
-        maven  (url = "https://jitpack.io")
+        maven {
+            url = uri("https://jitpack.io")
+        }
+
     }
 }
+
 
 rootProject.name = "GeoDes_Mobile"
 include(":app")
