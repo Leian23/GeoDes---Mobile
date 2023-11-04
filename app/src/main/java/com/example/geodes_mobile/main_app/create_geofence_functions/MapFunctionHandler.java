@@ -3,15 +3,10 @@ package com.example.geodes_mobile.main_app.create_geofence_functions;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.core.app.ActivityCompat;
@@ -85,15 +80,8 @@ public class MapFunctionHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions((MainActivity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
-            } else {
-                // Permission is already granted, initialize location updates
-                initializeLocationUpdates();
             }
-        } else {
-            // For devices running versions below Marshmallow, no need to check permissions, just initialize location updates
-            initializeLocationUpdates();
         }
-
         // Set up SeekBar listeners
         setupSeekBarListeners();
         updateInnerSeekBarState();
@@ -156,57 +144,11 @@ public class MapFunctionHandler {
     }
 
 
-    private void initializeLocationUpdates() {
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                GeoPoint userLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-                // Consider whether you really need to stop updates here
-            }
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
 
-            @Override
-            public void onProviderEnabled(String provider) {
-                if (!isGpsProviderEnabled) {
-                    isGpsProviderEnabled = true;
-                    requestLocationUpdates(); // Request new location updates when GPS is enabled again
-                }
-            }
 
-            @Override
-            public void onProviderDisabled(String provider) {
-                showToast("GPS provider is disabled. Please enable it.");
-                isGpsProviderEnabled = false;
-            }
-        };
 
-        // Request location updates
-        requestLocationUpdates();
-    }
 
-    private void requestLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.removeUpdates(locationListener); // Remove previous updates
-
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BETWEEN_UPDATES, MIN_DISTANCE_BETWEEN_UPDATES, locationListener);
-
-        }
-    }
-
-    private void updateLocationOnMap(GeoPoint geoPoint) {
-        mapController.setCenter(geoPoint);
-    }
-
-    private void showToast(final String message) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        });
-    }
 
     public void dropPinOnMap(GeoPoint geoPoint) {
         // Clear existing marker and geofences
@@ -317,7 +259,5 @@ public class MapFunctionHandler {
     public void setLongPressEnabled(boolean enabled) {
         isLongPressEnabled = enabled;
     }
-
-
 
 }

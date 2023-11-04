@@ -25,15 +25,23 @@ public class TilesLayout extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.tiles_layout); // Use your XML layout with RadioButtons
+        setContentView(R.layout.tiles_layout);
 
+        radioGroup = findViewById(R.id.radioGroup);
 
+        // Retrieve the saved radio button ID from SharedPreferences
+        int selectedRadioButtonId = sharedPreferences.getInt("selected_radio_id", R.id.Standard);
 
-        RadioGroup radioGroup = findViewById(R.id.radioGroup);
+        radioGroup.check(selectedRadioButtonId); // Set the selected radio button
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // Save the selected radio button ID in SharedPreferences
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("selected_radio_id", checkedId);
+                editor.apply();
+
                 if (checkedId == R.id.Standard) {
                     mapView.setTileSource(TileSourceFactory.MAPNIK);
                     mapView.invalidate();
@@ -49,7 +57,5 @@ public class TilesLayout extends Dialog {
                 }
             }
         });
-
-
     }
 }

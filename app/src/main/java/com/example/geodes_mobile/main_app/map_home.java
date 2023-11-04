@@ -4,10 +4,13 @@ package com.example.geodes_mobile.main_app;
 import android.Manifest;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -115,7 +118,7 @@ public class map_home extends AppCompatActivity {
     private FragmentManager fragmentManager = getSupportFragmentManager();
 
     private Button addGeo;
-    private String errorMessage;
+    public static final int MY_PERMISSION_REQUEST_CODE = 1;
 
 
     @Override
@@ -128,7 +131,21 @@ public class map_home extends AppCompatActivity {
 
 
         mapView = findViewById(R.id.map);
-        mapView.setTileSource(TileSourceFactory.MAPNIK);
+        mapView.setBuiltInZoomControls(false);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("radio_state", MODE_PRIVATE);
+        int selectedRadioButtonId = sharedPreferences.getInt("selected_radio_id", R.id.Standard);
+
+        // Set the map tile source based on the saved radio button ID
+        if (selectedRadioButtonId == R.id.Standard) {
+            mapView.setTileSource(TileSourceFactory.MAPNIK);
+        } else if (selectedRadioButtonId == R.id.cycle) {
+            mapView.setTileSource(TileSourceFactory.ChartbundleENRH);
+        } else if (selectedRadioButtonId == R.id.USGS) {
+            mapView.setTileSource(TileSourceFactory.USGS_SAT);
+        } else if (selectedRadioButtonId == R.id.open_topo) {
+            mapView.setTileSource(TileSourceFactory.OpenTopo);
+        }
         mapView.setMultiTouchControls(true);
 
         RotationGestureOverlay rotationGestureOverlay = new RotationGestureOverlay(mapView);
@@ -144,10 +161,79 @@ public class map_home extends AppCompatActivity {
 
         // Check and request location permissions if needed
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            enableMyLocationOverlay();
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+            // Initialize location listener
+            LocationListener locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    // Handle location updates and update the map accordingly
+
+                }
+
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+                    Toast.makeText(map_home.this, "GPS has been enabled", Toast.LENGTH_SHORT).show();
+                    if (myLocationOverlay != null) {
+                        myLocationOverlay.enableMyLocation();
+                    }
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+                    Toast.makeText(map_home.this, "GPS has been disabled, please enable it", Toast.LENGTH_SHORT).show();
+                    if (myLocationOverlay != null) {
+                        myLocationOverlay.disableMyLocation();
+                    }
+                }
+            };
+
+            // Request location updates from GPS provider
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            // Enable the location overlay
+            myLocationOverlay = new MyLocationNewOverlay(mapView);
+
+            mapView.getOverlays().add(myLocationOverlay);
+
+
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            // GPS permission is not granted, check for another permission
+
+
+                Toast.makeText(this, "Please allow this app to use location, before using it", Toast.LENGTH_SHORT).show();
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         maptile = findViewById(R.id.maptiles);
         landmarks = findViewById(R.id.landmarks);
@@ -246,7 +332,6 @@ public class map_home extends AppCompatActivity {
                 TilesLayout tilesLayout = new TilesLayout(map_home.this, mapView);
                 tilesLayout.show();
                 mapView.invalidate();
-
             }
         });
 
@@ -255,12 +340,13 @@ public class map_home extends AppCompatActivity {
         openDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Pass the context of the current activity (e.g., map_home.this) to the dialog
-                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView);
+                // Create a Location object for your current location
+                Location currentLocation = getCurrentLocation();
+                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView, currentLocation);
                 landmarksDialog.show();
-
             }
         });
+
 
 
 
@@ -685,7 +771,7 @@ public class map_home extends AppCompatActivity {
             if (lastKnownLocation != null) {
                 GeoPoint userLocation = new GeoPoint(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                 mapView.getController().animateTo(userLocation);
-                mapView.getController().setZoom(15.0);
+
             }
         }
     }
@@ -943,6 +1029,27 @@ public class map_home extends AppCompatActivity {
     public void setLongPressEnabled(boolean enabled) {
         locationHandler.setLongPressEnabled(enabled);
     }
+
+
+
+
+    private Location getCurrentLocation() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager != null) {
+            try {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (location != null) {
+                        return location;
+                    }
+                }
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
 
 
 }
