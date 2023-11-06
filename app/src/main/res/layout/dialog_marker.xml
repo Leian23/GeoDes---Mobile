@@ -1,0 +1,40 @@
+<!-- marker_info_popup.xml -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:background="@drawable/round_alert_dialog_marker"
+    android:maxWidth="300dp">
+
+    <LinearLayout
+        android:id="@+id/contentLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"> <!-- Set your desired maximum width in dp -->
+
+        <TextView
+            android:id="@+id/markerNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marker Name"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/coordinatesTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coordinates: Latitude, Longitude"
+            android:textSize="12sp"/>
+
+        <!-- Add a TextView for the address below -->
+        <TextView
+            android:id="@+id/addressTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coordinates: Loading..."
+            android:textSize="12sp"/>
+    </LinearLayout>
+
+</RelativeLayout>

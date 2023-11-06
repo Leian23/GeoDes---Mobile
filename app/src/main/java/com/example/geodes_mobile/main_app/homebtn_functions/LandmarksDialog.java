@@ -1,6 +1,9 @@
 package com.example.geodes_mobile.main_app.homebtn_functions;
 
+
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -8,16 +11,22 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,8 +36,10 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -41,29 +52,26 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class LandmarksDialog extends Dialog {
-    private CheckBox checkBoxRestaurants;
-    private CheckBox checkBoxTerminals;
-    private CheckBox checkBoxMalls;
-    private CheckBox checkBoxMuseum;
-    private CheckBox checkBoxParks;
-
-    private SharedPreferences sharedPreferences;
     private MapView mapView;
-    private HashMap<String, Integer> markerCounts;
-    private int maxMarkersPerKeyword = 200; // Maximum markers for each keyword
+    private CheckBox[] checkBoxes;
+    private SharedPreferences sharedPreferences;
+    private HashMap<String, Integer> markerCounts = new HashMap<>();
+    private int maxMarkersPerKeyword = 250;
     private String errorMessage;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+    private ExecutorService executorService = Executors.newFixedThreadPool(32);
+    private Location currentLocation;
+    private double maxDistanceInMeters = 5000;
+    private MapFunctionHandler mapFunctionHandler; // Add this member variable
+    private List<CheckBox> selectedCheckboxes = new ArrayList<>();
 
-    private Location currentLocation; // Store your current location here
-    private double maxDistanceInMeters = 5000; // Specify your desired radius in meters
 
-    public LandmarksDialog(Context context, MapView mapView, Location currentLocation) {
+    public LandmarksDialog(Context context, MapView mapView, Location currentLocation, MapFunctionHandler mapFunctionHandler) {
         super(context);
         this.mapView = mapView;
         this.currentLocation = currentLocation;
+        this.mapFunctionHandler = mapFunctionHandler; // Initialize the MapFunctionHandler reference
         sharedPreferences = context.getSharedPreferences("checkbox_state", Context.MODE_PRIVATE);
-        markerCounts = new HashMap<>();
     }
 
     @Override
@@ -71,144 +79,113 @@ public class LandmarksDialog extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.landmarks_layout2);
 
-        checkBoxRestaurants = findViewById(R.id.checkBoxRestaurants);
-        checkBoxTerminals = findViewById(R.id.checkBoxTerminals);
-        checkBoxMalls = findViewById(R.id.checkBoxMalls);
-        checkBoxMuseum = findViewById(R.id.checkBoxMuseum);
-        checkBoxParks = findViewById(R.id.checkBoxParks);
+        checkBoxes = new CheckBox[] {
+                findViewById(R.id.checkBoxRestaurants),
+                findViewById(R.id.checkBoxTerminals),
+                findViewById(R.id.checkBoxMalls),
+                findViewById(R.id.checkBoxConvenience),
+                findViewById(R.id.checkBoxParks)
+        };
 
-        checkBoxRestaurants.setChecked(sharedPreferences.getBoolean("Jollibee", false));
-        checkBoxTerminals.setChecked(sharedPreferences.getBoolean("Terminal", false));
-        checkBoxMalls.setChecked(sharedPreferences.getBoolean("Mall", false));
-        checkBoxMuseum.setChecked(sharedPreferences.getBoolean("Museum", false));
-        checkBoxParks.setChecked(sharedPreferences.getBoolean("Park", false));
+        setupCheckBoxes();
+        setupSeekBar();
+    }
+
+    private void setupCheckBoxes() {
+        String[] keywords = new String[] {
+                "Jollibee,Chowking,McDonald's",
+                "LRT,Tricycle Terminal,Bus Terminal,Jeepney Terminal,Bus Station,JAC Liner,JAM Liner,Victory Liner",
+                "Shangrila Mall,Vista Mall,Mall of Asia,SM Store,SM City,Robinsons Place,Robinsons,Robinsons Galleria,Savemore",
+                "FamilyMart,7-Eleven,Uncle John's",
+                ""
+        };
+
+        String[] prefsKeys = new String[] {
+                "Fast food",
+                "Terminal",
+                "Mall",
+                "Station",
+                "Park"
+        };
+
+        for (int i = 0; i < checkBoxes.length; i++) {
+            CheckBox checkBox = checkBoxes[i];
+            String keywordsString = keywords[i];
+            String prefKey = prefsKeys[i];
+
+            boolean isChecked = sharedPreferences.getBoolean(prefKey, false);
+
+            // Check if markers exist for the current keyword
+            boolean markersExist = markersExistForKeywords(keywordsString.split(","));
+            if (!markersExist) {
+                // If no markers exist, uncheck the checkbox
+                isChecked = false;
+            }
+
+            checkBox.setChecked(isChecked);
+
+            final int finalI = i;
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    sharedPreferences.edit().putBoolean(prefsKeys[finalI], isChecked).apply();
+
+                    if (isChecked) {
+                        if (selectedCheckboxes.size() >= 2) {
+                            // Limit to 2 checkboxes, uncheck the first one in the list
+                            CheckBox firstSelected = selectedCheckboxes.get(0);
+                            firstSelected.setChecked(false);
+                            selectedCheckboxes.remove(0);
+                        }
+                        selectedCheckboxes.add(checkBox);
+
+                        fetchAndDisplayMarkers(keywords[finalI]);
+                        Toast.makeText(getContext(), checkBox.getText() + " checkbox checked", Toast.LENGTH_SHORT).show();
+                    } else {
+                        selectedCheckboxes.remove(checkBox);
+                        clearMarkersForKeywords(keywords[finalI].split(","));
+                    }
+                }
+            });
+        }
+    }
 
 
+    private void setupSeekBar() {
         SeekBar seekBarDistance = findViewById(R.id.seekBarDistance);
         TextView distanceRangeTextView = findViewById(R.id.distanceRange);
 
+        int progress = sharedPreferences.getInt("seekBarProgress", 0); // Get the stored progress value
+        maxDistanceInMeters = progress * 5000; // Calculate maxDistanceInMeters based on progress
 
-        maxDistanceInMeters = sharedPreferences.getFloat("maxDistanceInMeters", 5000); // Set a default value if not found in SharedPreferences
-
-        // Update the SeekBar's progress based on the maxDistanceInMeters
-        int progress = (int) (maxDistanceInMeters / 5000); // Reverse calculation
-        seekBarDistance.setProgress(progress);
-
-        // Update the TextView to display the updated distance range
+        // Set the text to the current progress
         String rangeText = String.format(Locale.getDefault(), "%.1f km", maxDistanceInMeters / 1000.0);
         distanceRangeTextView.setText(rangeText);
 
+        seekBarDistance.setProgress(progress);
 
-        // Set an OnSeekBarChangeListener
         seekBarDistance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                // Calculate the distance in meters based on the seek bar's progress
-                maxDistanceInMeters = progress * 5000; // 3 kilometers per unit
-                // Update the TextView to display the updated distance range
+                maxDistanceInMeters = progress * 5000;
+                // Update the text as the progress changes
                 String rangeText = String.format(Locale.getDefault(), "%.1f km", maxDistanceInMeters / 1000.0);
                 distanceRangeTextView.setText(rangeText);
-
-                // Save the modified maxDistanceInMeters value to SharedPreferences
                 sharedPreferences.edit().putFloat("maxDistanceInMeters", (float) maxDistanceInMeters).apply();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Handle when the user starts touching the seek bar
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                // Handle when the user stops touching the seek bar
                 int progress = seekBar.getProgress();
                 sharedPreferences.edit().putInt("seekBarProgress", progress).apply();
             }
         });
-
-
-        checkBoxRestaurants.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("Jollibee", isChecked).apply();
-                if (isChecked) {
-                    String restaurantKeywords = "Jollibee,Chowking,McDonald's";
-                    fetchAndDisplayMarkers(restaurantKeywords);
-                    Toast.makeText(getContext(), "Restaurants checkbox checked", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Clear the markers related to these keywords
-                    List<String> keywordsToRemove = Arrays.asList("Jollibee", "Chowking", "McDonald's");
-                    clearMarkersForKeywords(keywordsToRemove);
-                }
-            }
-        });
-
-        checkBoxTerminals.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("Terminal", isChecked).apply();
-                if (isChecked) {
-                    String restaurantKeywords = "Tricycle Terminal, Jeepney Terminal, Bus Terminal";
-                    fetchAndDisplayMarkers(restaurantKeywords);
-                    Toast.makeText(getContext(), "Terminal checkbox checked", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Clear the markers related to these keywords
-                    List<String> keywordsToRemove = Arrays.asList("Tricycle Terminal", "Jeepney Terminal", "Bus Terminal");
-                    clearMarkersForKeywords(keywordsToRemove);
-                }
-            }
-        });
-
-        checkBoxMalls.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("Mall", isChecked).apply();
-                if (isChecked) {
-
-                    String restaurantKeywords = "SM";
-                    fetchAndDisplayMarkers(restaurantKeywords);
-                    Toast.makeText(getContext(), "Mall checkbox checked", Toast.LENGTH_SHORT).show();
-
-                } else {
-                    List<String> keywordsToRemove = Arrays.asList("SM");
-                    clearMarkersForKeywords(keywordsToRemove);
-
-                }
-            }
-        });
-
-        checkBoxMuseum.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("Museum", isChecked).apply();
-                if (isChecked) {
-
-                } else {
-                    // Clear the markers related to these keywords
-
-                }
-            }
-        });
-
-        checkBoxParks.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                sharedPreferences.edit().putBoolean("Park", isChecked).apply();
-                if (isChecked) {
-
-                } else {
-                    // Clear the markers related to these keywords
-
-                }
-            }
-        });
-
-
-
-
-
-
     }
+
 
     private void fetchAndDisplayMarkers(String keywords) {
         String[] keywordArray = keywords.split(",");
@@ -227,7 +204,6 @@ public class LandmarksDialog extends Dialog {
 
         @Override
         public void run() {
-            // Check if the marker count for this keyword has reached the limit
             if (markerCounts.containsKey(keywords) && markerCounts.get(keywords) >= maxMarkersPerKeyword) {
                 return;
             }
@@ -274,7 +250,6 @@ public class LandmarksDialog extends Dialog {
         }
     }
 
-    // Check if a GeoPoint is within a specified radius from the current location
     private boolean isWithinRadius(GeoPoint geoPoint, double radiusMeters) {
         Location markerLocation = new Location("MarkerLocation");
         markerLocation.setLatitude(geoPoint.getLatitude());
@@ -284,7 +259,6 @@ public class LandmarksDialog extends Dialog {
         return distance <= radiusMeters;
     }
 
-    // Modify your addMarkersToMap method to run on the main thread
     private void addMarkersToMap(final List<Marker> markers, final String keywords) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -292,74 +266,166 @@ public class LandmarksDialog extends Dialog {
                 if (errorMessage != null) {
                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 } else if (markers.isEmpty()) {
-                    Toast.makeText(getContext(), "No markers received from the API", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No markers received from the API"+ keywords, Toast.LENGTH_SHORT).show();
                 } else {
                     for (Marker marker : markers) {
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                        setMarkerIconByKeyword(marker, keywords);
+
+                        marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+                            @Override
+                            public boolean onMarkerClick(Marker marker, MapView mapView) {
+                                String markerName = marker.getTitle();
+
+                                if (markerName != null && !markerName.isEmpty()) {
+                                    // Create a custom dialog content view
+                                    View markerInfoView = getLayoutInflater().inflate(R.layout.dialog_marker, null);
+
+                                    GeoPoint markerPosition = marker.getPosition();
+
+                                    // Animate the map view to the marker's position (center of the screen)
+                                    mapView.getController().animateTo(markerPosition);
+
+                                    // Find the TextViews in the custom dialog content view
+                                    TextView markerNameTextView = markerInfoView.findViewById(R.id.markerNameTextView);
+                                    TextView coordinatesTextView = markerInfoView.findViewById(R.id.coordinatesTextView);
+                                    TextView addressTextView = markerInfoView.findViewById(R.id.addressTextView); // Add an TextView for the address
+
+                                    // Set the marker name and coordinates in the TextViews
+                                    markerNameTextView.setText(markerName);
+                                    final String coordinates = "Coordinates: " + marker.getPosition().getLatitude() + ", " + marker.getPosition().getLongitude();
+                                    coordinatesTextView.setText(coordinates);
+
+                                    // Retrieve the address for the marker's coordinates and display it
+                                    new GetAddressTask(addressTextView).execute(marker.getPosition());
+
+                                    // Create a PopupWindow with custom content view
+                                    final PopupWindow popupWindow = new PopupWindow(markerInfoView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+                                    // Set the gravity for the PopupWindow to align it to the bottom-left corner
+                                    popupWindow.showAtLocation(mapView, Gravity.START | Gravity.BOTTOM, 20, 500); // Adjust the y offset (e.g., -100)
+
+                                    // Add a long-press listener to the markerInfoView to copy the coordinates
+                                    markerInfoView.setOnLongClickListener(new View.OnLongClickListener() {
+                                        @Override
+                                        public boolean onLongClick(View v) {
+                                            // Copy the plain coordinates to the clipboard
+                                            ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                            ClipData clip = ClipData.newPlainText("Coordinates", coordinates.substring("Coordinates: ".length()));
+                                            clipboard.setPrimaryClip(clip);
+                                            Toast.makeText(getContext(), "Coordinates copied to clipboard", Toast.LENGTH_SHORT).show();
+                                            return true;
+                                        }
+                                    });
+
+                                    markerInfoView.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            // Call the dropPinOnMap method from the MapFunctionHandler
+                                            if (mapFunctionHandler != null) {
+                                                mapFunctionHandler.dropPinOnMap(marker.getPosition());
+                                            }
+
+                                            Toast.makeText(getContext(), "You have clicked the dialog box", Toast.LENGTH_SHORT).show();
+                                            popupWindow.dismiss();
+                                        }
+                                    });
+                                }
+                                return true; // Return true to consume the event, false to allow the default behavior
+                            }
+                        });
+
                         mapView.getOverlays().add(marker);
-
-                        if (keywords.contains("Jollibee")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.restaurant_marker);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-                        if (keywords.contains("McDonald's")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.mcdo_marker);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-                        if (keywords.contains("Chowking")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.chowking_landmark);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-                        if (keywords.contains("Tricycle Terminal")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.tricycle_marker);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-                        if (keywords.contains("Jeepney Terminal")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.jeepney_marker);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-                        if (keywords.contains("Bus Terminal")) {
-                            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.bus_marker);
-                            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
-                            marker.setIcon(drawable);
-                            mapView.getOverlays().add(marker);
-                            mapView.invalidate();
-                        }
-
-
-
-
-
+                        mapView.invalidate();
                     }
-                    mapView.invalidate();
                 }
             }
         });
     }
 
+    private void setMarkerIconByKeyword(Marker marker, String keywords) {
+        int resourceId = 0;
+        String[] keywordArray = keywords.split(",");
+
+        for (String keyword : keywordArray) {
+            String trimmedKeyword = keyword.trim(); // Trim leading/trailing spaces
+            if (marker.getTitle() != null && marker.getTitle().toLowerCase().contains(trimmedKeyword.toLowerCase())) {
+                switch (trimmedKeyword.toLowerCase()) { // Convert the keyword to lowercase for case-insensitive comparison
+                    case "jollibee":
+                        resourceId = R.drawable.restaurant_marker;
+                        break;
+                    case "mcdonald's":
+                        resourceId = R.drawable.mcdo_marker;
+                        break;
+                    case "chowking":
+                        resourceId = R.drawable.chowking_landmark;
+                        break;
+                    case "tricycle terminal":
+                    case "tricycle transport terminal":
+                    case "tricycle transportation terminal":
+                        resourceId = R.drawable.tricycle_marker;
+                        break;
+                    case "jeepney terminal":
+                        resourceId = R.drawable.jeepney_marker;
+                        break;
+                    case "bus terminal":
+                    case "bus station":
+                    case "jac liner":
+                    case "jam liner":
+                    case "victory liner":
+                        resourceId = R.drawable.bus_marker;
+                        break;
+                    case "lrt":
+                        resourceId = R.drawable.train_station;
+                        break;
+                    case "mall of asia":
+                    case "sm store":
+                    case "sm city":
+                        resourceId = R.drawable.sm_markers;
+                        break;
+                    case "savemore":
+                        resourceId = R.drawable.save_more_marker;
+                        break;
+                    case "robinsons place":
+                    case "robinsons galleria":
+                    case "robinsons":
+                        resourceId = R.drawable.robinson_marker;
+                        break;
+                    case "shangrila mall":
+                    case "vista mall":
+                        resourceId = R.drawable.other_malls;
+                        break;
+                    case "uncle john's":
+                        resourceId = R.drawable.ministop_marker;
+                        break;
+                    case "7-eleven":
+                        resourceId = R.drawable.eleven_marker;
+                        break;
+                    case "familymart":
+                        resourceId = R.drawable.family_mart_marker;
+                        break;
+                    default:
+                        resourceId = 0;
+                        break;
+                }
+                if (resourceId != 0) {
+                    break; // No need to check further
+                }
+            }
+        }
+
+        if (resourceId != 0) {
+            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), resourceId);
+            Drawable drawable = new BitmapDrawable(getContext().getResources(), bitmap);
+            marker.setIcon(drawable);
+        }
+    }
+
+
+
     private String getOverpassQuery(String keywords) {
         return "[out:json][bbox:5.37,117.17,18.85,126.6];node[name~\"" + keywords + "\"];out;";
     }
+
 
     private List<Marker> parseOverpassResponse(String response) {
         List<Marker> markers = new ArrayList<>();
@@ -386,9 +452,6 @@ public class LandmarksDialog extends Dialog {
         return markers;
     }
 
-
-
-
     private String getTagName(JSONObject elementJson) throws JSONException {
         JSONObject tagsJson = elementJson.optJSONObject("tags");
         if (tagsJson != null) {
@@ -397,7 +460,7 @@ public class LandmarksDialog extends Dialog {
         return "";
     }
 
-    private void clearMarkersForKeywords(List<String> keywords) {
+    private void clearMarkersForKeywords(String[] keywords) {
         List<Marker> markersToRemove = new ArrayList<>();
 
         for (org.osmdroid.views.overlay.Overlay overlay : mapView.getOverlays()) {
@@ -406,11 +469,10 @@ public class LandmarksDialog extends Dialog {
                 String markerKeywords = marker.getTitle();
 
                 if (markerKeywords != null) {
-                    // Check if any of the keywords to remove is contained in the marker's title
                     for (String keywordToRemove : keywords) {
                         if (markerKeywords.toLowerCase().contains(keywordToRemove.toLowerCase())) {
                             markersToRemove.add(marker);
-                            break; // No need to check this marker further
+                            break;
                         }
                     }
                 }
@@ -423,4 +485,73 @@ public class LandmarksDialog extends Dialog {
 
         mapView.invalidate();
     }
+
+
+    private class GetAddressTask extends AsyncTask<GeoPoint, Void, String> {
+        private TextView addressTextView;
+
+        public GetAddressTask(TextView addressTextView) {
+            this.addressTextView = addressTextView;
+        }
+
+        @Override
+        protected String doInBackground(GeoPoint... params) {
+            GeoPoint geoPoint = params[0];
+            String address = getAddressFromNominatim(geoPoint);
+            return address;
+        }
+
+        @Override
+        protected void onPostExecute(String address) {
+            addressTextView.setText("Address: " + address);
+        }
+    }
+
+    private String getAddressFromNominatim(GeoPoint geoPoint) {
+        try {
+            double latitude = geoPoint.getLatitude();
+            double longitude = geoPoint.getLongitude();
+            String urlString = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + latitude + "&lon=" + longitude + "&addressdetails=1";
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            InputStreamReader in = new InputStreamReader(connection.getInputStream());
+            int read;
+            char[] buff = new char[1024];
+            StringBuilder json = new StringBuilder();
+
+            while ((read = in.read(buff)) != -1) {
+                json.append(buff, 0, read);
+            }
+
+            JSONObject jsonObject = new JSONObject(json.toString());
+            if (jsonObject.has("display_name")) {
+                return jsonObject.getString("display_name");
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return "Address not found";
+    }
+
+    private boolean markersExistForKeywords(String[] keywords) {
+        for (String keyword : keywords) {
+            String trimmedKeyword = keyword.trim();
+            for (org.osmdroid.views.overlay.Overlay overlay : mapView.getOverlays()) {
+                if (overlay instanceof Marker) {
+                    Marker marker = (Marker) overlay;
+                    String markerKeywords = marker.getTitle();
+
+                    if (markerKeywords != null && markerKeywords.toLowerCase().contains(trimmedKeyword.toLowerCase())) {
+                        // If a marker exists for this keyword, return true
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
 }

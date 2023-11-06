@@ -30,19 +30,7 @@
         app:layout_constraintTop_toBottomOf="@+id/dialog_title"
         app:layout_constraintBottom_toTopOf="@+id/dialog_button_ok">
 
-        <CheckBox
-            android:id="@+id/checkBoxRestaurants"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Restaurants"
-            android:paddingLeft="10dp"/>
 
-        <CheckBox
-            android:id="@+id/checkBoxTerminals"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Terminals"
-            android:paddingLeft="10dp" />
 
         <CheckBox
             android:id="@+id/checkBoxMalls"
@@ -50,20 +38,32 @@
             android:layout_height="wrap_content"
             android:text="Malls"
             android:paddingLeft="10dp"/>
-
-        <CheckBox
-            android:id="@+id/checkBoxMuseum"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Museum"
-            android:paddingLeft="10dp"/>
-
         <CheckBox
             android:id="@+id/checkBoxParks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Parks"
             android:paddingLeft="10dp"/>
+        <CheckBox
+            android:id="@+id/checkBoxRestaurants"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Restaurants"
+            android:paddingLeft="10dp"/>
+        <CheckBox
+            android:id="@+id/checkBoxConvenience"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Convenience Stores"
+            android:paddingLeft="10dp"/>
+
+
+        <CheckBox
+            android:id="@+id/checkBoxTerminals"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Terminals/ Stations"
+            android:paddingLeft="10dp" />
 
     </LinearLayout>
 
@@ -84,8 +84,8 @@
 
     <TextView
         android:id="@+id/distanceRange"
-        android:layout_width="114dp"
-        android:layout_height="25dp"
+        android:layout_width="70dp"
+        android:layout_height="28dp"
         android:layout_marginTop="15dp"
         android:layout_marginEnd="4dp"
 

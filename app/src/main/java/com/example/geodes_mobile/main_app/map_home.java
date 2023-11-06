@@ -118,7 +118,10 @@ public class map_home extends AppCompatActivity {
     private FragmentManager fragmentManager = getSupportFragmentManager();
 
     private Button addGeo;
+
+    private View weatherview;
     public static final int MY_PERMISSION_REQUEST_CODE = 1;
+
 
 
     @Override
@@ -207,31 +210,7 @@ public class map_home extends AppCompatActivity {
 
 
                 Toast.makeText(this, "Please allow this app to use location, before using it", Toast.LENGTH_SHORT).show();
-
-
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -249,6 +228,8 @@ public class map_home extends AppCompatActivity {
         addRadius = findViewById(R.id.btnSave1);
         searchView = findViewById(R.id.search_func);
         addGeo = findViewById(R.id.addGeofenceButton);
+        weatherview = findViewById(R.id.WeatherView);
+
 
 
 
@@ -340,12 +321,20 @@ public class map_home extends AppCompatActivity {
         openDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create a Location object for your current location
-                Location currentLocation = getCurrentLocation();
-                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView, currentLocation);
+                // Create a fixed Location object for Mall of Asia
+                Location currentLocation = new Location("MOA");
+
+                //Location currentLocation = getCurrentLocation();
+
+
+                currentLocation.setLatitude(14.5359);
+                currentLocation.setLongitude(120.9827);
+
+                LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView, currentLocation, locationHandler);
                 landmarksDialog.show();
             }
         });
+
 
 
 
@@ -1049,7 +1038,5 @@ public class map_home extends AppCompatActivity {
         }
         return null;
     }
-
-
 
 }

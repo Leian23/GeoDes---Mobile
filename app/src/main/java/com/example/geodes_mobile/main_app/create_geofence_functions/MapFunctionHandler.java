@@ -1,12 +1,16 @@
 package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.view.View;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.core.app.ActivityCompat;
@@ -15,6 +19,7 @@ import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.MainActivity;
 import com.example.geodes_mobile.main_app.map_home;
 
+import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
@@ -24,6 +29,10 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MapFunctionHandler {
 
@@ -45,6 +54,10 @@ public class MapFunctionHandler {
     private SeekBar innerSeekBar;
     private boolean isLongPressEnabled = true;
     private boolean isEntryMode = true;
+    private static final String WEATHER_API_BASE_URL = "http://api.weatherapi.com/v1"; // Replace with your API base URL
+    private static final String API_KEY = "ade995c254e64059a8a05234230611"; // Replace with your API key
+
+
 
 
 
@@ -56,6 +69,11 @@ public class MapFunctionHandler {
         this.innerSeekBar = innerSeekBar;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
+
+
+
+
+
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
@@ -185,9 +203,9 @@ public class MapFunctionHandler {
 
 
 
-
         // enable the bottomsheet for geofence configuration
         ((map_home) context).BottomSheetRadii();
+        updateWeatherView(geoPoint);
 
         // Set the toggle button to true
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
@@ -212,10 +230,7 @@ public class MapFunctionHandler {
 
         return new BoundingBox(pinLatitude, maxLon, center.getLatitude(), minLon);
     }
-
-
-
-
+    
 
     public void clearMarkerAndGeofences() {
         // Remove existing marker and geofences
@@ -259,5 +274,59 @@ public class MapFunctionHandler {
     public void setLongPressEnabled(boolean enabled) {
         isLongPressEnabled = enabled;
     }
+
+
+    private void updateWeatherView(GeoPoint geoPoint) {
+        new Thread(() -> {
+            try {
+                OkHttpClient client = new OkHttpClient();
+                String apiUrl = "http://api.weatherapi.com/v1/current.json?key=" + API_KEY + "&q=" + geoPoint.getLatitude() + "," + geoPoint.getLongitude();
+                Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    JSONObject weatherData = new JSONObject(responseData);
+
+                    if (weatherData.has("current")) {
+                        JSONObject currentData = weatherData.getJSONObject("current");
+                        double temperatureCelsius = currentData.getDouble("temp_c");
+                        String conditionText = currentData.getJSONObject("condition").getString("text");
+
+                        // Update the Weatherview with weather information
+                        ((Activity) context).runOnUiThread(() -> {
+                            View weatherView = ((map_home) context).findViewById(R.id.WeatherView);
+                            TextView temperatureTextView = weatherView.findViewById(R.id.weatherTemp);
+                            TextView conditionTextView = weatherView.findViewById(R.id.weatherCon);
+
+                            temperatureTextView.setText(String.format("%.1f °C", temperatureCelsius));
+                            conditionTextView.setText(conditionText);
+                        });
+                    } else {
+                        ((Activity) context).runOnUiThread(() -> {
+                            Toast.makeText(context, "Failed to retrieve weather data", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                } else {
+                    ((Activity) context).runOnUiThread(() -> {
+                        Toast.makeText(context, "Failed to retrieve weather data", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                ((Activity) context).runOnUiThread(() -> {
+                    View weatherView = ((map_home) context).findViewById(R.id.WeatherView);
+                    TextView temperatureTextView = weatherView.findViewById(R.id.weatherTemp);
+                    temperatureTextView.setText(e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+
+
+
 
 }
