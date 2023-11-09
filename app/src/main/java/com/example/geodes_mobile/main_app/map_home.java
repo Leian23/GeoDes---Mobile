@@ -171,12 +171,12 @@ public class map_home extends AppCompatActivity {
                 @Override
                 public void onLocationChanged(Location location) {
                     // Handle location updates and update the map accordingly
-
+                    // Toast.makeText(map_home.this, "Current Location: Latitude " + location.getLatitude() + ", Longitude " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                 }
-
 
                 @Override
                 public void onStatusChanged(String provider, int status, Bundle extras) {
+                    // Handle status changes if needed
                 }
 
                 @Override
@@ -197,20 +197,20 @@ public class map_home extends AppCompatActivity {
             };
 
             // Request location updates from GPS provider
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            } else {
+                // Handle the case where GPS is not enabled
+                Toast.makeText(map_home.this, "GPS is not enabled. Please enable it in device settings.", Toast.LENGTH_SHORT).show();
+            }
 
-            // Enable the location overlay
+            // Enable the location overlay (assuming it's properly configured)
             myLocationOverlay = new MyLocationNewOverlay(mapView);
-
             mapView.getOverlays().add(myLocationOverlay);
-
-
         } else {
-            // GPS permission is not granted, check for another permission
-
-
-                Toast.makeText(this, "Please allow this app to use location, before using it", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
+
 
 
 
@@ -261,7 +261,6 @@ public class map_home extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-
 
                 // Check if the query is in the format of coordinates (e.g., "12.345,67.890")
                 if (isValidCoordinates(query)) {
@@ -322,19 +321,12 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Create a fixed Location object for Mall of Asia
-                Location currentLocation = new Location("MOA");
-
-                //Location currentLocation = getCurrentLocation();
-
-
-                currentLocation.setLatitude(14.5359);
-                currentLocation.setLongitude(120.9827);
+                Location currentLocation = getCurrentLocation();
 
                 LandmarksDialog landmarksDialog = new LandmarksDialog(map_home.this, mapView, currentLocation, locationHandler);
                 landmarksDialog.show();
             }
         });
-
 
 
 
@@ -1023,20 +1015,16 @@ public class map_home extends AppCompatActivity {
 
 
     private Location getCurrentLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (locationManager != null) {
-            try {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (location != null) {
-                        return location;
-                    }
-                }
-            } catch (SecurityException e) {
-                e.printStackTrace();
+        if (myLocationOverlay != null) {
+            Location lastKnownLocation = myLocationOverlay.getLastFix();
+            if (lastKnownLocation != null) {
+                return lastKnownLocation;
             }
         }
         return null;
     }
+
+
+
 
 }
