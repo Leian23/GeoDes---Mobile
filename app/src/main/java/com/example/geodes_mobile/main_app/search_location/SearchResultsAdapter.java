@@ -13,14 +13,14 @@ import com.example.geodes_mobile.R;
 import java.util.ArrayList;
 
 public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.ViewHolder> {
-    private ArrayList<LocationResult> data;
+    private ArrayList<LocationResultt> data;
     private OnItemClickListener listener;
 
     public SearchResultsAdapter() {
         data = new ArrayList<>();
     }
 
-    public void setData(ArrayList<LocationResult> newData) {
+    public void setData(ArrayList<LocationResultt> newData) {
         data.clear();
         data.addAll(newData);
         notifyDataSetChanged();
@@ -40,7 +40,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        LocationResult result = data.get(position);
+        LocationResultt result = data.get(position);
         holder.textViewResult.setText(result.getName());
 
         holder.itemView.setOnClickListener(view -> {
@@ -60,7 +60,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     }
 
     public interface OnItemClickListener {
-        void onItemClick(LocationResult locationResult);
+        void onItemClick(LocationResultt locationResult);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

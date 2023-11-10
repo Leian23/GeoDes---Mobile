@@ -1,11 +1,11 @@
 package com.example.geodes_mobile.main_app.search_location;
 
-public class LocationResult {
+public class LocationResultt {
     private String name;
     private double latitude;
     private double longitude;
 
-    public LocationResult(String name, double latitude, double longitude) {
+    public LocationResultt(String name, double latitude, double longitude) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;

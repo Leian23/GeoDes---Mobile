@@ -92,5 +92,8 @@ dependencies {
     implementation ("com.loopj.android:android-async-http:1.4.11")
     implementation ("com.squareup.picasso:picasso:2.71828")
 
+    implementation ("com.google.android.gms:play-services-location:16.0.0")
+
+
 
 }
