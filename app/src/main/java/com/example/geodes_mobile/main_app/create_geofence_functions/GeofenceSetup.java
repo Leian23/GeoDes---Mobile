@@ -70,7 +70,6 @@ public class GeofenceSetup {
         if (outerGeofence != null && innerGeofence != null && marker != null) {
             // Update outer geofence
             outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerGeofenceRadius));
-
             // Update inner geofence
             innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerGeofenceRadius));
             mapView.invalidate();

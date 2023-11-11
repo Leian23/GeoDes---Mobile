@@ -146,7 +146,6 @@ public class map_home extends AppCompatActivity {
 
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
-    private Polygon circle;
 
     private double outerGeofenceRadius = 10000; // Adjust as needed
     private double innerGeofenceRadius = 5000; // Adjust as needed
@@ -244,8 +243,6 @@ public class map_home extends AppCompatActivity {
         add_geofence = findViewById(R.id.colorChangingButton4);
         cancelbtn = findViewById(R.id.cancelButton);
         btnDiscard = findViewById(R.id.btnDiscard);
-        outerSeekBar = findViewById(R.id.levelSeekBar);
-        innerSeekBar = findViewById(R.id.levelSeekBar2);
         dicardAddSched = findViewById(R.id.discardSched);
         closeAlerts = findViewById(R.id.CloseAlert);
         closeSched = findViewById(R.id.closeSchedule);
@@ -254,6 +251,12 @@ public class map_home extends AppCompatActivity {
         addGeo = findViewById(R.id.addGeofenceButton);
         weatherview = findViewById(R.id.WeatherView);
 
+        //seekbars for geofence resizing
+        outerSeekBar = findViewById(R.id.outerBar);
+        innerSeekBar = findViewById(R.id.innerBar);
+
+        //coordinatestext
+        TextView coordinatesVal = findViewById(R.id.coordinatesValue1);
 
 
 
@@ -264,7 +267,7 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
-        locationHandler = new MapFunctionHandler(map_home.this, mapView, outerSeekBar, innerSeekBar);
+        locationHandler = new MapFunctionHandler(map_home.this, mapView, coordinatesVal, outerSeekBar, innerSeekBar);
 
 
         recyclerViewSearchResults = findViewById(R.id.recyclerViewSearchResults);

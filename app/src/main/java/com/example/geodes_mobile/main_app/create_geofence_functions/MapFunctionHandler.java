@@ -2,6 +2,8 @@ package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
@@ -55,6 +57,7 @@ public class MapFunctionHandler {
     private GeofenceSetup geofenceSetup;
     private SeekBar outerSeekBar;
     private SeekBar innerSeekBar;
+    private  TextView coordinates;
     private boolean isLongPressEnabled = true;
     private boolean isEntryMode = true;
     private static final String WEATHER_API_BASE_URL = "http://api.weatherapi.com/v1"; // Replace with your API base URL
@@ -65,9 +68,10 @@ public class MapFunctionHandler {
 
 
 
-    public MapFunctionHandler(Context context, MapView mapView, SeekBar outerSeekBar, SeekBar innerSeekBar) {
+    public MapFunctionHandler(Context context, MapView mapView, TextView coordinates, SeekBar outerSeekBar, SeekBar innerSeekBar) {
         this.context = context;
         this.mapView = mapView;
+        this.coordinates = coordinates;
         this.outerSeekBar = outerSeekBar;
         this.innerSeekBar = innerSeekBar;
 
@@ -153,6 +157,7 @@ public class MapFunctionHandler {
         // Inside setupSeekBarListeners method
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
 
+
         toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isEntryMode = isChecked;
             updateInnerSeekBarState();
@@ -209,6 +214,22 @@ public class MapFunctionHandler {
         // enable the bottomsheet for geofence configuration
         ((map_home) context).BottomSheetRadii();
         updateWeatherView(geoPoint);
+
+        coordinates.setText(geoPoint.getLatitude() + "\n" + geoPoint.getLongitude());
+        coordinates.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                final String coordinates = "Coordinates: " + geoPoint.getLatitude() + ", " + geoPoint.getLongitude();
+                ClipboardManager clipboard = (ClipboardManager) v.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                Toast.makeText(v.getContext(), "Coordinates copied to clipboard", Toast.LENGTH_SHORT).show();
+                ClipData clip = ClipData.newPlainText("Coordinates", coordinates.substring("Coordinates: ".length()));
+                clipboard.setPrimaryClip(clip);
+                return true;
+            }
+        });
+
+
+
 
         // Set the toggle button to true
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
