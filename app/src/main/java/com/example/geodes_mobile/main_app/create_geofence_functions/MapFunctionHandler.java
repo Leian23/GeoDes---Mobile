@@ -35,6 +35,8 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
+import java.util.Locale;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -42,9 +44,6 @@ import okhttp3.Response;
 public class MapFunctionHandler {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
-    private static final long MIN_TIME_BETWEEN_UPDATES = 0; // 500 milliseconds
-    private static final float MIN_DISTANCE_BETWEEN_UPDATES = 10;
-
     private Context context;
     private MapView mapView;
     private IMapController mapController;
@@ -62,23 +61,30 @@ public class MapFunctionHandler {
     private boolean isEntryMode = true;
     private static final String WEATHER_API_BASE_URL = "http://api.weatherapi.com/v1"; // Replace with your API base URL
     private static final String API_KEY = "ade995c254e64059a8a05234230611"; // Replace with your API key
+    private int initialMaxLevelOuter = 50; // maximum level of outerseekbar
+    private int initialMaxLevelInner = 10; // maximum level of innerseekbar
+
+    private double currentOuterRadius;
+    private double currentInnerRadius;
+    private TextView innerLabel;
+    private TextView outerLabel;
 
 
 
 
 
 
-    public MapFunctionHandler(Context context, MapView mapView, TextView coordinates, SeekBar outerSeekBar, SeekBar innerSeekBar) {
+
+    public MapFunctionHandler(Context context, MapView mapView, TextView coordinates, SeekBar outerSeekBar, SeekBar innerSeekBar, TextView outerLabel, TextView innerLabel) {
         this.context = context;
         this.mapView = mapView;
         this.coordinates = coordinates;
         this.outerSeekBar = outerSeekBar;
         this.innerSeekBar = innerSeekBar;
+        this.outerLabel = outerLabel;
+        this.innerLabel = innerLabel;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-
-
-
 
 
 
@@ -116,30 +122,50 @@ public class MapFunctionHandler {
         outerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                double outerRadius = progress + 0;
-                updateGeofences(outerRadius, innerSeekBar.getProgress());
+                double outerRadiusMeters = (progress / (double) initialMaxLevelOuter) * 8000.0; // Convert progress to meters
+
+                // Limit the minimum outer radius to 0.5 km
+                if (outerRadiusMeters < 300.0) {
+                    outerRadiusMeters = 300.0;
+                    seekBar.setProgress((int) ((outerRadiusMeters / 8000.0) * initialMaxLevelOuter));
+                }
+
+                currentOuterRadius = outerRadiusMeters; // Store the current outer radius
+
+                // Update geofences with the calculated outer radius and the current inner radius
+                updateGeofences(currentOuterRadius, currentInnerRadius);
+
+                double outerRadiusKm = outerRadiusMeters / 1000.0;
+                String rangeText = String.format(Locale.getDefault(), "%.1f km", outerRadiusKm);
+                outerLabel.setText(rangeText);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
-
-            // Other methods...
         });
 
         innerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                double innerRadius = progress + 0;
-                updateGeofences(outerSeekBar.getProgress(), innerRadius);
+                double innerRadiusMeters = (progress / (double) initialMaxLevelInner) * 300.0; // Convert progress to meters
+
+                // Limit the minimum inner radius to 0.2 km
+                if (innerRadiusMeters < 200.0) {
+                    innerRadiusMeters = 200.0;
+                    seekBar.setProgress((int) ((innerRadiusMeters / 300.0) * initialMaxLevelInner));
+                }
+
+                currentInnerRadius = innerRadiusMeters; // Store the current outer radius
+                updateGeofences(currentOuterRadius, currentInnerRadius);
+
+                double innerRadiusKM = innerRadiusMeters / 1000.0;
+                String rangeText = String.format(Locale.getDefault(), "%.1f km", innerRadiusKM);
+                innerLabel.setText(rangeText);
             }
 
             @Override
@@ -148,15 +174,12 @@ public class MapFunctionHandler {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
-
         });
 
 
         // Inside setupSeekBarListeners method
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
-
 
         toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isEntryMode = isChecked;
@@ -168,12 +191,6 @@ public class MapFunctionHandler {
             }
         });
     }
-
-
-
-
-
-
 
 
     public void dropPinOnMap(GeoPoint geoPoint) {
@@ -190,16 +207,23 @@ public class MapFunctionHandler {
             geofenceSetup = new GeofenceSetup(context, mapView);
         }
 
-        double outerRadius = 50; // Set your desired default outer radius
-        double innerRadius = isEntryMode ? 20 : 0; // Set your desired default inner radius
+        double outerRadius = 2; // default outer radius seekbar progress
+        double innerRadius = 8; // default inner radius seekbar progress
 
-        outerSeekBar.setProgress((int) outerRadius);
-        innerSeekBar.setProgress((int) innerRadius);
+        double initialSavedOuterRadius = (outerRadius / (double) initialMaxLevelOuter) * 8000.0;
+        double initialSavedInnerRadius = isEntryMode ? (innerRadius / (double) 10) * 300.0 : 0; // Set your desired default inner radius
 
-        geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), outerRadius, innerRadius);
+        // Calculate the initial progress based on the initial saved outer radius
+        int initialOuterProgress = (int) ((initialSavedOuterRadius / 8000.0) * initialMaxLevelOuter);
+        int initialInnerProgress = (int) ((initialSavedInnerRadius / 300.0) * initialMaxLevelInner);
+
+        outerSeekBar.setProgress(initialOuterProgress);
+        innerSeekBar.setProgress(initialInnerProgress);
+
+        geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), initialSavedOuterRadius, initialSavedInnerRadius);
 
         // Calculate bounding box
-        BoundingBox boundingBox = calculateBoundingBox(geoPoint, outerRadius);
+        BoundingBox boundingBox = calculateBoundingBox(geoPoint, initialSavedOuterRadius);
 
         // Animate the map to the bounding box
         mapView.zoomToBoundingBox(boundingBox, true);
@@ -209,9 +233,7 @@ public class MapFunctionHandler {
 
         mapView.invalidate();
 
-
-
-        // enable the bottomsheet for geofence configuration
+        // enable the bottom sheet for geofence configuration
         ((map_home) context).BottomSheetRadii();
         updateWeatherView(geoPoint);
 
@@ -228,13 +250,11 @@ public class MapFunctionHandler {
             }
         });
 
-
-
-
         // Set the toggle button to true
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
         toggleButton.setChecked(true);
     }
+
 
 
 
@@ -288,7 +308,9 @@ public class MapFunctionHandler {
     private void updateInnerSeekBarState() {
         if (isEntryMode) {
             innerSeekBar.setEnabled(true);
-            innerSeekBar.setProgress(20);
+            double initialSavedInnerRadius = isEntryMode ? (10 / (double) 10) * 300.0 : 0;
+            int initialInnerProgress = (int) ((initialSavedInnerRadius / 300.0) * 10);
+            innerSeekBar.setProgress(initialInnerProgress);
         } else {
             innerSeekBar.setEnabled(false);
             innerSeekBar.setProgress(0);
@@ -428,13 +450,6 @@ public class MapFunctionHandler {
         // Default to considering it as daytime in case of errors
         return true;
     }
-
-
-
-
-
-
-
 
 
 }

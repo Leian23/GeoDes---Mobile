@@ -158,11 +158,11 @@
                 app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
 
             <TextView
-                android:id="@+id/coordinatesValue3"
+                android:id="@+id/OuterFenceValue"
                 android:layout_width="39dp"
                 android:layout_height="21dp"
                 android:layout_marginStart="72dp"
-                android:layout_marginTop="107dp"
+                android:layout_marginTop="115dp"
                 android:text="5.0"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -175,7 +175,7 @@
                 android:layout_width="103dp"
                 android:layout_height="22dp"
                 android:layout_marginStart="118dp"
-                android:layout_marginTop="107dp"
+                android:layout_marginTop="115dp"
                 android:text="km"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -188,7 +188,7 @@
                 android:layout_width="103dp"
                 android:layout_height="22dp"
                 android:layout_marginStart="115dp"
-                android:layout_marginTop="179dp"
+                android:layout_marginTop="185dp"
                 android:text="km"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -198,11 +198,11 @@
 
 
             <TextView
-                android:id="@+id/coordinatesValue5"
-                android:layout_width="80dp"
+                android:id="@+id/InnerFenceValue"
+                android:layout_width="39dp"
                 android:layout_height="22dp"
                 android:layout_marginStart="72dp"
-                android:layout_marginTop="179dp"
+                android:layout_marginTop="185dp"
                 android:text="5.0"
                 android:textColor="#000000"
                 android:textSize="18sp"
@@ -263,6 +263,7 @@
                 android:progressDrawable="@drawable/level_indicator_outer"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
+                android:max="50"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.13"
                 app:layout_constraintStart_toStartOf="parent"
@@ -276,6 +277,7 @@
                 android:progressDrawable="@drawable/level_indicator_inner"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
+                android:max="10"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.13"
                 app:layout_constraintStart_toStartOf="parent"

@@ -150,6 +150,9 @@ public class map_home extends AppCompatActivity {
     private double outerGeofenceRadius = 10000; // Adjust as needed
     private double innerGeofenceRadius = 5000; // Adjust as needed
 
+    private TextView outerLabel;
+    private TextView innerLabel;
+
     private Polygon outerGeofence;
     private Polygon innerGeofence;
 
@@ -255,6 +258,12 @@ public class map_home extends AppCompatActivity {
         outerSeekBar = findViewById(R.id.outerBar);
         innerSeekBar = findViewById(R.id.innerBar);
 
+        //Label for seekbar progress geofence
+        outerLabel = findViewById(R.id.OuterFenceValue);
+        innerLabel = findViewById(R.id.InnerFenceValue);
+
+
+
         //coordinatestext
         TextView coordinatesVal = findViewById(R.id.coordinatesValue1);
 
@@ -267,7 +276,7 @@ public class map_home extends AppCompatActivity {
         setRoundedButtonBackground(add_geofence, R.color.white, R.color.green);
 
 
-        locationHandler = new MapFunctionHandler(map_home.this, mapView, coordinatesVal, outerSeekBar, innerSeekBar);
+        locationHandler = new MapFunctionHandler(map_home.this, mapView, coordinatesVal, outerSeekBar, innerSeekBar, outerLabel, innerLabel);
 
 
         recyclerViewSearchResults = findViewById(R.id.recyclerViewSearchResults);
