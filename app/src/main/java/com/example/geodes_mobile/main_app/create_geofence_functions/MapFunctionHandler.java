@@ -71,10 +71,6 @@ public class MapFunctionHandler {
 
 
 
-
-
-
-
     public MapFunctionHandler(Context context, MapView mapView, TextView coordinates, SeekBar outerSeekBar, SeekBar innerSeekBar, TextView outerLabel, TextView innerLabel) {
         this.context = context;
         this.mapView = mapView;
@@ -154,11 +150,20 @@ public class MapFunctionHandler {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 double innerRadiusMeters = (progress / (double) initialMaxLevelInner) * 300.0; // Convert progress to meters
 
-                // Limit the minimum inner radius to 0.2 km
+
                 if (innerRadiusMeters < 200.0) {
-                    innerRadiusMeters = 200.0;
+
+                    if (isEntryMode) {
+                        innerRadiusMeters = 200.0;
+                    } else {
+                        innerRadiusMeters = 0.0;
+                    }
+
+
                     seekBar.setProgress((int) ((innerRadiusMeters / 300.0) * initialMaxLevelInner));
                 }
+
+
 
                 currentInnerRadius = innerRadiusMeters; // Store the current outer radius
                 updateGeofences(currentOuterRadius, currentInnerRadius);
@@ -187,7 +192,7 @@ public class MapFunctionHandler {
 
             // Call the method to update the color of the outer geofence based on the toggle button state
             if (geofenceSetup != null) {
-                geofenceSetup.updateOuterGeofenceColor(!isChecked);
+                geofenceSetup.updateOuterGeofenceColor(mapView.getContext(), !isChecked);
             }
         });
     }

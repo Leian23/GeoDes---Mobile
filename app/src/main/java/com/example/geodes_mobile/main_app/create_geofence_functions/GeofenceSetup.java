@@ -85,19 +85,35 @@ public class GeofenceSetup {
     }
 
 
-    public void updateOuterGeofenceColor(boolean isExitMode) {
+    public void updateOuterGeofenceColor(Context context, boolean isExitMode) {
         if (outerGeofence != null) {
             int fillColor;
             int strokeColor;
             if (isExitMode) {
                 // Set the color to F1D99A with 40% opacity for exit mode
+                mapView.getOverlays().remove(marker);
                 fillColor = Color.argb(102, 241, 217, 154);
                 strokeColor = Color.argb(255, 180, 158, 80);
+                Bitmap customBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_loc_exit);
+                Drawable customDrawable = new BitmapDrawable(context.getResources(), customBitmap);
+
+                // Set the custom Drawable as the icon for the marker
+                marker.setIcon(customDrawable);
+
+                mapView.getOverlays().add(marker);
 
             } else {
                 // Set the original color for entry mode
                 fillColor = Color.argb(102, 154, 220, 241);
                 strokeColor = Color.rgb(80, 156, 180);
+                mapView.getOverlays().remove(marker);
+                Bitmap customBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_loc);
+                Drawable customDrawable = new BitmapDrawable(context.getResources(), customBitmap);
+
+                // Set the custom Drawable as the icon for the marker
+                marker.setIcon(customDrawable);
+
+                mapView.getOverlays().add(marker);
             }
             outerGeofence.setFillColor(fillColor);
             outerGeofence.setStrokeColor(strokeColor);
