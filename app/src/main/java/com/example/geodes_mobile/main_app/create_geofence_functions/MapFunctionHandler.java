@@ -59,7 +59,6 @@ public class MapFunctionHandler {
     private  TextView coordinates;
     private boolean isLongPressEnabled = true;
     private boolean isEntryMode = true;
-    private static final String WEATHER_API_BASE_URL = "http://api.weatherapi.com/v1"; // Replace with your API base URL
     private static final String API_KEY = "ade995c254e64059a8a05234230611"; // Replace with your API key
     private int initialMaxLevelOuter = 50; // maximum level of outerseekbar
     private int initialMaxLevelInner = 10; // maximum level of innerseekbar

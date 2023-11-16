@@ -332,8 +332,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -366,7 +364,7 @@ public class map_home extends AppCompatActivity {
 
                 // Perform search as the user types
                 if (newText.length() > 2) {
-                    new NominatimTask().execute(newText);
+                    new GooglePlacesTask().execute(newText);
                     findViewById(R.id.search_res_view).setVisibility(View.VISIBLE);
                     findViewById(R.id.noRes).setVisibility(View.GONE); // Hide "no results" message
                 } else {
@@ -961,13 +959,18 @@ public class map_home extends AppCompatActivity {
 
 
 
-    private class NominatimTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
+    private class GooglePlacesTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
         @Override
         protected ArrayList<LocationResultt> doInBackground(String... params) {
             ArrayList<LocationResultt> results = new ArrayList<>();
             OkHttpClient client = new OkHttpClient();
 
-            String url = "https://nominatim.openstreetmap.org/search?q=" + params[0] + "&format=json";
+            // Replace "YOUR_GOOGLE_API_KEY" with your actual Google API key
+            String apiKey = "AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc";
+            String url = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
+                    "?query=" + params[0] +
+                    "&key=" + apiKey;
+
             Request request = new Request.Builder()
                     .url(url)
                     .build();
@@ -975,14 +978,26 @@ public class map_home extends AppCompatActivity {
             try {
                 Response response = client.newCall(request).execute();
                 String jsonData = response.body().string();
-                JSONArray jsonArray = new JSONArray(jsonData);
+                JSONObject jsonObject = new JSONObject(jsonData);
 
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String displayName = jsonObject.optString("display_name", "");
-                    double latitude = jsonObject.optDouble("lat", 0);
-                    double longitude = jsonObject.optDouble("lon", 0);
-                    results.add(new LocationResultt(displayName, latitude, longitude));
+                // Check if the response contains results
+                if (jsonObject.has("results")) {
+                    JSONArray resultsArray = jsonObject.getJSONArray("results");
+
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        JSONObject resultObject = resultsArray.getJSONObject(i);
+                        JSONObject geometry = resultObject.getJSONObject("geometry");
+                        JSONObject location = geometry.getJSONObject("location");
+                        double latitude = location.optDouble("lat", 0);
+                        double longitude = location.optDouble("lng", 0);
+                        String name = resultObject.optString("name", "");
+                        String address = resultObject.optString("formatted_address", "");
+
+                        // Construct the display name combining name and address if needed
+                        String displayName = name + ", " + address;
+
+                        results.add(new LocationResultt(displayName, latitude, longitude));
+                    }
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -993,7 +1008,6 @@ public class map_home extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<LocationResultt> results) {
             super.onPostExecute(results);
-
 
             SearchResultsAdapter adapter = (SearchResultsAdapter) recyclerViewSearchResults.getAdapter();
             adapter.setData(results);
@@ -1007,17 +1021,14 @@ public class map_home extends AppCompatActivity {
                 findViewById(R.id.noRes).setVisibility(View.GONE);
             }
 
-
             // Set the click listener for the search results
             adapter.setOnItemClickListener(locationResult -> {
                 // Handle the click action here, display coordinates as a toast
-
-                GeoPoint point = new GeoPoint(locationResult.getLatitude(),locationResult.getLongitude());
+                GeoPoint point = new GeoPoint(locationResult.getLatitude(), locationResult.getLongitude());
                 locationHandler.dropPinOnMap(point);
 
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
-
-                showToast( locationResult.getLatitude()  + ", " + locationResult.getLongitude());
+                showToast(locationResult.getLatitude() + ", " + locationResult.getLongitude());
             });
         }
 
@@ -1026,6 +1037,7 @@ public class map_home extends AppCompatActivity {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
     private boolean isValidCoordinates(String input) {
