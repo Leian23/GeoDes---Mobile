@@ -134,7 +134,7 @@
             </TextView>
 
             <ImageButton
-                android:id="@+id/EditAlert"
+                android:id="@+id/EditAlertIcon"
                 android:layout_width="30dp"
                 android:layout_height="32dp"
                 android:background="@color/white"

@@ -80,8 +80,7 @@ dependencies {
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.google.android.gms:play-services-location:17.1.0")
-    implementation ("com.google.android.gms:play-services-maps:17.0.1")
+
 
 
     implementation ("com.google.android.material:material:1.4.0")
@@ -92,9 +91,14 @@ dependencies {
     implementation ("com.loopj.android:android-async-http:1.4.11")
     implementation ("com.squareup.picasso:picasso:2.71828")
 
-    implementation ("com.google.android.gms:play-services-location:16.0.0")
+    implementation ("com.google.android.gms:play-services-location:18.0.0")
 
-    
+
+
+
+
+
+
 
 
 

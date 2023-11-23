@@ -1,3 +1,4 @@
+
 package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.Manifest;
@@ -58,15 +59,18 @@ public class MapFunctionHandler {
     private SeekBar innerSeekBar;
     private  TextView coordinates;
     private boolean isLongPressEnabled = true;
-    private boolean isEntryMode = true;
+    private static boolean isEntryMode = true;
     private static final String API_KEY = "ade995c254e64059a8a05234230611"; // Replace with your API key
     private int initialMaxLevelOuter = 50; // maximum level of outerseekbar
     private int initialMaxLevelInner = 10; // maximum level of innerseekbar
 
-    private double currentOuterRadius;
-    private double currentInnerRadius;
+    private static double currentOuterRadius;
+    private static double currentInnerRadius;
     private TextView innerLabel;
     private TextView outerLabel;
+
+    private static GeoPoint markerLocation;
+    private map_home mapHome;
 
 
 
@@ -80,8 +84,6 @@ public class MapFunctionHandler {
         this.innerLabel = innerLabel;
 
         Configuration.getInstance().load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-
-
 
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
@@ -157,12 +159,8 @@ public class MapFunctionHandler {
                     } else {
                         innerRadiusMeters = 0.0;
                     }
-
-
                     seekBar.setProgress((int) ((innerRadiusMeters / 300.0) * initialMaxLevelInner));
                 }
-
-
 
                 currentInnerRadius = innerRadiusMeters; // Store the current outer radius
                 updateGeofences(currentOuterRadius, currentInnerRadius);
@@ -199,7 +197,7 @@ public class MapFunctionHandler {
 
     public void dropPinOnMap(GeoPoint geoPoint) {
         // Clear existing marker and geofences
-        clearMarkerAndGeofences();
+        //clearMarkerAndGeofences();
 
         // Add a new marker at the long-pressed location
         mapMarker = new Marker(mapView);
@@ -224,7 +222,9 @@ public class MapFunctionHandler {
         outerSeekBar.setProgress(initialOuterProgress);
         innerSeekBar.setProgress(initialInnerProgress);
 
+
         geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), initialSavedOuterRadius, initialSavedInnerRadius);
+
 
         // Calculate bounding box
         BoundingBox boundingBox = calculateBoundingBox(geoPoint, initialSavedOuterRadius);
@@ -257,8 +257,29 @@ public class MapFunctionHandler {
         // Set the toggle button to true
         ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
         toggleButton.setChecked(true);
+
+        getpoint(geoPoint);
+
     }
 
+
+    public void dropPinOnMap1(GeoPoint geoPoint) {
+        mapMarker = new Marker(mapView);
+        mapMarker.setPosition(geoPoint);
+        mapMarker.setVisible(false);
+        mapView.getOverlays().add(mapMarker);
+
+        if (geofenceSetup == null) {
+            geofenceSetup = new GeofenceSetup(context, mapView);
+        }
+
+        double initialSavedOuterRadius = 0.00;
+        double initialSavedInnerRadius = 0.00; // Set your desired default inner radius
+
+        geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), initialSavedOuterRadius, initialSavedInnerRadius);
+
+        mapView.invalidate();
+    }
 
 
 
@@ -278,7 +299,40 @@ public class MapFunctionHandler {
 
         return new BoundingBox(pinLatitude, maxLon, center.getLatitude(), minLon);
     }
-    
+
+    public BoundingBox centerBoundingBox(GeoPoint center, double radius) {
+        double halfDistanceInMeters = radius * 3; // Adjust as needed for better visibility
+        double latPerMeter = 1.0 / 111319.9; // Approximate value for latitude degrees per meter
+
+        double deltaLat = halfDistanceInMeters * latPerMeter;
+        double deltaLon = halfDistanceInMeters / (111319.9 * Math.cos(Math.toRadians(center.getLatitude())));
+
+        // Calculate the new latitude and longitude for the center
+        double newCenterLatitude = center.getLatitude();
+        double newCenterLongitude = center.getLongitude();
+
+        // Center the bounding box by adjusting latitude and longitude
+        double minLat = newCenterLatitude - deltaLat / 2;
+        double maxLat = newCenterLatitude + deltaLat / 2;
+        double minLon = newCenterLongitude - deltaLon / 2;
+        double maxLon = newCenterLongitude + deltaLon / 2;
+
+        return new BoundingBox(maxLat, maxLon, minLat, minLon);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void clearMarkerAndGeofences() {
         // Remove existing marker and geofences
@@ -301,7 +355,7 @@ public class MapFunctionHandler {
             BoundingBox boundingBox = calculateBoundingBox(markerPosition, outerRadius);
 
             // Animate the map to the new bounding box
-                mapView.zoomToBoundingBox(boundingBox, true);
+            mapView.zoomToBoundingBox(boundingBox, true);
 
             mapView.invalidate();
         }
@@ -414,6 +468,7 @@ public class MapFunctionHandler {
         }).start();
     }
 
+
     private static boolean isDaytime(double latitude, double longitude) {
         try {
             OkHttpClient client = new OkHttpClient();
@@ -450,10 +505,27 @@ public class MapFunctionHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Default to considering it as daytime in case of errors
         return true;
     }
 
+
+    public GeoPoint getpoint(GeoPoint markerloc) {
+        markerLocation = markerloc;
+        return markerloc;
+    }
+
+    public static GeoPoint getMarkerLocation() {
+        return markerLocation;
+    }
+
+    public static double getOuterRadius() {
+        return currentOuterRadius;
+    }
+
+    public static double getInnerRadius() {
+        return currentInnerRadius;
+    }
+
+    public static boolean geTEntryOrExit() {return  isEntryMode; }
 
 }

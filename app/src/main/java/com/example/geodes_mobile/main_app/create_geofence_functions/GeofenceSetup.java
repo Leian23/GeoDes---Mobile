@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.map_home;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
@@ -21,6 +22,8 @@ public class GeofenceSetup {
     private Polygon innerGeofence;
     private Marker marker;
 
+    private map_home mapHome;
+
 
     public GeofenceSetup(Context context, MapView mapView) {
         Configuration.getInstance().setUserAgentValue(context.getPackageName());
@@ -29,6 +32,11 @@ public class GeofenceSetup {
 
     public void addMarkerWithGeofences(Context context, double latitude, double longitude, double outerGeofenceRadius, double innerGeofenceRadius) {
         clearGeofencesAndMarker();
+
+
+        if (mapHome.isButtonClicked()) {
+            clearGeofencesAndMarker();
+        }
 
         GeoPoint markerPoint = new GeoPoint(latitude, longitude);
 
@@ -66,6 +74,38 @@ public class GeofenceSetup {
     }
 
 
+
+    public void addExitGeofence(Context context, double latitude, double longitude, double outerGeofenceRadius) {
+        clearGeofencesAndMarker();
+
+        GeoPoint markerPoint = new GeoPoint(latitude, longitude);
+
+        outerGeofence = new Polygon();
+        outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerGeofenceRadius));
+        outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
+        outerGeofence.setStrokeColor(Color.rgb(180, 158, 80));
+        outerGeofence.setStrokeWidth(3.0f);
+        mapView.getOverlayManager().add(outerGeofence);
+
+        marker = new Marker(mapView);
+        marker.setPosition(markerPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        marker.setInfoWindow(null);
+
+        // Load a new custom Bitmap or image resource for the marker
+        Bitmap customBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_loc_exit);
+
+        // Create a Drawable from the custom Bitmap
+        Drawable customDrawable = new BitmapDrawable(context.getResources(), customBitmap);
+
+        // Set the custom Drawable as the icon for the marker
+        marker.setIcon(customDrawable);
+
+        mapView.getOverlays().add(marker);
+        mapView.invalidate();
+    }
+
+
     public void updateGeofences(GeoPoint markerPoint, double outerGeofenceRadius, double innerGeofenceRadius) {
         if (outerGeofence != null && innerGeofence != null && marker != null) {
             // Update outer geofence
@@ -76,11 +116,10 @@ public class GeofenceSetup {
         }
     }
 
-    private void clearGeofencesAndMarker() {
+    public void clearGeofencesAndMarker() {
         mapView.getOverlayManager().remove(outerGeofence);
         mapView.getOverlayManager().remove(innerGeofence);
         mapView.getOverlays().remove(marker);
-
         mapView.invalidate();
     }
 
@@ -120,4 +159,20 @@ public class GeofenceSetup {
             mapView.invalidate();
         }
     }
+
+
+    public Marker markerview() {
+        return marker;
+    }
+
+    public Polygon getOuter() {
+        return outerGeofence;
+    }
+
+    public Polygon getInner() {
+        return innerGeofence;
+    }
+
+
+
 }

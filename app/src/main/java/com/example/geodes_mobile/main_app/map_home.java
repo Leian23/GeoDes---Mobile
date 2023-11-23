@@ -1,7 +1,10 @@
 package com.example.geodes_mobile.main_app;
 
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.Manifest;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,9 +21,11 @@ import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -57,14 +62,22 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.Ad
 import com.example.geodes_mobile.main_app.bottom_sheet_content.alerts_section.DataModel;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.Adapter2;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section.DataModel2;
+import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceBroadcastReceiver;
+import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceHelper;
+import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceSetup;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
+import com.example.geodes_mobile.main_app.homebtn_functions.AlertEditDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
+import com.example.geodes_mobile.main_app.homebtn_functions.SchedEditDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.TilesLayout;
 import com.example.geodes_mobile.main_app.search_location.LocationResultt;
 import com.example.geodes_mobile.main_app.search_location.SearchResultsAdapter;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -72,6 +85,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -81,6 +96,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -92,8 +108,10 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -114,7 +132,7 @@ public class map_home extends AppCompatActivity {
     private BottomSheetBehavior bottomSheetBehavior;
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
-    MyLocationNewOverlay myLocationOverlay;
+    private GeofenceSetup setup;
 
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
@@ -155,6 +173,16 @@ public class map_home extends AppCompatActivity {
 
     private Polygon outerGeofence;
     private Polygon innerGeofence;
+
+    private GeofencingClient geofencingClient;
+    private GeofenceHelper geofenceHelper;
+    static boolean isButtonClicked = false;
+
+    private List<String> inner;
+    private List<String> outer;
+
+    private EditText alertName;
+
 
 
     @Override
@@ -199,8 +227,17 @@ public class map_home extends AppCompatActivity {
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // If not granted, request ACCESS_FINE_LOCATION permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
+        }
+        else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "In order for the app to work properly please enable 'Allow all the time'", Toast.LENGTH_SHORT).show();
+                // If not granted, request ACCESS_BACKGROUND_LOCATION permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 456);
+            }
+
+
             // Set up location request
             locationRequest = new LocationRequest();
             locationRequest.setInterval(10000); // 10 seconds
@@ -220,9 +257,6 @@ public class map_home extends AppCompatActivity {
 
                         GeoPoint userLocation = new GeoPoint(latitude, longitude);
 
-                        // Check if user is inside the polygon
-                        checkGeofence(userLocation);
-
                         // Display coordinates in a Toast
                         String coordinatesMessage = "Latitude: " + latitude + "\nLongitude: " + longitude;
                         Toast.makeText(getApplicationContext(), coordinatesMessage, Toast.LENGTH_SHORT).show();
@@ -239,6 +273,17 @@ public class map_home extends AppCompatActivity {
         checkLocationSettings();
 
 
+
+        geofencingClient = LocationServices.getGeofencingClient(this);
+        geofenceHelper = new GeofenceHelper();
+
+        GeoPoint point = new GeoPoint(14.321691300834615, 121.07544382248642);
+
+        //removeGeofence("Alert#1");
+
+
+
+        clearGeo("3590","1963");
 
         maptile = findViewById(R.id.maptiles);
         landmarks = findViewById(R.id.landmarks);
@@ -261,6 +306,7 @@ public class map_home extends AppCompatActivity {
         //Label for seekbar progress geofence
         outerLabel = findViewById(R.id.OuterFenceValue);
         innerLabel = findViewById(R.id.InnerFenceValue);
+        alertName = findViewById(R.id.AlertBoxname);
 
 
 
@@ -293,42 +339,54 @@ public class map_home extends AppCompatActivity {
 
 
 
-        // This is the circle setup for custom polygon with functionalities
-        double centerLat = 14.322441;
-        double centerLng =  121.074748;
-        GeoPoint markerPoint = new GeoPoint(centerLat, centerLng);
+        Button buttonsave = findViewById(R.id.btnSave2);
 
-        outerGeofence = new Polygon();
-        outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerGeofenceRadius));
-        outerGeofence.setFillColor(Color.argb(102, 154, 220, 241));
-        outerGeofence.setStrokeColor(Color.rgb(80, 156, 180));
-        outerGeofence.setStrokeWidth(3.0f);
-        mapView.getOverlayManager().add(outerGeofence);
+        buttonsave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Set the flag to true when the button is clicked
 
-        innerGeofence = new Polygon();
-        innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerGeofenceRadius));
-        innerGeofence.setFillColor(Color.argb(50, 0, 255, 0));
-        innerGeofence.setStrokeColor(Color.rgb(91, 206, 137));
-        innerGeofence.setStrokeWidth(3.0f);
-        mapView.getOverlayManager().add(innerGeofence);
+                showElements();
 
-        Marker marker = new Marker(mapView);
-        marker.setPosition(markerPoint);
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setInfoWindow(null);
+                GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
+                float outer = (float) MapFunctionHandler.getOuterRadius();
+                float inner = (float) MapFunctionHandler.getInnerRadius();
 
-        // Load a new custom Bitmap or image resource for the marker
-        Bitmap customBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_loc);
+                setup = new GeofenceSetup(context, mapView);
 
-        // Create a Drawable from the custom Bitmap
-        Drawable customDrawable = new BitmapDrawable(getResources(), customBitmap);
+                locationHandler.centerBoundingBox(retrievedGeoPoint, outer);
 
-        // Set the custom Drawable as the icon for the marker
-        marker.setIcon(customDrawable);
+                isButtonClicked = true;
 
-        mapView.getOverlays().add(marker);
-        mapView.invalidate();
+                if (isButtonClicked) {
+                       locationHandler.dropPinOnMap1(retrievedGeoPoint);
+                    }
 
+                BoundingBox boundingBox = locationHandler.centerBoundingBox(retrievedGeoPoint, outer);
+
+                mapView.zoomToBoundingBox(boundingBox,true);
+
+                // Reset map orientation
+                mapView.setMapOrientation(0);
+
+                mapView.invalidate();
+
+
+                String enteredText = alertName.getText().toString();
+
+                // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
+
+                if (locationHandler.geTEntryOrExit()) {
+                    createGeofences(retrievedGeoPoint, enteredText, outer, inner);
+                } else if (!locationHandler.geTEntryOrExit()) {
+                    createExitGeofence(retrievedGeoPoint, enteredText, outer, inner);
+                }
+
+
+                // Call clearGeofencesAndMarker on the existing geofenceSetup instance
+                Toast.makeText(context, retrievedGeoPoint + "  " + outer + "  " + inner, Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
 
@@ -375,7 +433,6 @@ public class map_home extends AppCompatActivity {
                 }
                 return true;
             }
-
         });
 
 
@@ -420,6 +477,7 @@ public class map_home extends AppCompatActivity {
         userloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 locateUser();
             }
         });
@@ -569,6 +627,36 @@ public class map_home extends AppCompatActivity {
         });
 
 
+        //edit the view alert
+        ImageButton editalert = findViewById(R.id.EditAlertIcon);
+        editalert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Log statement indicating that the ImageButton was tapped
+                Log.d("ImageButton", "EditAlertIcon tapped");
+
+                AlertEditDialog alertEditDialog = new AlertEditDialog(map_home.this);
+                alertEditDialog.show();
+            }
+        });
+
+
+        //edit the viewsched
+        ImageButton editsched = findViewById(R.id.EditSchedule);
+        editsched.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Log statement indicating that the ImageButton was tapped
+                Log.d("ImageButton", "EditAlertIcon tapped");
+
+                SchedEditDialog schedEditDialog = new SchedEditDialog(map_home.this);
+                schedEditDialog.show();
+            }
+        });
+
+
+
+
 
         // Bottom Sheet
         LinearLayout linearLayout = findViewById(R.id.design_bottom_sheet);
@@ -610,11 +698,6 @@ public class map_home extends AppCompatActivity {
         dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
         dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
         dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("52 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
         dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
 
 
@@ -638,7 +721,6 @@ public class map_home extends AppCompatActivity {
 
 
         //dito yung list of selected alerts sa schedules
-
         List<DataModel5> dataList = new ArrayList<>();
 
         dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
@@ -715,9 +797,6 @@ public class map_home extends AppCompatActivity {
             }
         });
     }
-
-
-
 
 
 
@@ -802,6 +881,7 @@ public class map_home extends AppCompatActivity {
     public void BottomSheetRadii() {
         hideElements(false);
 
+
         final LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
@@ -834,6 +914,7 @@ public class map_home extends AppCompatActivity {
             }
         });
     }
+
 
 
 
@@ -900,6 +981,8 @@ public class map_home extends AppCompatActivity {
                 .setDuration(500)  // Set the duration of the animation in milliseconds
                 .start();
     }
+
+
 
     public void ViewAlerts() {
         RelativeLayout overlayLayouttt = findViewById(R.id.viewAlert);
@@ -1040,6 +1123,7 @@ public class map_home extends AppCompatActivity {
 
 
 
+
     private boolean isValidCoordinates(String input) {
 
         String[] parts = input.split(",");
@@ -1086,6 +1170,7 @@ public class map_home extends AppCompatActivity {
 
         return null;
     }
+
 
 
     private void checkLocationSettings() {
@@ -1169,60 +1254,175 @@ public class map_home extends AppCompatActivity {
     }
 
 
+    private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius) {
+        // Create outer geofence
+        outerGeofence = new Polygon();
+        outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
+        outerGeofence.setFillColor(Color.argb(102, 154, 220, 241));
+        outerGeofence.setStrokeColor(Color.rgb(80, 156, 180));
+        outerGeofence.setStrokeWidth(3.0f);
+        mapView.getOverlayManager().add(outerGeofence);
+
+        // Create inner geofence
+        innerGeofence = new Polygon();
+        innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerRadius));
+        innerGeofence.setFillColor(Color.argb(50, 0, 255, 0));
+        innerGeofence.setStrokeColor(Color.rgb(91, 206, 137));
+        innerGeofence.setStrokeWidth(3.0f);
+        mapView.getOverlayManager().add(innerGeofence);
+
+        // Create marker
+        Marker marker = new Marker(mapView);
+        marker.setPosition(markerPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        marker.setInfoWindow(null);
+
+        // Load a new custom Bitmap or image resource for the marker
+        Bitmap customBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_loc);
+
+        // Create a Drawable from the custom Bitmap
+        Drawable customDrawable = new BitmapDrawable(getResources(), customBitmap);
+
+        // Set the custom Drawable as the icon for the marker
+        marker.setIcon(customDrawable);
+
+        mapView.getOverlays().add(marker);
+        mapView.invalidate();
+
+        String outerType = geofenceHelper.OuterVal();
+        String innerType = geofenceHelper.innerVal();
 
 
+        addGeofence(markerPoint, outerRadius, outerType, GeoName, true);
+        addGeofence(markerPoint, innerRadius, innerType, GeoName, true);
+        Log.d("GeofenceValues", "Outer Type: " + outerType);
+        Log.d("GeofenceValues", "Inner Type: " + innerType);
 
-    // Check if the user is inside the nested geofences and show appropriate toast messages
-    private void checkGeofence(GeoPoint userLocation) {
-        if (isPointInPolygon(userLocation, outerGeofence)) {
-            if (!isPointInPolygon(userLocation, innerGeofence)) {
-                showToast("User is inside the outer fence but outside the inner fence!");
-            } else {
-                showToast("User is inside the outer fence and inside the inner fence!");
-            }
-        } else {
-            showToast("User is outside the outer fence!");
-        }
     }
 
 
-    // Check if a point is inside a polygon
-    private boolean isPointInPolygon(GeoPoint point, Polygon polygon) {
-        List<GeoPoint> polygonPoints = polygon.getPoints();
-        int intersectCount = 0;
+    private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, float inner) {
+        outerGeofence = new Polygon();
+        outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
+        outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
+        outerGeofence.setStrokeColor(Color.argb(255, 180, 158, 80));
+        outerGeofence.setStrokeWidth(3.0f);
+        mapView.getOverlayManager().add(outerGeofence);
 
-        for (int j = 0; j < polygonPoints.size() - 1; j++) {
-            if (rayCastIntersect(point, polygonPoints.get(j), polygonPoints.get(j + 1))) {
-                intersectCount++;
-            }
-        }
+        Marker marker = new Marker(mapView);
+        marker.setPosition(markerPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        marker.setInfoWindow(null);
 
-        // Check for odd or even intersections to determine if the point is inside the polygon
-        return (intersectCount % 2) == 1;
+        // Load a new custom Bitmap or image resource for the marker
+        Bitmap customBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker_loc_exit);
+
+        // Create a Drawable from the custom Bitmap
+        Drawable customDrawable = new BitmapDrawable(getResources(), customBitmap);
+
+        // Set the custom Drawable as the icon for the marker
+        marker.setIcon(customDrawable);
+
+        mapView.getOverlays().add(marker);
+        mapView.invalidate();
+
+        String uniqueId = geofenceHelper.generateRequestId();
+        addGeofence(markerPoint, outerRadius, uniqueId, GeoName,false);
     }
 
-    // Helper method to check if a ray cast from a point intersects with a polygon edge
-    private boolean rayCastIntersect(GeoPoint tap, GeoPoint vertA, GeoPoint vertB) {
-        double aY = vertA.getLatitude();
-        double bY = vertB.getLatitude();
-        double aX = vertA.getLongitude();
-        double bX = vertB.getLongitude();
-        double pY = tap.getLatitude();
-        double pX = tap.getLongitude();
 
-        if ((aY > pY && bY > pY) || (aY < pY && bY < pY) || (aX < pX && bX < pX)) {
-            return false;
+    private void addGeofence(GeoPoint latLng, float radius, String requestId, String geofenceName, boolean addEntryGeofence) {
+
+        Geofence geofenceExit = geofenceHelper.createExitGeofence(latLng, radius, requestId);
+        // Create GeofencingRequest for exit geofence
+        GeofencingRequest.Builder geofencingRequestBuilder = new GeofencingRequest.Builder()
+                .addGeofence(geofenceExit);
+
+        if (addEntryGeofence) {
+            // If true, then entry geofence would be added
+            Geofence geofenceEntry = geofenceHelper.createEntryGeofence(latLng, radius, requestId);
+            geofencingRequestBuilder.addGeofence(geofenceEntry);
         }
 
-        double m = (aY - bY) / (aX - bX);
-        double bee = (-aX) * m + aY;
-        double x = (pY - bee) / m;
+        GeofencingRequest geofencingRequest = geofencingRequestBuilder.build();
 
-        return x > pX;
+        PendingIntent pendingIntent = getGeofencePendingIntent(geofenceName);
+
+        geofencingClient.addGeofences(geofencingRequest, pendingIntent)
+                .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "onSuccess: Geofence Added...");
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: " + e.getMessage());
+                    }
+                });
+
     }
 
-    private void showToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+
+    private void clearGeo(String inner, String outer) {
+        List<String> innerList = Collections.singletonList(inner);
+        List<String> outerList = Collections.singletonList(outer);
+
+        geofencingClient.removeGeofences(innerList)
+                .addOnSuccessListener(aVoid -> {
+                    Log.i("GeofenceRemoval", "Inner geofence removed successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("GeofenceRemoval", "Failed to remove inner geofence: " + e.getMessage());
+                });
+
+        geofencingClient.removeGeofences(outerList)
+                .addOnSuccessListener(aVoid -> {
+                    Log.i("GeofenceRemoval", "Outer geofence removed successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("GeofenceRemoval", "Failed to remove outer geofence: " + e.getMessage());
+                });
+    }
+
+
+    private void removeGeofence(String geofenceName) {
+        // Get the PendingIntent associated with the geofence
+        PendingIntent geofencePendingIntent = getGeofencePendingIntent(geofenceName);
+
+        // Remove the geofence using the geofencingClient
+        geofencingClient.removeGeofences(geofencePendingIntent)
+                .addOnSuccessListener(aVoid -> {
+                    // Geofence removal was successful
+                    Log.i("GeofenceRemoval", "Geofence removed successfully: " + geofenceName);
+                })
+                .addOnFailureListener(e -> {
+                    // Geofence removal failed
+                    Log.e("GeofenceRemoval", "Failed to remove geofence " + geofenceName + ": " + e.getMessage());
+                });
+    }
+
+
+
+
+    private PendingIntent getGeofencePendingIntent(String geofenceName) {
+        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+        int flags = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+        String uniqueId = UUID.randomUUID().toString();
+        int requestCode = 0;
+        // Pass geofenceName as an extra to the intent
+        intent.putExtra("GEOFENCE_NAME", geofenceName);
+        return PendingIntent.getBroadcast(this, requestCode, intent, flags);}
+
+
+
+    public static void setButtonClicked(boolean clicked) {
+        isButtonClicked = clicked;
+    }
+
+    public static boolean isButtonClicked() {
+        return isButtonClicked;
     }
 
 }

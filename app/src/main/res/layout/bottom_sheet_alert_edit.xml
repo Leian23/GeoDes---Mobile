@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:id="@+id/add_geo_btm"
+    android:id="@+id/editAlertDetails"
     android:background="@android:color/transparent"
     app:behavior_hideable="true"
     app:behavior_peekHeight="80dp"
@@ -31,26 +31,18 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="530dp"
+            android:layout_height="430dp"
             android:orientation="vertical"
             android:paddingTop="12dp">
 
-            <View
-                android:layout_width="45dp"
-                android:layout_height="8dp"
-                android:layout_gravity="center"
-                android:background="@drawable/view_rounded"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Discard Button -->
+
             <Button
                 android:id="@+id/btnDiscard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="32dp"
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -60,190 +52,106 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
-            <FrameLayout
-                android:id="@+id/WeatherView"
-                android:layout_width="180dp"
-                android:layout_height="94dp"
-                android:layout_marginStart="32dp"
-                android:background="@drawable/round_weather"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnDiscard"
-                app:layout_constraintVertical_bias="0.036">
-
-                <ImageView
-                    android:id="@+id/weatherIconImageView"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" /> <!-- Default image to display -->
-
-                <TextView
-                    android:id="@+id/weatherTemp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="Weather Info"
-                    android:textSize="16sp"
-                    android:textColor="#000000" />
-
-                <TextView
-                    android:id="@+id/weatherCon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Weather Info"
-                    android:textSize="16sp"
-                    android:textColor="#000000" />
-
-            </FrameLayout>
-
-
-
-
-
-
-            <!-- Start Button -->
-
-            <TextView
-                android:id="@+id/coordinatesLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="12dp"
-                android:text="Coordinates"
-                android:textColor="#888888"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/btnStart" />
-
-            <!-- Save Button -->
-
             <TextView
                 android:id="@+id/coordinatesLabel2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="96dp"
                 android:text="Outer fence"
                 android:textColor="#888888"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/WeatherView" />
+                app:layout_constraintTop_toTopOf="parent" />
+
 
             <TextView
                 android:id="@+id/coordinatesLabel3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="80dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="172dp"
                 android:text="Inner Fence"
                 android:textColor="#888888"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/WeatherView" />
-
-            <TextView
-                android:id="@+id/coordinatesValue1"
-                android:layout_width="105dp"
-                android:layout_height="70dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="2dp"
-                android:text="---, \n ---"
-                android:textColor="#000000"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/OuterFenceValue"
                 android:layout_width="39dp"
                 android:layout_height="21dp"
-                android:layout_marginStart="72dp"
-                android:layout_marginTop="115dp"
+                android:layout_marginTop="44dp"
                 android:text="5.0"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.119"
+                app:layout_constraintStart_toEndOf="@+id/outerBar"
+                app:layout_constraintTop_toBottomOf="@+id/btnSave1" />
 
             <TextView
                 android:id="@+id/unitdistanceOuter"
-                android:layout_width="103dp"
-                android:layout_height="22dp"
-                android:layout_marginStart="118dp"
-                android:layout_marginTop="115dp"
+                android:layout_width="42dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="44dp"
                 android:text="km"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
+                app:layout_constraintBottom_toTopOf="@+id/unitdistanceInner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.691"
+                app:layout_constraintStart_toEndOf="@+id/outerBar" />
 
             <TextView
                 android:id="@+id/unitdistanceInner"
-                android:layout_width="103dp"
+                android:layout_width="45dp"
                 android:layout_height="22dp"
-                android:layout_marginStart="115dp"
-                android:layout_marginTop="185dp"
                 android:text="km"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
-
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.241"
+                app:layout_constraintStart_toEndOf="@+id/InnerFenceValue"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/InnerFenceValue"
                 android:layout_width="39dp"
                 android:layout_height="22dp"
-                android:layout_marginStart="72dp"
-                android:layout_marginTop="185dp"
+                android:layout_marginTop="48dp"
                 android:text="5.0"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.139"
+                app:layout_constraintStart_toEndOf="@+id/innerBar"
+                app:layout_constraintTop_toBottomOf="@+id/OuterFenceValue" />
 
             <TextView
                 android:id="@+id/coordinatesValue"
                 android:layout_width="103dp"
                 android:layout_height="22dp"
-                android:layout_marginStart="304dp"
-                android:layout_marginTop="176dp"
                 android:text="5.0 mi"
                 android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/WeatherView"
-                app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel" />
-
-            <Button
-                android:id="@+id/btnStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="Start"
-                android:textColor="#888888"
-                android:textSize="15sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/btnSave2"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.044" />
+                tools:layout_editor_absoluteX="516dp"
+                tools:layout_editor_absoluteY="315dp" />
 
 
             <Button
-                android:id="@+id/btnSave2"
+                android:id="@+id/btnSave1"
                 android:layout_width="82dp"
                 android:layout_height="46dp"
-                android:layout_marginEnd="32dp"
+                android:layout_marginEnd="40dp"
                 android:layout_marginBottom="-35dp"
                 android:background="@drawable/bottom_round"
                 android:text="Save"
@@ -252,42 +160,43 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.041" />
-
+                app:layout_constraintVertical_bias="0.097" />
 
             <SeekBar
                 android:id="@+id/outerBar"
                 android:layout_width="270dp"
                 android:layout_height="30dp"
                 android:layout_marginTop="8dp"
+                android:max="50"
                 android:progressDrawable="@drawable/level_indicator_outer"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
-                android:max="50"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.13"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel2" />
 
+            <!-- Your layout XML -->
+
             <SeekBar
                 android:id="@+id/innerBar"
                 android:layout_width="270dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="44dp"
+                android:max="10"
                 android:progressDrawable="@drawable/level_indicator_inner"
                 android:theme="@style/Widget.AppCompat.SeekBar"
                 android:thumb="@drawable/seekbar"
-                android:max="10"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.13"
+                app:layout_constraintHorizontal_bias="0.113"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/outerBar" />
 
             <EditText
-                android:id="@+id/AlertBoxname"
-                android:layout_width="213dp"
-                android:layout_height="43dp"
-                android:layout_marginTop="64dp"
+                android:id="@+id/textBox"
+                android:layout_width="218dp"
+                android:layout_height="41dp"
+                android:layout_marginTop="56dp"
                 android:background="@drawable/round_alert_title"
                 android:hint="Alert Title"
                 android:padding="10dp"
@@ -295,48 +204,41 @@
                 android:textColor="#888888"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.177"
+                app:layout_constraintHorizontal_bias="0.165"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel3" />
 
             <EditText
                 android:id="@+id/notesEditText1"
-                android:layout_width="327dp"
+                android:layout_width="348dp"
                 android:layout_height="68dp"
-                android:layout_marginTop="80dp"
+                android:layout_marginTop="76dp"
                 android:background="@drawable/round_alert_title"
                 android:hint="Notes"
                 android:padding="10dp"
                 android:textColor="#888888"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.484"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/innerBar" />
 
-            <!-- Your layout XML -->
             <ToggleButton
                 android:id="@+id/toggleButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="136dp"
-                android:text="ToggleButton"
-                android:checked="true"
+                android:layout_marginTop="25dp"
                 android:background="@drawable/custom_radio_background"
-                android:textOn="Entry"
+                android:checked="true"
+                android:text="ToggleButton"
                 android:textOff="Exit"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:textOn="Entry"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.433"
-                app:layout_constraintStart_toEndOf="@+id/AlertBoxname" />
-
-
-
+                app:layout_constraintHorizontal_bias="0.52"
+                app:layout_constraintStart_toEndOf="@+id/textBox"
+                app:layout_constraintTop_toBottomOf="@+id/InnerFenceValue" />
 
 
             <!-- res/layout/your_layout.xml -->
-
-
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
