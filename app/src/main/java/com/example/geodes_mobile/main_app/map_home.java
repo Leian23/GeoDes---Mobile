@@ -1409,10 +1409,10 @@ public class map_home extends AppCompatActivity {
     private PendingIntent getGeofencePendingIntent(String geofenceName) {
         Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
         int flags = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
-        String uniqueId = UUID.randomUUID().toString();
         int requestCode = 0;
         // Pass geofenceName as an extra to the intent
         intent.putExtra("GEOFENCE_NAME", geofenceName);
+        intent.setAction("com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION");
         return PendingIntent.getBroadcast(this, requestCode, intent, flags);}
 
 

@@ -39,11 +39,11 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
             String fenceName = intent.getStringExtra("GEOFENCE_NAME");
             if (fenceName != null) {
                 if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    // Handle entry events
+                    // Entry Events
                     Log.d(TAG, "onReceive: ENTER from " + fenceName);
                     handleEntryEvent(context, fenceName, geofence);
                 } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                    // Handle exit events
+                    // Exit Events
                     Log.d(TAG, "onReceive: EXIT from " + fenceName);
                     handleExitEvent(context, fenceName);
                 } else {

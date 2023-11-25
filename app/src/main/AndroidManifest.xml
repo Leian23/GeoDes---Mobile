@@ -77,15 +77,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc" />
 
-
         <receiver
             android:name=".main_app.create_geofence_functions.GeofenceBroadcastReceiver"
-            android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.example.geodes_mobile.YOUR_GEOFENCE_INTENT_ACTION" />
+                <action android:name="com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION"/>
             </intent-filter>
         </receiver>
+
 
 
 
