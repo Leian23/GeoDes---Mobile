@@ -120,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -189,8 +190,12 @@ public class map_home extends AppCompatActivity {
     private EditText alertName;
 
     private DatabaseReference databaseReference;
-
     private FirebaseAuth mAuth;
+    private static final String PREFS_NAME = "GeofencePrefs";
+    private static final String KEY_UNIQUE_ID = "uniqueID";
+    private static final String KEY_GEO_NAME = "geoName";
+    private static final String KEY_EMAIL = "email";
+    private EditText alertBoxName;
 
 
 
@@ -406,17 +411,12 @@ public class map_home extends AppCompatActivity {
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Assuming you have access to the uniqueId variable
-                String uniqueId = geofenceHelper.generateRequestId();
-
-                // Assuming you have access to the geoName variable
-                String geoName = alertName.getText().toString();
-
-                // Store the geofence information in Firestore
-                saveGeofenceInFirestore(uniqueId, geoName);
-
-                // Optionally, you can display a message to the user indicating that the geofence has been saved.
-                Toast.makeText(map_home.this, "Geofence Saved!", Toast.LENGTH_SHORT).show();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                if (currentUser != null) {
+                    saveGeofenceDataToFirestore(currentUser);
+                } else {
+                    saveGeofenceDataToLocal();
+                }
             }
         });
 
@@ -1471,7 +1471,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-    private void saveGeofenceInFirestore(String uniqueId, String geoName) {
+    /*private void saveGeofenceInFirestore(String uniqueId, String geoName) {
         // Access Firestore instance
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -1496,6 +1496,61 @@ public class map_home extends AppCompatActivity {
                     Log.e("Firestore", "Failed to store geofence data: " + e.getMessage());
                     // Handle the failure, if needed
                 });
+    }*/
+
+    private void saveGeofenceDataToFirestore(FirebaseUser currentUser) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        alertBoxName = findViewById(R.id.AlertBoxname);
+        String uid = currentUser.getUid();
+        String geoName = alertBoxName.getText().toString(); // Replace with your geofence name
+
+        // Create a unique ID for the geofence or use your own logic
+        String geofenceId = geofenceHelper.generateRequestId();
+
+        // Create a map to store geofence data
+        Map<String, Object> geofenceData = new HashMap<>();
+        geofenceData.put("uniqueID", geofenceId);
+        geofenceData.put("alertName", geoName);
+        geofenceData.put("email", currentUser.getEmail());
+
+        // Add data to Firestore
+        db.collection("geofences")
+                .document(geofenceId)
+                .set(geofenceData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Data added successfully to Firestore
+                        // You can add a Toast or other UI feedback here if needed
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the failure
+                    }
+                });
+    }
+    private void saveGeofenceDataToLocal() {
+        // Get or create SharedPreferences
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        // Replace "defaultValue" with default values if needed
+        String geofenceId = preferences.getString(KEY_UNIQUE_ID, "defaultValue");
+        String geoName = preferences.getString(KEY_GEO_NAME, "defaultValue");
+        String email = preferences.getString(KEY_EMAIL, "defaultValue");
+
+        // Your existing geofence data
+        String newGeofenceId = geofenceHelper.generateRequestId();
+        String newGeoName = "YourGeofenceName"; // Replace with your geofence name
+
+        // Save the new geofence data locally
+        editor.putString(KEY_UNIQUE_ID, newGeofenceId);
+        editor.putString(KEY_GEO_NAME, newGeoName);
+
+        // Apply changes
+        editor.apply();
     }
 
 
