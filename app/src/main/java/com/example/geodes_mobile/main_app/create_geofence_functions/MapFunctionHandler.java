@@ -1,23 +1,29 @@
 
 package com.example.geodes_mobile.main_app.create_geofence_functions;
 
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.MainActivity;
@@ -26,7 +32,6 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.util.BoundingBox;
@@ -47,9 +52,6 @@ public class MapFunctionHandler {
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private Context context;
     private MapView mapView;
-    private IMapController mapController;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
     private boolean isGpsProviderEnabled = true;
     private boolean isLocationUpdatesInitialized = false;
     private Marker mapMarker;
@@ -116,6 +118,26 @@ public class MapFunctionHandler {
     }
 
     private void setupSeekBarListeners() {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        updateOuterLabel(preferences.getString("distance_unit", "kilometers"));
+        updateInnerLabel(preferences.getString("distance_unit", "kilometers"));
+
+
+        preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals("distance_unit")) {
+                    // If the "distance_unit" preference changes, update the label
+                    Log.d("Preferences", "Distance unit preference changed");
+                    updateOuterLabel(sharedPreferences.getString("distance_unit", "kilometers"));
+                    updateInnerLabel(sharedPreferences.getString("distance_unit", "kilometers"));
+
+
+                }
+            }
+        });
         outerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -132,9 +154,11 @@ public class MapFunctionHandler {
                 // Update geofences with the calculated outer radius and the current inner radius
                 updateGeofences(currentOuterRadius, currentInnerRadius);
 
-                double outerRadiusKm = outerRadiusMeters / 1000.0;
-                String rangeText = String.format(Locale.getDefault(), "%.1f km", outerRadiusKm);
-                outerLabel.setText(rangeText);
+                String distanceUnit = preferences.getString("distance_unit", "kilometers");
+
+                updateOuterLabel(distanceUnit);
+
+
             }
 
             @Override
@@ -152,10 +176,10 @@ public class MapFunctionHandler {
                 double innerRadiusMeters = (progress / (double) initialMaxLevelInner) * 300.0; // Convert progress to meters
 
 
-                if (innerRadiusMeters < 200.0) {
+                if (innerRadiusMeters < 150.0) {
 
                     if (isEntryMode) {
-                        innerRadiusMeters = 200.0;
+                        innerRadiusMeters = 150.0;
                     } else {
                         innerRadiusMeters = 0.0;
                     }
@@ -165,9 +189,12 @@ public class MapFunctionHandler {
                 currentInnerRadius = innerRadiusMeters; // Store the current outer radius
                 updateGeofences(currentOuterRadius, currentInnerRadius);
 
-                double innerRadiusKM = innerRadiusMeters / 1000.0;
-                String rangeText = String.format(Locale.getDefault(), "%.1f km", innerRadiusKM);
-                innerLabel.setText(rangeText);
+                String distanceUnit = preferences.getString("distance_unit", "kilometers");
+
+                updateInnerLabel(distanceUnit);
+
+
+
             }
 
             @Override
@@ -210,7 +237,7 @@ public class MapFunctionHandler {
         }
 
         double outerRadius = 2; // default outer radius seekbar progress
-        double innerRadius = 8; // default inner radius seekbar progress
+        double innerRadius = 5; // default inner radius seekbar progress
 
         double initialSavedOuterRadius = (outerRadius / (double) initialMaxLevelOuter) * 8000.0;
         double initialSavedInnerRadius = isEntryMode ? (innerRadius / (double) 10) * 300.0 : 0; // Set your desired default inner radius
@@ -239,7 +266,23 @@ public class MapFunctionHandler {
 
         // enable the bottom sheet for geofence configuration
         ((map_home) context).BottomSheetRadii();
-        updateWeatherView(geoPoint);
+
+
+        RelativeLayout layout = ((map_home) context).findViewById(R.id.infoLayout);
+        layout.setVisibility(View.GONE);
+
+        FrameLayout layout1 = ((map_home) context).findViewById(R.id.idLoad);
+        layout1.setVisibility(View.VISIBLE);
+
+        FrameLayout layoutt = ((map_home) context).findViewById(R.id.NotAvail);
+
+        if(!isInternetAvailable()) {
+            layout1.setVisibility(View.GONE);
+            layout.setVisibility(View.GONE);
+            layoutt.setVisibility(View.VISIBLE);
+        } else {
+            layoutt.setVisibility(View.GONE);
+            updateWeatherView(geoPoint);}
 
         coordinates.setText(geoPoint.getLatitude() + "\n" + geoPoint.getLongitude());
         coordinates.setOnLongClickListener(new View.OnLongClickListener() {
@@ -259,29 +302,16 @@ public class MapFunctionHandler {
         toggleButton.setChecked(true);
 
         getpoint(geoPoint);
-
     }
 
 
-    public void dropPinOnMap1(GeoPoint geoPoint) {
-        mapMarker = new Marker(mapView);
-        mapMarker.setPosition(geoPoint);
-        mapMarker.setVisible(false);
-        mapView.getOverlays().add(mapMarker);
-
+    public void dropPinOnMap1() {
         if (geofenceSetup == null) {
             geofenceSetup = new GeofenceSetup(context, mapView);
         }
-
-        double initialSavedOuterRadius = 0.00;
-        double initialSavedInnerRadius = 0.00; // Set your desired default inner radius
-
-        geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), initialSavedOuterRadius, initialSavedInnerRadius);
-
+        geofenceSetup.clearGeofencesAndMarker();
         mapView.invalidate();
     }
-
-
 
 
     private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
@@ -322,18 +352,6 @@ public class MapFunctionHandler {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     public void clearMarkerAndGeofences() {
         // Remove existing marker and geofences
         mapView.getOverlays().remove(mapMarker);
@@ -366,7 +384,7 @@ public class MapFunctionHandler {
     private void updateInnerSeekBarState() {
         if (isEntryMode) {
             innerSeekBar.setEnabled(true);
-            double initialSavedInnerRadius = isEntryMode ? (10 / (double) 10) * 300.0 : 0;
+            double initialSavedInnerRadius = isEntryMode ? (5 / (double) 10) * 300.0 : 0;
             int initialInnerProgress = (int) ((initialSavedInnerRadius / 300.0) * 10);
             innerSeekBar.setProgress(initialInnerProgress);
         } else {
@@ -439,13 +457,23 @@ public class MapFunctionHandler {
                             TextView temperatureTextView = weatherView.findViewById(R.id.weatherTemp);
                             TextView conditionTextView = weatherView.findViewById(R.id.weatherCon);
                             ImageView iconImageView = weatherView.findViewById(R.id.weatherIconImageView);
+                            RelativeLayout layout = weatherView.findViewById(R.id.infoLayout);
+                            FrameLayout layout1 = weatherView.findViewById(R.id.idLoad);
+                            FrameLayout layout2 = weatherView.findViewById(R.id.NotAvail);
+                            layout1.setVisibility(View.VISIBLE);
 
-                            temperatureTextView.setText(String.format("%.1f °C", temperatureCelsius));
-                            conditionTextView.setText(conditionText);
+                                temperatureTextView.setText(String.format("%.1f °C", temperatureCelsius));
+                                conditionTextView.setText(conditionText);
+                                layout1.setVisibility(View.GONE);
+                                layout2.setVisibility(View.GONE);
+                                Picasso.get().load(iconUrl).into(iconImageView);
+                                layout.setVisibility(View.VISIBLE);
 
-                            // Load the weather icon using Picasso
-                            Picasso.get().load(iconUrl).into(iconImageView);
+
+
                         });
+
+
 
                     } else {
                         ((Activity) context).runOnUiThread(() -> {
@@ -459,11 +487,6 @@ public class MapFunctionHandler {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                ((Activity) context).runOnUiThread(() -> {
-                    View weatherView = ((map_home) context).findViewById(R.id.WeatherView);
-                    TextView temperatureTextView = weatherView.findViewById(R.id.weatherTemp);
-                    temperatureTextView.setText(e.getMessage());
-                });
             }
         }).start();
     }
@@ -513,6 +536,65 @@ public class MapFunctionHandler {
         markerLocation = markerloc;
         return markerloc;
     }
+
+
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NetworkCapabilities networkCapabilities =
+                    connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+
+            boolean isAvailable = networkCapabilities != null &&
+                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+
+            Log.d("Internet", "Internet available: " + isAvailable);
+            return isAvailable;
+        } else {
+            // For devices below Android M
+            android.net.NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            boolean isAvailable = networkInfo != null && networkInfo.isConnected();
+
+            Log.d("Internet", "Internet available: " + isAvailable);
+            return isAvailable;
+        }
+    }
+
+
+    private void updateOuterLabel(String distanceUnit) {
+        // Update the label based on the current distance unit preference
+        double outerRadiusMeters = currentOuterRadius; // Use the stored radius
+        double outerRadiusConverted;
+
+        if (distanceUnit.equals("kilometers")) {
+            outerRadiusConverted = outerRadiusMeters / 1000.0;
+            outerLabel.setText(String.format(Locale.getDefault(), "%.1f km", outerRadiusConverted) + "  km");
+
+        } else if (distanceUnit.equals("miles")) {
+            outerRadiusConverted = outerRadiusMeters / 1609.34;
+            outerLabel.setText(String.format(Locale.getDefault(), "%.1f mi", outerRadiusConverted) + "  mi");
+
+        }
+    }
+
+    private void updateInnerLabel(String distanceUnit) {
+        // Update the inner label based on the current distance unit preference
+        double innerRadiusMeters = currentInnerRadius; // Use the stored radius
+        double innerRadiusConverted;
+
+        if (distanceUnit.equals("kilometers")) {
+            innerRadiusConverted = innerRadiusMeters / 1000.0;
+            innerLabel.setText(String.format(Locale.getDefault(), "%.1f km", innerRadiusConverted) + "   km");
+        } else if (distanceUnit.equals("miles")) {
+            innerRadiusConverted = innerRadiusMeters / 1609.34;
+            innerLabel.setText(String.format(Locale.getDefault(), "%.1f mi", innerRadiusConverted) + "   mi");
+        }
+    }
+
 
     public static GeoPoint getMarkerLocation() {
         return markerLocation;

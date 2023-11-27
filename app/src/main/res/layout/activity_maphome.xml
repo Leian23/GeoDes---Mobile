@@ -66,7 +66,6 @@
                         app:searchIcon="@null">
                     </androidx.appcompat.widget.SearchView>
 
-                    <!-- Replace Button with an ImageButton to use the hamburger menu icon -->
                     <ImageButton
                         android:id="@+id/menu_button"
                         android:layout_width="63dp"

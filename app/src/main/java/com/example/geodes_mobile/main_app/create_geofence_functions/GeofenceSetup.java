@@ -33,7 +33,6 @@ public class GeofenceSetup {
     public void addMarkerWithGeofences(Context context, double latitude, double longitude, double outerGeofenceRadius, double innerGeofenceRadius) {
         clearGeofencesAndMarker();
 
-
         if (mapHome.isButtonClicked()) {
             clearGeofencesAndMarker();
         }

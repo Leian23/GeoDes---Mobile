@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -339,7 +340,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-        Button buttonsave = findViewById(R.id.btnSave2);
+        Button buttonsave = findViewById(R.id.btnStart);
 
         buttonsave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -359,7 +360,7 @@ public class map_home extends AppCompatActivity {
                 isButtonClicked = true;
 
                 if (isButtonClicked) {
-                       locationHandler.dropPinOnMap1(retrievedGeoPoint);
+                       locationHandler.dropPinOnMap1();
                     }
 
                 BoundingBox boundingBox = locationHandler.centerBoundingBox(retrievedGeoPoint, outer);
@@ -515,7 +516,22 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showElements();
-                locationHandler.clearMarkerAndGeofences();
+
+
+                GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
+
+
+                setup = new GeofenceSetup(context, mapView);
+
+                locationHandler.dropPinOnMap1();
+
+
+                RelativeLayout layout = findViewById(R.id.infoLayout);
+                layout.setVisibility(View.GONE);
+
+                FrameLayout layout1 = findViewById(R.id.idLoad);
+                layout1.setVisibility(View.VISIBLE);
+
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED); // Reset the state
             }
         });
@@ -828,7 +844,7 @@ public class map_home extends AppCompatActivity {
             } else if (overlayLayoutt.getVisibility() == View.VISIBLE) {
                 showElements();
                 overlayLayoutt.setVisibility(View.GONE);
-                locationHandler.clearMarkerAndGeofences();
+                locationHandler.dropPinOnMap1();
             } else {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
                 if (currentFragment instanceof AlertsFragment ||
@@ -1257,6 +1273,7 @@ public class map_home extends AppCompatActivity {
     private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius) {
         // Create outer geofence
         outerGeofence = new Polygon();
+        outerGeofence.setTitle(GeoName);
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 154, 220, 241));
         outerGeofence.setStrokeColor(Color.rgb(80, 156, 180));
@@ -1265,6 +1282,7 @@ public class map_home extends AppCompatActivity {
 
         // Create inner geofence
         innerGeofence = new Polygon();
+        innerGeofence.setTitle(GeoName);
         innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerRadius));
         innerGeofence.setFillColor(Color.argb(50, 0, 255, 0));
         innerGeofence.setStrokeColor(Color.rgb(91, 206, 137));
@@ -1273,6 +1291,7 @@ public class map_home extends AppCompatActivity {
 
         // Create marker
         Marker marker = new Marker(mapView);
+        marker.setTitle(GeoName);
         marker.setPosition(markerPoint);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setInfoWindow(null);
@@ -1303,6 +1322,7 @@ public class map_home extends AppCompatActivity {
 
     private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, float inner) {
         outerGeofence = new Polygon();
+        outerGeofence.setTitle(GeoName);
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
         outerGeofence.setStrokeColor(Color.argb(255, 180, 158, 80));
@@ -1310,6 +1330,7 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlayManager().add(outerGeofence);
 
         Marker marker = new Marker(mapView);
+        marker.setTitle(GeoName);
         marker.setPosition(markerPoint);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setInfoWindow(null);

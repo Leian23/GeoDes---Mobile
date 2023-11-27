@@ -34,7 +34,7 @@
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyle"
             android:layout_width="35dp"
-            android:layout_height="31dp"
+            android:layout_height="26dp"
             android:layout_marginStart="181dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="182dp"
@@ -42,8 +42,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView">
-        </ProgressBar>
-
-
+            app:layout_constraintTop_toBottomOf="@+id/textView"></ProgressBar>
 </LinearLayout>
