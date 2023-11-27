@@ -1502,7 +1502,13 @@ public class map_home extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         alertBoxName = findViewById(R.id.AlertBoxname);
         String uid = currentUser.getUid();
-        String geoName = alertBoxName.getText().toString(); // Replace with your geofence name
+        String enteredText = alertName.getText().toString();
+        GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
+        String ExitCode = geofenceHelper.generateRequestId();
+        float outer = (float) MapFunctionHandler.getOuterRadius();
+        float inner = (float) MapFunctionHandler.getInnerRadius();
+        String outerCode = geofenceHelper.OuterVal();
+        String innerCode = geofenceHelper.innerVal();
 
         // Create a unique ID for the geofence or use your own logic
         String geofenceId = geofenceHelper.generateRequestId();
@@ -1510,8 +1516,14 @@ public class map_home extends AppCompatActivity {
         // Create a map to store geofence data
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("uniqueID", geofenceId);
-        geofenceData.put("alertName", geoName);
+        geofenceData.put("alertName", enteredText);
         geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("location",retrievedGeoPoint);
+        geofenceData.put("outerRadius",outer);
+        geofenceData.put("innerRadius",inner);
+        geofenceData.put("exitCode",ExitCode);
+        geofenceData.put("outerCode",outerCode);
+        geofenceData.put("innerCode",innerCode);
 
         // Add data to Firestore
         db.collection("geofences")
