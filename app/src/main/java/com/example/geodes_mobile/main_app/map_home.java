@@ -90,6 +90,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
@@ -118,7 +120,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -189,6 +190,8 @@ public class map_home extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
 
+    private FirebaseAuth mAuth;
+
 
 
     @Override
@@ -197,6 +200,8 @@ public class map_home extends AppCompatActivity {
         Configuration.getInstance().load(getApplicationContext(), getPreferences(MODE_PRIVATE));
         setContentView(R.layout.activity_maphome);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        mAuth = FirebaseAuth.getInstance();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -284,10 +289,6 @@ public class map_home extends AppCompatActivity {
 
         geofencingClient = LocationServices.getGeofencingClient(this);
         geofenceHelper = new GeofenceHelper();
-
-        GeoPoint point = new GeoPoint(14.321691300834615, 121.07544382248642);
-
-        //removeGeofence("Alert#1");
 
 
 
@@ -385,16 +386,21 @@ public class map_home extends AppCompatActivity {
                 // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
 
                 if (locationHandler.geTEntryOrExit()) {
-                    createGeofences(retrievedGeoPoint, enteredText, outer, inner);
+                    String outerCode = geofenceHelper.OuterVal();
+                    String innerCode = geofenceHelper.innerVal();
+                    createGeofences(retrievedGeoPoint, enteredText, outer, inner, outerCode, innerCode);
                 } else if (!locationHandler.geTEntryOrExit()) {
-                    createExitGeofence(retrievedGeoPoint, enteredText, outer, inner);
+                    String ExitCode = geofenceHelper.generateRequestId();
+                    createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
                 }
-
 
                 // Call clearGeofencesAndMarker on the existing geofenceSetup instance
                 Toast.makeText(context, retrievedGeoPoint + "  " + outer + "  " + inner, Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
 
         Button buttonSave = findViewById(R.id.btnSave2);
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -444,7 +450,6 @@ public class map_home extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
 
-
                 // Perform search as the user types
                 if (newText.length() > 2) {
                     new GooglePlacesTask().execute(newText);
@@ -485,9 +490,6 @@ public class map_home extends AppCompatActivity {
         });
 
 
-
-
-
         ImageButton openAddAlertButton = findViewById(R.id.addAlerts);
         openAddAlertButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -498,12 +500,19 @@ public class map_home extends AppCompatActivity {
         });
 
 
-
         userloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 locateUser();
+
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                String uid = currentUser.getUid();
+                String email = currentUser.getEmail();
+
+                Toast.makeText(map_home.this, uid + " " + email, Toast.LENGTH_SHORT).show();
+
+
             }
         });
 
@@ -550,7 +559,6 @@ public class map_home extends AppCompatActivity {
         addGeo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Get the center point of the currently displayed map area
 
                 GeoPoint centerPoint = (GeoPoint) mapView.getMapCenter();
                 locationHandler.dropPinOnMap(centerPoint);
@@ -569,7 +577,6 @@ public class map_home extends AppCompatActivity {
 
             }
         });
-
 
 
         //time picker in addsched bottom sheet
@@ -813,8 +820,29 @@ public class map_home extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.frame_layout, new UserProfile_Fragment())
                             .commit();
-                }else if (item.getItemId() == R.id.logout) {
-                    Toast.makeText(map_home.this, "You have selected alerts", Toast.LENGTH_SHORT).show();
+                } else if (item.getItemId() == R.id.logout) {
+
+                    mAuth.signOut();
+                    mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+                        @Override
+                        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            if (user == null) {
+                                // The user is successfully signed out
+                                Intent intent = new Intent(map_home.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+
+                                // Additional actions after logging out if needed
+                                Toast.makeText(map_home.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+                                // Remove the listener to avoid unnecessary callbacks
+                                mAuth.removeAuthStateListener(this);
+                            }
+                        }
+                    });
+
+
                 }
 
                 drawerLayout.closeDrawer(GravityCompat.START); // Close the drawer after an item is selected
@@ -905,7 +933,6 @@ public class map_home extends AppCompatActivity {
 
     public void BottomSheetRadii() {
         hideElements(false);
-
 
         final LinearLayout linearLayout = findViewById(R.id.add_geo_btm);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
@@ -1279,7 +1306,7 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius) {
+    private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius, String outerType, String innerType) {
         // Create outer geofence
         outerGeofence = new Polygon();
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
@@ -1314,8 +1341,6 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlays().add(marker);
         mapView.invalidate();
 
-        String outerType = geofenceHelper.OuterVal();
-        String innerType = geofenceHelper.innerVal();
 
 
         addGeofence(markerPoint, outerRadius, outerType, GeoName, true);
@@ -1323,14 +1348,12 @@ public class map_home extends AppCompatActivity {
         Log.d("GeofenceValues", "Outer Type: " + outerType);
         Log.d("GeofenceValues", "Inner Type: " + innerType);
 
-        // Generate a unique ID for the geofence
-        String uniqueId = geofenceHelper.generateRequestId();
 
 
     }
 
 
-    private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, float inner) {
+    private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, String ExitCode) {
         outerGeofence = new Polygon();
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
@@ -1355,15 +1378,15 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlays().add(marker);
         mapView.invalidate();
 
-        String uniqueId = geofenceHelper.generateRequestId();
-        addGeofence(markerPoint, outerRadius, uniqueId, GeoName,false);
+
+        addGeofence(markerPoint, outerRadius, ExitCode, GeoName,false);
+        Log.d("GeofenceValues", "Inner Type: " + ExitCode);
 
 
     }
 
 
     private void addGeofence(GeoPoint latLng, float radius, String requestId, String geofenceName, boolean addEntryGeofence) {
-
         Geofence geofenceExit = geofenceHelper.createExitGeofence(latLng, radius, requestId);
         // Create GeofencingRequest for exit geofence
         GeofencingRequest.Builder geofencingRequestBuilder = new GeofencingRequest.Builder()
@@ -1445,6 +1468,8 @@ public class map_home extends AppCompatActivity {
         intent.putExtra("GEOFENCE_NAME", geofenceName);
         intent.setAction("com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION");
         return PendingIntent.getBroadcast(this, requestCode, intent, flags);}
+
+
 
     private void saveGeofenceInFirestore(String uniqueId, String geoName) {
         // Access Firestore instance

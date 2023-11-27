@@ -387,14 +387,6 @@
                 app:layout_constraintStart_toEndOf="@+id/AlertBoxname" />
 
 
-
-
-
-            <!-- res/layout/your_layout.xml -->
-
-
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
