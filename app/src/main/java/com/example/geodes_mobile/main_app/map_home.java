@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -91,6 +90,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,8 +114,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import okhttp3.OkHttpClient;
@@ -166,9 +172,6 @@ public class map_home extends AppCompatActivity {
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
-    private double outerGeofenceRadius = 10000; // Adjust as needed
-    private double innerGeofenceRadius = 5000; // Adjust as needed
-
     private TextView outerLabel;
     private TextView innerLabel;
 
@@ -184,6 +187,8 @@ public class map_home extends AppCompatActivity {
 
     private EditText alertName;
 
+    private DatabaseReference databaseReference;
+
 
 
     @Override
@@ -194,6 +199,8 @@ public class map_home extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("geofences");
 
 
         mapView = findViewById(R.id.map);
@@ -259,8 +266,8 @@ public class map_home extends AppCompatActivity {
                         GeoPoint userLocation = new GeoPoint(latitude, longitude);
 
                         // Display coordinates in a Toast
-                        String coordinatesMessage = "Latitude: " + latitude + "\nLongitude: " + longitude;
-                        Toast.makeText(getApplicationContext(), coordinatesMessage, Toast.LENGTH_SHORT).show();
+                        //String coordinatesMessage = "Latitude: " + latitude + "\nLongitude: " + longitude;
+                        //Toast.makeText(getApplicationContext(), coordinatesMessage, Toast.LENGTH_SHORT).show();
 
                         // Do something else with the location if needed (e.g., update UI or send to a server)
                     }
@@ -340,9 +347,9 @@ public class map_home extends AppCompatActivity {
 
 
 
-        Button buttonsave = findViewById(R.id.btnStart);
+        Button buttonStart = findViewById(R.id.btnStart);
 
-        buttonsave.setOnClickListener(new View.OnClickListener() {
+        buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Set the flag to true when the button is clicked
@@ -360,8 +367,8 @@ public class map_home extends AppCompatActivity {
                 isButtonClicked = true;
 
                 if (isButtonClicked) {
-                       locationHandler.dropPinOnMap1();
-                    }
+                    locationHandler.dropPinOnMap1();
+                }
 
                 BoundingBox boundingBox = locationHandler.centerBoundingBox(retrievedGeoPoint, outer);
 
@@ -389,6 +396,23 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+        Button buttonSave = findViewById(R.id.btnSave2);
+        buttonSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Assuming you have access to the uniqueId variable
+                String uniqueId = geofenceHelper.generateRequestId();
+
+                // Assuming you have access to the geoName variable
+                String geoName = alertName.getText().toString();
+
+                // Store the geofence information in Firestore
+                saveGeofenceInFirestore(uniqueId, geoName);
+
+                // Optionally, you can display a message to the user indicating that the geofence has been saved.
+                Toast.makeText(map_home.this, "Geofence Saved!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -516,22 +540,7 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showElements();
-
-
-                GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
-
-
-                setup = new GeofenceSetup(context, mapView);
-
                 locationHandler.dropPinOnMap1();
-
-
-                RelativeLayout layout = findViewById(R.id.infoLayout);
-                layout.setVisibility(View.GONE);
-
-                FrameLayout layout1 = findViewById(R.id.idLoad);
-                layout1.setVisibility(View.VISIBLE);
-
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED); // Reset the state
             }
         });
@@ -1273,7 +1282,6 @@ public class map_home extends AppCompatActivity {
     private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius) {
         // Create outer geofence
         outerGeofence = new Polygon();
-        outerGeofence.setTitle(GeoName);
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 154, 220, 241));
         outerGeofence.setStrokeColor(Color.rgb(80, 156, 180));
@@ -1282,7 +1290,6 @@ public class map_home extends AppCompatActivity {
 
         // Create inner geofence
         innerGeofence = new Polygon();
-        innerGeofence.setTitle(GeoName);
         innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerRadius));
         innerGeofence.setFillColor(Color.argb(50, 0, 255, 0));
         innerGeofence.setStrokeColor(Color.rgb(91, 206, 137));
@@ -1291,7 +1298,6 @@ public class map_home extends AppCompatActivity {
 
         // Create marker
         Marker marker = new Marker(mapView);
-        marker.setTitle(GeoName);
         marker.setPosition(markerPoint);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setInfoWindow(null);
@@ -1317,12 +1323,15 @@ public class map_home extends AppCompatActivity {
         Log.d("GeofenceValues", "Outer Type: " + outerType);
         Log.d("GeofenceValues", "Inner Type: " + innerType);
 
+        // Generate a unique ID for the geofence
+        String uniqueId = geofenceHelper.generateRequestId();
+
+
     }
 
 
     private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, float inner) {
         outerGeofence = new Polygon();
-        outerGeofence.setTitle(GeoName);
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
         outerGeofence.setStrokeColor(Color.argb(255, 180, 158, 80));
@@ -1330,7 +1339,6 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlayManager().add(outerGeofence);
 
         Marker marker = new Marker(mapView);
-        marker.setTitle(GeoName);
         marker.setPosition(markerPoint);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setInfoWindow(null);
@@ -1349,6 +1357,8 @@ public class map_home extends AppCompatActivity {
 
         String uniqueId = geofenceHelper.generateRequestId();
         addGeofence(markerPoint, outerRadius, uniqueId, GeoName,false);
+
+
     }
 
 
@@ -1435,6 +1445,33 @@ public class map_home extends AppCompatActivity {
         intent.putExtra("GEOFENCE_NAME", geofenceName);
         intent.setAction("com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION");
         return PendingIntent.getBroadcast(this, requestCode, intent, flags);}
+
+    private void saveGeofenceInFirestore(String uniqueId, String geoName) {
+        // Access Firestore instance
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Assuming you have a "geofences" collection in Firestore
+        CollectionReference geofencesCollection = db.collection("geofences");
+
+        // Create a document with the uniqueId as the document ID
+        DocumentReference geofenceDocument = geofencesCollection.document(uniqueId);
+
+        // Create a map to store geofence information
+        Map<String, Object> geofenceData = new HashMap<>();
+        geofenceData.put("uniqueId", uniqueId);
+        geofenceData.put("geoName", geoName);
+
+        // Set the data in the document
+        geofenceDocument.set(geofenceData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Geofence data stored successfully");
+                    // You can add any additional logic here after successful storage
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Failed to store geofence data: " + e.getMessage());
+                    // Handle the failure, if needed
+                });
+    }
 
 
 
