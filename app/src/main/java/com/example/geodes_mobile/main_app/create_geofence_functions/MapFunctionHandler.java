@@ -249,7 +249,6 @@ public class MapFunctionHandler {
         outerSeekBar.setProgress(initialOuterProgress);
         innerSeekBar.setProgress(initialInnerProgress);
 
-
         geofenceSetup.addMarkerWithGeofences(mapView.getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(), initialSavedOuterRadius, initialSavedInnerRadius);
 
 
@@ -468,12 +467,7 @@ public class MapFunctionHandler {
                                 layout2.setVisibility(View.GONE);
                                 Picasso.get().load(iconUrl).into(iconImageView);
                                 layout.setVisibility(View.VISIBLE);
-
-
-
                         });
-
-
 
                     } else {
                         ((Activity) context).runOnUiThread(() -> {

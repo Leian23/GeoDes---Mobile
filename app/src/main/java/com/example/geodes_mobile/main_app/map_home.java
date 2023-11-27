@@ -193,7 +193,6 @@ public class map_home extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -206,6 +205,8 @@ public class map_home extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("geofences");
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
 
         mapView = findViewById(R.id.map);
@@ -1459,7 +1460,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
     private PendingIntent getGeofencePendingIntent(String geofenceName) {
         Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
         int flags = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
@@ -1468,7 +1468,6 @@ public class map_home extends AppCompatActivity {
         intent.putExtra("GEOFENCE_NAME", geofenceName);
         intent.setAction("com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION");
         return PendingIntent.getBroadcast(this, requestCode, intent, flags);}
-
 
 
     private void saveGeofenceInFirestore(String uniqueId, String geoName) {
