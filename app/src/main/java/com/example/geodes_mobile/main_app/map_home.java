@@ -282,13 +282,7 @@ public class map_home extends AppCompatActivity {
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
 
-                        GeoPoint userLocation = new GeoPoint(latitude, longitude);
 
-                        // Display coordinates in a Toast
-                        //String coordinatesMessage = "Latitude: " + latitude + "\nLongitude: " + longitude;
-                        //Toast.makeText(getApplicationContext(), coordinatesMessage, Toast.LENGTH_SHORT).show();
-
-                        // Do something else with the location if needed (e.g., update UI or send to a server)
                     }
                 }
             };
@@ -400,7 +394,6 @@ public class map_home extends AppCompatActivity {
                 // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
 
 
-
                 if (locationHandler.geTEntryOrExit()) {
                     String outerCode = geofenceHelper.OuterVal();
                     String innerCode = geofenceHelper.innerVal();
@@ -409,21 +402,27 @@ public class map_home extends AppCompatActivity {
                     //ito yung code para ma store yung geofence data na sa similar sa local
                     saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
 
+                    //ito yung backend for adding geofence using geofencing api
+                    addGeofence(retrievedGeoPoint, outer, outerCode, enteredText, true);
+                    addGeofence(retrievedGeoPoint, inner, innerCode, enteredText, true);
+                    Log.d("GeofenceValues", "Outer Type: " + outerCode + " "+ outer + " " + inner);
+                    Log.d("GeofenceValues", "Inner Type: " + innerCode);
+
                 } else if (!locationHandler.geTEntryOrExit()) {
                     String ExitCode = geofenceHelper.generateRequestId();
                     createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
 
                     saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
+
+                    addGeofence(retrievedGeoPoint, outer, ExitCode, enteredText,false);
+                    Log.d("GeofenceValues", "Inner Type: " + ExitCode);
                 }
 
                 // Call clearGeofencesAndMarker on the existing geofenceSetup instance
                 Toast.makeText(context, retrievedGeoPoint + " outer: " + outer + " inner: " + inner, Toast.LENGTH_SHORT).show();
 
-
-
             }
         });
-
 
 
 
@@ -437,7 +436,6 @@ public class map_home extends AppCompatActivity {
                 float outer = (float) MapFunctionHandler.getOuterRadius();
                 float inner = (float) MapFunctionHandler.getInnerRadius();
                 String enteredText = alertName.getText().toString();
-
                 if (currentUser != null) {
 
                     if (locationHandler.geTEntryOrExit()) {
@@ -445,7 +443,6 @@ public class map_home extends AppCompatActivity {
                         String innerCode = geofenceHelper.innerVal();
                         //ito yung code para ma store yung geofence data na sa similar sa local
                         saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
-
                     } else if (!locationHandler.geTEntryOrExit()) {
                         String ExitCode = geofenceHelper.generateRequestId();
                         saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
@@ -1372,14 +1369,6 @@ public class map_home extends AppCompatActivity {
         mapView.invalidate();
 
 
-
-        addGeofence(markerPoint, outerRadius, outerType, GeoName, true);
-        addGeofence(markerPoint, innerRadius, innerType, GeoName, true);
-        Log.d("GeofenceValues", "Outer Type: " + outerType);
-        Log.d("GeofenceValues", "Inner Type: " + innerType);
-
-
-
     }
 
 
@@ -1407,12 +1396,6 @@ public class map_home extends AppCompatActivity {
 
         mapView.getOverlays().add(marker);
         mapView.invalidate();
-
-
-        addGeofence(markerPoint, outerRadius, ExitCode, GeoName,false);
-        Log.d("GeofenceValues", "Inner Type: " + ExitCode);
-
-
     }
 
 
