@@ -93,10 +93,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -120,7 +118,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -206,11 +203,23 @@ public class map_home extends AppCompatActivity {
         setContentView(R.layout.activity_maphome);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+
+
+
+
         mAuth = FirebaseAuth.getInstance();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference("geofences");
+
+
+       // FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        //databaseReference = firebaseDatabase.getReference("geofences");
 
 
         mapView = findViewById(R.id.map);
@@ -1609,6 +1618,7 @@ public class map_home extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         // Handle the failure
+                        Log.e("Firestore", "Error storing geofence data: " + e.getMessage());
                     }
                 });
     }
@@ -1648,8 +1658,6 @@ public class map_home extends AppCompatActivity {
                     }
                 });
     }
-
-
 
 
 
