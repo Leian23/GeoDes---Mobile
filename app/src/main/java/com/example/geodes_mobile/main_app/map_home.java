@@ -351,14 +351,14 @@ public class map_home extends AppCompatActivity {
         recyclerViewSearchResults.setAdapter(adapter);
 
 
-
-
         Button buttonStart = findViewById(R.id.btnStart);
 
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Set the flag to true when the button is clicked
+
+                FirebaseUser currentUser = mAuth.getCurrentUser();
 
                 showElements();
 
@@ -390,17 +390,28 @@ public class map_home extends AppCompatActivity {
 
                 // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
 
+
+
                 if (locationHandler.geTEntryOrExit()) {
                     String outerCode = geofenceHelper.OuterVal();
                     String innerCode = geofenceHelper.innerVal();
                     createGeofences(retrievedGeoPoint, enteredText, outer, inner, outerCode, innerCode);
+
+                    //ito yung code para ma store yung geofence data na sa similar sa local
+                    saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
+
                 } else if (!locationHandler.geTEntryOrExit()) {
                     String ExitCode = geofenceHelper.generateRequestId();
                     createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
+
+                    saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
                 }
 
                 // Call clearGeofencesAndMarker on the existing geofenceSetup instance
-                Toast.makeText(context, retrievedGeoPoint + "  " + outer + "  " + inner, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, retrievedGeoPoint + " outer: " + outer + " inner: " + inner, Toast.LENGTH_SHORT).show();
+
+
+
             }
         });
 
@@ -411,9 +422,29 @@ public class map_home extends AppCompatActivity {
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 FirebaseUser currentUser = mAuth.getCurrentUser();
+                GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
+                float outer = (float) MapFunctionHandler.getOuterRadius();
+                float inner = (float) MapFunctionHandler.getInnerRadius();
+                String enteredText = alertName.getText().toString();
+
                 if (currentUser != null) {
-                    saveGeofenceDataToFirestore(currentUser);
+
+                    if (locationHandler.geTEntryOrExit()) {
+                        String outerCode = geofenceHelper.OuterVal();
+                        String innerCode = geofenceHelper.innerVal();
+                        createGeofences(retrievedGeoPoint, enteredText, outer, inner, outerCode, innerCode);
+
+                        //ito yung code para ma store yung geofence data na sa similar sa local
+                        saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
+
+                    } else if (!locationHandler.geTEntryOrExit()) {
+                        String ExitCode = geofenceHelper.generateRequestId();
+                        createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
+
+                        saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
+                    }
                 } else {
                     saveGeofenceDataToLocal();
                 }
@@ -505,12 +536,6 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
 
                 locateUser();
-
-                FirebaseUser currentUser = mAuth.getCurrentUser();
-                String uid = currentUser.getUid();
-                String email = currentUser.getEmail();
-
-                Toast.makeText(map_home.this, uid + " " + email, Toast.LENGTH_SHORT).show();
 
 
             }
@@ -1498,7 +1523,7 @@ public class map_home extends AppCompatActivity {
                 });
     }*/
 
-    private void saveGeofenceDataToFirestore(FirebaseUser currentUser) {
+   /* private void saveGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         alertBoxName = findViewById(R.id.AlertBoxname);
         String uid = currentUser.getUid();
@@ -1543,6 +1568,91 @@ public class map_home extends AppCompatActivity {
                     }
                 });
     }
+
+    */
+
+
+
+
+    private void saveEntryGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = currentUser.getUid();
+
+        // Create a unique ID for the geofence or use your own logic
+        String geofenceId = geofenceHelper.generateRequestId();
+
+        // Create a map to store geofence data
+        Map<String, Object> geofenceData = new HashMap<>();
+        geofenceData.put("uniqueID", geofenceId);
+        geofenceData.put("alertName", AlertName);
+        geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("location",Point);
+        geofenceData.put("outerRadius",outRadius);
+        geofenceData.put("innerRadius",innRadius);
+        geofenceData.put("outerCode",outerCode);
+        geofenceData.put("innerCode",innerCode);
+
+        // Add data to Firestore
+        db.collection("geofences")
+                .document(geofenceId)
+                .set(geofenceData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Data added successfully to Firestore
+                        // You can add a Toast or other UI feedback here if needed
+                        Log.d("Firestore", "Geofence data stored successfully: " + geofenceId);
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the failure
+                    }
+                });
+    }
+
+    private void saveExitGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, String ExitCode) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String uid = currentUser.getUid();
+
+        // Create a unique ID for the geofence or use your own logic
+        String geofenceId = geofenceHelper.generateRequestId();
+
+        // Create a map to store geofence data
+        Map<String, Object> geofenceData = new HashMap<>();
+        geofenceData.put("uniqueID", geofenceId);
+        geofenceData.put("alertName", AlertName);
+        geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("location",Point);
+        geofenceData.put("outerRadius",outRadius);
+        geofenceData.put("outerCode", ExitCode);
+
+
+        // Add data to Firestore
+        db.collection("geofences")
+                .document(geofenceId)
+                .set(geofenceData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Data added successfully to Firestore
+                        // You can add a Toast or other UI feedback here if needed
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the failure
+                    }
+                });
+    }
+
+
+
+
+
     private void saveGeofenceDataToLocal() {
         // Get or create SharedPreferences
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
