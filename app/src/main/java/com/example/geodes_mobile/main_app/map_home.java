@@ -443,15 +443,11 @@ public class map_home extends AppCompatActivity {
                     if (locationHandler.geTEntryOrExit()) {
                         String outerCode = geofenceHelper.OuterVal();
                         String innerCode = geofenceHelper.innerVal();
-                        createGeofences(retrievedGeoPoint, enteredText, outer, inner, outerCode, innerCode);
-
                         //ito yung code para ma store yung geofence data na sa similar sa local
                         saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
 
                     } else if (!locationHandler.geTEntryOrExit()) {
                         String ExitCode = geofenceHelper.generateRequestId();
-                        createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
-
                         saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
                     }
                 } else {
