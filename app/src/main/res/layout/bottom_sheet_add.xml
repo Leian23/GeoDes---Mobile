@@ -356,7 +356,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/coordinatesLabel3" />
 
             <EditText
-                android:id="@+id/notesEditText1"
+                android:id="@+id/AlertBoxNotes"
                 android:layout_width="340dp"
                 android:layout_height="68dp"
                 android:layout_marginTop="80dp"

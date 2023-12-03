@@ -91,7 +91,7 @@
             android:id="@+id/NoteSetAlert"
             android:layout_width="193dp"
             android:layout_height="34dp"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="-3dp"
             android:ellipsize="end"
             android:maxLines="2"
@@ -101,7 +101,7 @@
             app:layout_constraintBottom_toTopOf="@+id/IconMarker"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/TitleSetAlert"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.75" />
 
         <ImageView
             android:id="@+id/IconMarker"
@@ -117,14 +117,13 @@
 
         <Switch
             android:id="@+id/AlertSwitch"
-            android:layout_width="57dp"
-            android:layout_height="34dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.129" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

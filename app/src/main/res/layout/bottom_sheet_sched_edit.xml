@@ -53,7 +53,7 @@
 
 
             <Button
-                android:id="@+id/btnSave1"
+                android:id="@+id/btnSaveSchedEdit"
                 android:layout_width="82dp"
                 android:layout_height="46dp"
                 android:layout_marginEnd="28dp"

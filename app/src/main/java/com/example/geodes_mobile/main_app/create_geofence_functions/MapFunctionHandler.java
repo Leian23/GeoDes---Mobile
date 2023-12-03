@@ -397,7 +397,7 @@ public class MapFunctionHandler {
     }
 
 
-    private void updateWeatherView(GeoPoint geoPoint) {
+    public void updateWeatherView(GeoPoint geoPoint) {
         new Thread(() -> {
             try {
                 OkHttpClient client = new OkHttpClient();
@@ -533,7 +533,7 @@ public class MapFunctionHandler {
 
 
 
-    private boolean isInternetAvailable() {
+    public boolean isInternetAvailable() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 

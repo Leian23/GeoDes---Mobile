@@ -21,170 +21,142 @@
         app:cardUseCompatPadding="true"
         android:layout_marginBottom="-4dp" />
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        android:layout_marginBottom="-20dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="374dp"
-            android:orientation="vertical"
-            android:paddingTop="12dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="350dp"
+        android:layout_height="374dp"
+        android:orientation="vertical"
+        android:paddingTop="12dp">
 
-
-            <Button
-                android:id="@+id/btnDiscard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginTop="24dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="Discard"
-                android:textColor="#888888"
-                android:textSize="15sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/coordinatesValue"
-                android:layout_width="103dp"
-                android:layout_height="22dp"
-                android:text="5.0 mi"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:layout_editor_absoluteX="516dp"
-                tools:layout_editor_absoluteY="315dp" />
+        <Button
+            android:id="@+id/discardEditAlert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="Discard"
+            android:textColor="#888888"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-            <!-- Your layout XML -->
+        <Button
+            android:id="@+id/saveEditAlert"
+            android:layout_width="82dp"
+            android:layout_height="46dp"
+            android:layout_marginEnd="56dp"
+            android:layout_marginBottom="-35dp"
+            android:background="@drawable/bottom_round"
+            android:text="Save"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.044" />
 
-            <Button
-                android:id="@+id/btnSave1"
-                android:layout_width="82dp"
-                android:layout_height="46dp"
-                android:layout_marginEnd="36dp"
-                android:layout_marginBottom="-35dp"
-                android:background="@drawable/bottom_round"
-                android:text="Save"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.059" />
+        <EditText
+            android:id="@+id/NameAlertBox"
+            android:layout_width="296dp"
+            android:layout_height="48dp"
+            android:background="@drawable/round_alert_title"
+            android:hint="Alert Title"
+            android:padding="10dp"
 
-            <EditText
-                android:id="@+id/textBox"
-                android:layout_width="329dp"
-                android:layout_height="49dp"
-                android:background="@drawable/round_alert_title"
-                android:hint="Alert Title"
-                android:padding="10dp"
+            android:textColor="#888888"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.487"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.258" />
 
-                android:textColor="#888888"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.516"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="93dp" />
+        <TextView
+            android:id="@+id/viewAlertTitle2"
+            android:layout_width="89dp"
+            android:layout_height="22dp"
+            android:layout_marginTop="148dp"
+            android:text="Inner Fence"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.68"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/viewAlertTitle2"
-                android:layout_width="89dp"
-                android:layout_height="22dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="155dp"
-                android:text="Inner Fence"
-                android:textSize="15dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.7"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+        </TextView>
 
-            </TextView>
+        <TextView
+            android:id="@+id/viewAlertTitle4"
+            android:layout_width="113dp"
+            android:layout_height="23dp"
+            android:layout_marginLeft="35dp"
+            android:layout_marginTop="148dp"
+            android:text="Outer Fence"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/viewAlertTitle4"
-                android:layout_width="113dp"
-                android:layout_height="23dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="155dp"
-                android:text="Outer Fence"
-                android:textSize="15dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.042"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+        </TextView>
 
-            </TextView>
+        <EditText
+            android:id="@+id/OuterGeofenceTextBox"
+            android:layout_width="126dp"
+            android:layout_height="39dp"
+            android:background="@drawable/round_alert_title"
+            android:hint="Outer Radius"
+            android:padding="10dp"
 
-            <EditText
-                android:id="@+id/OuterFenceBox"
-                android:layout_width="157dp"
-                android:layout_height="40dp"
-                android:background="@drawable/round_alert_title"
-                android:hint="Outer Radius"
-                android:padding="10dp"
+            android:textColor="#888888"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.150"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.564" />
 
-                android:textColor="#888888"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.083"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.570" />
+        <EditText
+            android:id="@+id/InnerGeofenceTextBox"
+            android:layout_width="126dp"
+            android:layout_height="39dp"
+            android:background="@drawable/round_alert_title"
+            android:hint="Inner Radius"
+            android:padding="10dp"
+            android:textColor="#888888"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.794"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.564" />
 
-            <EditText
-                android:id="@+id/InnerFenceBox"
-                android:layout_width="157dp"
-                android:layout_height="40dp"
-                android:background="@drawable/round_alert_title"
-                android:hint="Inner Radius"
-                android:padding="10dp"
+        <EditText
+            android:id="@+id/EditGeofencingNotes"
+            android:layout_width="293dp"
+            android:layout_height="76dp"
+            android:background="@drawable/round_alert_title"
+            android:hint="Notes"
+            android:padding="10dp"
+            android:textColor="#888888"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.493"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.816" />
 
-                android:textColor="#888888"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.926"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.570" />
-
-            <EditText
-                android:id="@+id/notesEditText1"
-                android:layout_width="328dp"
-                android:layout_height="69dp"
-                android:background="@drawable/round_alert_title"
-                android:hint="Notes"
-                android:padding="10dp"
-                android:textColor="#888888"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.531"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:layout_editor_absoluteY="242dp" />
-
-
-            <!-- res/layout/your_layout.xml -->
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    </androidx.cardview.widget.CardView>
-
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </LinearLayout>

@@ -25,13 +25,16 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +43,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -93,8 +97,11 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -109,15 +116,18 @@ import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -125,7 +135,7 @@ import okhttp3.Response;
 
 
 public class map_home extends AppCompatActivity {
-    MapView mapView;
+    public MapView mapView;
     private boolean isFirstButtonColor1 = true;
     private boolean isSecondButtonColor1 = true;
     private boolean isThirdButtonColor1 = true;
@@ -186,13 +196,37 @@ public class map_home extends AppCompatActivity {
 
     private EditText alertName;
 
+    private EditText NotesText;
+
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
     private static final String PREFS_NAME = "GeofencePrefs";
     private static final String KEY_UNIQUE_ID = "uniqueID";
     private static final String KEY_GEO_NAME = "geoName";
     private static final String KEY_EMAIL = "email";
-    private EditText alertBoxName;
+    private FirebaseFirestore firestore;
+    private Query alertsQuery;
+
+    private boolean alertEnabled = false;
+
+    private Set<String> existingGeofenceIds = new HashSet<>();
+
+    Map<String, Pair<Polygon, Polygon>> geofencesMapEntry = new HashMap<>();
+
+    Map<String, Pair<Polygon, Polygon>> geofencesMapExit = new HashMap<>();
+    Map<String, Marker> markersMap = new HashMap<>();
+
+
+    private String togmon="", togtue="", togwed="", togthu="", togfri="", togsat="", togsun="";
+    private ToggleButton toggleMon, toggleTue, toggleWed, toggleThu, toggleFri, toggleSat, toggleSun;
+
+    public TextView ViewAlerttitle;
+    public TextView coordinatesValueAlertView;
+
+    public TextView notesView;
+
+
+    private boolean isEntryorExit = false;
 
 
 
@@ -218,8 +252,9 @@ public class map_home extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
 
-       // FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        //databaseReference = firebaseDatabase.getReference("geofences");
+        firestore = FirebaseFirestore.getInstance();
+        alertsQuery = firestore.collection("geofencesEntry");
+
 
 
         mapView = findViewById(R.id.map);
@@ -281,8 +316,6 @@ public class map_home extends AppCompatActivity {
                     for (Location location : locationResult.getLocations()) {
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-
-
                     }
                 }
             };
@@ -292,7 +325,6 @@ public class map_home extends AppCompatActivity {
 
         // Check location settings
         checkLocationSettings();
-
 
 
         geofencingClient = LocationServices.getGeofencingClient(this);
@@ -309,9 +341,8 @@ public class map_home extends AppCompatActivity {
         cancelbtn = findViewById(R.id.cancelButton);
         btnDiscard = findViewById(R.id.btnDiscard);
         dicardAddSched = findViewById(R.id.discardSched);
-        closeAlerts = findViewById(R.id.CloseAlert);
+        closeAlerts = findViewById(R.id.CloseAlert1);
         closeSched = findViewById(R.id.closeSchedule);
-        addRadius = findViewById(R.id.btnSave1);
         searchView = findViewById(R.id.search_func);
         addGeo = findViewById(R.id.addGeofenceButton);
         weatherview = findViewById(R.id.WeatherView);
@@ -324,6 +355,84 @@ public class map_home extends AppCompatActivity {
         outerLabel = findViewById(R.id.OuterFenceValue);
         innerLabel = findViewById(R.id.InnerFenceValue);
         alertName = findViewById(R.id.AlertBoxname);
+        NotesText = findViewById(R.id.AlertBoxNotes);
+        ViewAlerttitle = findViewById(R.id.ViewAlertTitle1);
+        coordinatesValueAlertView = findViewById(R.id.valueCoordinates1);
+        notesView = findViewById(R.id.AlertNoteView);
+
+
+        toggleMon = findViewById(R.id.toggleMon1);
+        toggleTue = findViewById(R.id.toggleTue2);
+        toggleWed = findViewById(R.id.toggleWed3);
+        toggleThu = findViewById(R.id.toggleThu4);
+        toggleFri = findViewById(R.id.toggleFri5);
+        toggleSat = findViewById(R.id.toggleSat6);
+        toggleSun = findViewById(R.id.toggleSun7);
+
+
+
+
+
+
+
+        //toggle conditions
+        toggleMon.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togmon = isChecked ? "true" : "false";
+            }
+        });
+        toggleTue.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togtue = isChecked ? "true" : "false";
+            }
+        });
+        toggleWed.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togwed = isChecked ? "true" : "false";
+            }
+        });
+        toggleThu.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togthu = isChecked ? "true" : "false";
+            }
+        });
+        toggleFri.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togfri = isChecked ? "true" : "false";
+            }
+        });
+        toggleSat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togsat = isChecked ? "true" : "false";
+            }
+        });
+        toggleSun.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                togsun = isChecked ? "true" : "false";
+            }
+        });
+
+
+        Button buttonSchedSave = findViewById(R.id.btnSaveSched);
+        buttonSchedSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                saveSchedToFirestore(currentUser);
+            }
+        });
+
+
+
+
+
 
 
 
@@ -388,8 +497,8 @@ public class map_home extends AppCompatActivity {
 
                 mapView.invalidate();
 
-
                 String enteredText = alertName.getText().toString();
+                String notesText =  NotesText.getText().toString();
 
                 // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
 
@@ -397,10 +506,14 @@ public class map_home extends AppCompatActivity {
                 if (locationHandler.geTEntryOrExit()) {
                     String outerCode = geofenceHelper.OuterVal();
                     String innerCode = geofenceHelper.innerVal();
-                    createGeofences(retrievedGeoPoint, enteredText, outer, inner, outerCode, innerCode);
+
+                    alertEnabled = true;
+                    isEntryorExit = true;
+
+
 
                     //ito yung code para ma store yung geofence data na sa similar sa local
-                    saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
+                    saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode, notesText, alertEnabled, isEntryorExit);
 
                     //ito yung backend for adding geofence using geofencing api
                     addGeofence(retrievedGeoPoint, outer, outerCode, enteredText, true);
@@ -409,10 +522,15 @@ public class map_home extends AppCompatActivity {
                     Log.d("GeofenceValues", "Inner Type: " + innerCode);
 
                 } else if (!locationHandler.geTEntryOrExit()) {
-                    String ExitCode = geofenceHelper.generateRequestId();
-                    createExitGeofence(retrievedGeoPoint, enteredText, outer, ExitCode);
 
-                    saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
+
+                    String ExitCode = geofenceHelper.generateRequestId();
+
+
+                    alertEnabled = true;
+                    isEntryorExit = false;
+
+                    saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode, notesText, alertEnabled, isEntryorExit);
 
                     addGeofence(retrievedGeoPoint, outer, ExitCode, enteredText,false);
                     Log.d("GeofenceValues", "Inner Type: " + ExitCode);
@@ -436,16 +554,21 @@ public class map_home extends AppCompatActivity {
                 float outer = (float) MapFunctionHandler.getOuterRadius();
                 float inner = (float) MapFunctionHandler.getInnerRadius();
                 String enteredText = alertName.getText().toString();
+                String notesText =  NotesText.getText().toString();
                 if (currentUser != null) {
 
                     if (locationHandler.geTEntryOrExit()) {
                         String outerCode = geofenceHelper.OuterVal();
                         String innerCode = geofenceHelper.innerVal();
+                        alertEnabled = false;
+                        isEntryorExit = true;
                         //ito yung code para ma store yung geofence data na sa similar sa local
-                        saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode);
+                        saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode, notesText, alertEnabled, isEntryorExit);
                     } else if (!locationHandler.geTEntryOrExit()) {
                         String ExitCode = geofenceHelper.generateRequestId();
-                        saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode);
+                        alertEnabled = false;
+                        isEntryorExit = false;
+                        saveExitGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, ExitCode, notesText, alertEnabled, isEntryorExit);
                     }
                 } else {
                     saveGeofenceDataToLocal();
@@ -457,7 +580,6 @@ public class map_home extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
                 // Check if the query is in the format of coordinates (e.g., "12.345,67.890")
                 if (isValidCoordinates(query)) {
                     try {
@@ -596,16 +718,6 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        //add geofence button from BottomsheetRadii
-
-        addRadius.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
-
         //time picker in addsched bottom sheet
         TextView txtTimePicker = findViewById(R.id.txtTimePicker);
         txtTimePicker.setOnClickListener(new View.OnClickListener() {
@@ -660,7 +772,7 @@ public class map_home extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                findViewById(R.id.viewAlert).setVisibility(View.GONE);
+                findViewById(R.id.viewAlert1).setVisibility(View.GONE);
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -687,7 +799,7 @@ public class map_home extends AppCompatActivity {
 
 
         //edit the view alert
-        ImageButton editalert = findViewById(R.id.EditAlertIcon);
+        ImageButton editalert = findViewById(R.id.EditAlertIcon1);
         editalert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -712,9 +824,6 @@ public class map_home extends AppCompatActivity {
                 schedEditDialog.show();
             }
         });
-
-
-
 
 
         // Bottom Sheet
@@ -750,20 +859,136 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        //dito maglalagay ng ng list of active alerts
+
+
+
         List<DataModel> dataForAlerts = new ArrayList<>();
-        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no noteeddwdwdwdwdwdwdwswdiiuiuiuiuiuiuisadsdsadsade", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("5246 km", R.drawable.get_in, "Alert#2", "no noote", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("3 km", R.drawable.get_in, "Alert#3", "no notte", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, "Alert#1", "no notee", R.drawable.pinalerts));
-        dataForAlerts.add(new DataModel("9 km", R.drawable.get_in, "Alert#7", "no not8e", R.drawable.pinalerts));
-
-
         RecyclerView recyclerView = findViewById(R.id.alerts_recyclerView);
+        Adapter adapter4 = new Adapter(dataForAlerts, this, new Adapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(GeoPoint geoPoint) {
+                // Handle item click here
+                // Perform the animation and set center logic here using geoPoint
+                double latitude = geoPoint.getLatitude();
+                double longitude = geoPoint.getLongitude();
+
+                GeoPoint point = new GeoPoint(latitude, longitude);
+                mapView.getController().animateTo(point);
+
+
+            }
+        });
+
+
+        CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
+        geofencesEntryCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+            if (e != null) {
+                // Handle error
+                return;
+            }
+
+            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                    String uniID = document.getString("uniqueID");
+                    Boolean alertEnabled = document.getBoolean("alertEnabled");
+
+                    // Check if the geofence with this ID has already been added
+                    if (!existingGeofenceIds.contains(uniID)) {
+                        String alertName = document.getString("alertName");
+                        String alertNotes = document.getString("notes");
+                        Double inner = document.getDouble("innerRadius");
+                        Double outer = document.getDouble("outerRadius");
+                        String innerCode = document.getString("innerCode");
+                        String outerCode = document.getString("outerCode");
+
+                        Map<String, Object> location = (Map<String, Object>) document.get("location");
+
+                        double latitude = (double) location.get("latitude");
+                        double longitude = (double) location.get("longitude");
+
+                        float innerFloat = inner.floatValue();
+                        float outerFloat = outer.floatValue();
+
+                        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+
+                        if (alertEnabled != null && alertEnabled) {
+                            dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, alertName, alertNotes, R.drawable.pinalerts, geoPoint));
+                            createGeofences(uniID, geoPoint, alertName, outerFloat, innerFloat, outerCode, innerCode);
+
+                            // Add the ID to the set to mark it as added
+                            existingGeofenceIds.add(uniID);
+                        }
+                    } else {
+                        // Geofence with this ID already exists, check if it needs to be removed
+                        if (alertEnabled != null && !alertEnabled) {
+                            // If alert is disabled, remove the geofence
+                            removeGeofencesAndMarker(uniID);
+                        }
+                    }
+                }
+            }
+
+            // Notify adapter after processing geofencesEntry data
+            adapter4.notifyDataSetChanged();
+        });
+
+        CollectionReference geofencesExitCollection = firestore.collection("geofencesExit");
+        geofencesExitCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+            if (e != null) {
+                // Handle error
+                return;
+            }
+
+            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                // Process the updated data for geofencesExit
+                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                    String uniID = document.getString("uniqueID");
+                    Boolean alertEnabled = document.getBoolean("alertEnabled");
+
+                    // Check if the geofence with this ID has already been added
+                    if (!existingGeofenceIds.contains(uniID)) {
+                        String alertName = document.getString("alertName");
+                        String alertNotes = document.getString("notes");
+                        Double outer = document.getDouble("outerRadius");
+                        String exCode = document.getString("outerCode"); //EntryType
+
+
+
+                        Map<String, Object> location = (Map<String, Object>) document.get("location");
+
+                        double latitude = (double) location.get("latitude");
+                        double longitude = (double) location.get("longitude");
+
+
+                        float outerFloat = outer.floatValue();
+                        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+
+
+                        if (alertEnabled != null && alertEnabled) {
+                            dataForAlerts.add(new DataModel("54 km", R.drawable.get_out, alertName, alertNotes, R.drawable.pinalerts, geoPoint));
+
+                            createExitGeofence(uniID, geoPoint, alertName, outerFloat,exCode);
+                            existingGeofenceIds.add(uniID);
+                        }
+                    } else {
+                            // Geofence with this ID already exists, check if it needs to be removed
+                            if (alertEnabled != null && !alertEnabled) {
+                                removeGeofencesAndMarkerExit(uniID);
+                            }
+                    }
+                }
+            }
+
+            // Notify adapter after processing geofencesExit data
+            adapter4.notifyDataSetChanged();
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        Adapter adapter4 = new Adapter(dataForAlerts, this);
         recyclerView.setAdapter(adapter4);
+
+
+
+
 
         //dito maglalagay ng list of active schedules
         List<DataModel2> dataForSched = new ArrayList<>();
@@ -926,7 +1151,7 @@ public class map_home extends AppCompatActivity {
                         locationHandler.setLongPressEnabled(true);
                         findViewById(R.id.add_schedule).setVisibility(View.GONE);
                         findViewById(R.id.viewSchedule).setVisibility(View.GONE);
-                        findViewById(R.id.viewAlert).setVisibility(View.GONE);
+                        findViewById(R.id.viewAlert1).setVisibility(View.GONE);
                     } else {
                         // If it's another fragment, remove it
                         LinearLayout overlayLayouttt = findViewById(R.id.add_schedule);
@@ -1064,10 +1289,10 @@ public class map_home extends AppCompatActivity {
 
 
     public void ViewAlerts() {
-        RelativeLayout overlayLayouttt = findViewById(R.id.viewAlert);
+        RelativeLayout overlayLayouttt = findViewById(R.id.viewAlert1);
         overlayLayouttt.setVisibility(View.VISIBLE);
 
-        RelativeLayout linearLayout = findViewById(R.id.viewAlert);
+        RelativeLayout linearLayout = findViewById(R.id.viewAlert1);
         bottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
         bottomSheetBehavior.setHideable(false);
 
@@ -1233,7 +1458,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-    private Location getCurrentLocation() {
+    public Location getCurrentLocation() {
         MyLocationNewOverlay myLocationOverlay = (MyLocationNewOverlay) mapView.getOverlays().stream()
                 .filter(overlay -> overlay instanceof MyLocationNewOverlay)
                 .findFirst()
@@ -1333,9 +1558,9 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void createGeofences(GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius, String outerType, String innerType) {
+    public void createGeofences(String uniID, GeoPoint markerPoint, String GeoName, float outerRadius, float innerRadius, String outerType, String innerType) {
         // Create outer geofence
-        outerGeofence = new Polygon();
+        Polygon outerGeofence = new Polygon();
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 154, 220, 241));
         outerGeofence.setStrokeColor(Color.rgb(80, 156, 180));
@@ -1343,7 +1568,7 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlayManager().add(outerGeofence);
 
         // Create inner geofence
-        innerGeofence = new Polygon();
+        Polygon innerGeofence = new Polygon();
         innerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, innerRadius));
         innerGeofence.setFillColor(Color.argb(50, 0, 255, 0));
         innerGeofence.setStrokeColor(Color.rgb(91, 206, 137));
@@ -1368,11 +1593,14 @@ public class map_home extends AppCompatActivity {
         mapView.getOverlays().add(marker);
         mapView.invalidate();
 
-
+        // Add geofences and marker to the maps
+        geofencesMapEntry.put(uniID, new Pair<>(outerGeofence, innerGeofence));
+        markersMap.put(uniID, marker);
     }
 
 
-    private void createExitGeofence(GeoPoint markerPoint, String GeoName, float outerRadius, String ExitCode) {
+
+    private void createExitGeofence(String uniID,GeoPoint markerPoint, String GeoName, float outerRadius, String ExitCode) {
         outerGeofence = new Polygon();
         outerGeofence.setPoints(Polygon.pointsAsCircle(markerPoint, outerRadius));
         outerGeofence.setFillColor(Color.argb(102, 241, 217, 154));
@@ -1396,6 +1624,9 @@ public class map_home extends AppCompatActivity {
 
         mapView.getOverlays().add(marker);
         mapView.invalidate();
+
+        geofencesMapExit.put(uniID, new Pair<>(outerGeofence, innerGeofence));
+        markersMap.put(uniID, marker);
     }
 
 
@@ -1484,85 +1715,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-    /*private void saveGeofenceInFirestore(String uniqueId, String geoName) {
-        // Access Firestore instance
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Assuming you have a "geofences" collection in Firestore
-        CollectionReference geofencesCollection = db.collection("geofences");
-
-        // Create a document with the uniqueId as the document ID
-        DocumentReference geofenceDocument = geofencesCollection.document(uniqueId);
-
-        // Create a map to store geofence information
-        Map<String, Object> geofenceData = new HashMap<>();
-        geofenceData.put("uniqueId", uniqueId);
-        geofenceData.put("geoName", geoName);
-
-        // Set the data in the document
-        geofenceDocument.set(geofenceData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Geofence data stored successfully");
-                    // You can add any additional logic here after successful storage
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Failed to store geofence data: " + e.getMessage());
-                    // Handle the failure, if needed
-                });
-    }*/
-
-   /* private void saveGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        alertBoxName = findViewById(R.id.AlertBoxname);
-        String uid = currentUser.getUid();
-        String enteredText = alertName.getText().toString();
-        GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
-        String ExitCode = geofenceHelper.generateRequestId();
-        float outer = (float) MapFunctionHandler.getOuterRadius();
-        float inner = (float) MapFunctionHandler.getInnerRadius();
-        String outerCode = geofenceHelper.OuterVal();
-        String innerCode = geofenceHelper.innerVal();
-
-        // Create a unique ID for the geofence or use your own logic
-        String geofenceId = geofenceHelper.generateRequestId();
-
-        // Create a map to store geofence data
-        Map<String, Object> geofenceData = new HashMap<>();
-        geofenceData.put("uniqueID", geofenceId);
-        geofenceData.put("alertName", enteredText);
-        geofenceData.put("email", currentUser.getEmail());
-        geofenceData.put("location",retrievedGeoPoint);
-        geofenceData.put("outerRadius",outer);
-        geofenceData.put("innerRadius",inner);
-        geofenceData.put("exitCode",ExitCode);
-        geofenceData.put("outerCode",outerCode);
-        geofenceData.put("innerCode",innerCode);
-
-        // Add data to Firestore
-        db.collection("geofences")
-                .document(geofenceId)
-                .set(geofenceData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Data added successfully to Firestore
-                        // You can add a Toast or other UI feedback here if needed
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle the failure
-                    }
-                });
-    }
-
-    */
-
-
-
-
-    private void saveEntryGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode) {
+    private void saveEntryGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode, String Notes, boolean alertenabled, boolean isEntry) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = currentUser.getUid();
 
@@ -1574,14 +1727,18 @@ public class map_home extends AppCompatActivity {
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("alertName", AlertName);
         geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("notes", Notes);
         geofenceData.put("location",Point);
         geofenceData.put("outerRadius",outRadius);
         geofenceData.put("innerRadius",innRadius);
         geofenceData.put("outerCode",outerCode);
         geofenceData.put("innerCode",innerCode);
+        geofenceData.put("alertEnabled", alertenabled);
+        geofenceData.put("EntryType", isEntry);
+
 
         // Add data to Firestore
-        db.collection("geofences")
+        db.collection("geofencesEntry")
                 .document(geofenceId)
                 .set(geofenceData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -1602,7 +1759,7 @@ public class map_home extends AppCompatActivity {
                 });
     }
 
-    private void saveExitGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, String ExitCode) {
+    private void saveExitGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, String ExitCode, String Notes, boolean alertenabled, boolean isExit) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = currentUser.getUid();
 
@@ -1614,13 +1771,16 @@ public class map_home extends AppCompatActivity {
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("alertName", AlertName);
         geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("notes", Notes);
         geofenceData.put("location",Point);
         geofenceData.put("outerRadius",outRadius);
         geofenceData.put("outerCode", ExitCode);
+        geofenceData.put("alertEnabled", alertenabled);
+        geofenceData.put("EntryType", isExit);
 
 
         // Add data to Firestore
-        db.collection("geofences")
+        db.collection("geofencesExit")
                 .document(geofenceId)
                 .set(geofenceData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -1663,10 +1823,138 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
-    public static void setButtonClicked(boolean clicked) {
-        isButtonClicked = clicked;
+    // Modify the removeGeofence method to handle Polygon objects
+    private void removeGeofence1(Polygon geofence) {
+        mapView.getOverlayManager().remove(geofence);
     }
+
+
+
+
+    private void removeGeofencesAndMarker(String uniID) {
+        Pair<Polygon, Polygon> geofencesPair = geofencesMapEntry.get(uniID);
+        if (geofencesPair != null) {
+            removeGeofence1(geofencesPair.first);
+            removeGeofence1(geofencesPair.second);
+
+        }
+
+        Marker marker = markersMap.get(uniID);
+        if (marker != null) {
+            mapView.getOverlays().remove(marker);
+        }
+
+        // Remove the ID from the set to mark it as removed
+        existingGeofenceIds.remove(uniID);
+
+        mapView.invalidate();
+    }
+
+
+    private void removeGeofencesAndMarkerExit(String uniID) {
+        Pair<Polygon, Polygon> geofences = geofencesMapExit.get(uniID);
+        if (geofences != null) {
+            removeGeofence1(geofences.first);
+
+        }
+
+        Marker marker = markersMap.get(uniID);
+        if (marker != null) {
+            mapView.getOverlays().remove(marker);
+        }
+
+        // Remove the ID from the set to mark it as removed
+        existingGeofenceIds.remove(uniID);
+
+        mapView.invalidate();
+    }
+
+
+
+
+
+
+
+
+
+    private void saveSchedToFirestore(FirebaseUser currentUser) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String monday = "false";
+        String tuesday = "false";
+        String wednesday = "false";
+        String thursday = "false";
+        String friday = "false";
+        String saturday = "false";
+        String sunday = "false";
+
+        String geofenceId = geofenceHelper.generateRequestId();
+
+        if ("true".equals(togmon)) {
+            monday = "true";
+        }
+        if ("true".equals(togtue)) {
+            tuesday = "true";
+        }
+        if ("true".equals(togwed)) {
+            wednesday = "true";
+        }
+        if ("true".equals(togthu)) {
+            thursday = "true";
+        }
+        if ("true".equals(togfri)) {
+            friday = "true";
+        }
+        if ("true".equals(togsat)) {
+            saturday = "true";
+        }
+        if ("true".equals(togsun)) {
+            sunday = "true";
+        }
+
+        // Get values from UI elements
+        EditText schedNameEditText = findViewById(R.id.SchedName1);
+        String schedName = schedNameEditText.getText().toString();
+
+        // Get the selected time from the TextView
+        TextView txtTimePicker = findViewById(R.id.txtTimePicker);
+        String selectedTime = txtTimePicker.getText().toString();
+
+        Map<String, Object> geofenceData = new HashMap<>();
+        geofenceData.put("Sched", schedName);
+        geofenceData.put("Time", selectedTime);
+        geofenceData.put("Monday", monday);
+        geofenceData.put("Tuesday", tuesday);
+        geofenceData.put("Wednesday", wednesday);
+        geofenceData.put("Thursday", thursday);
+        geofenceData.put("Friday", friday);
+        geofenceData.put("Saturday", saturday);
+        geofenceData.put("Sunday", sunday);
+        geofenceData.put("Email", currentUser.getEmail());
+        geofenceData.put("uniqueID", geofenceId);
+
+        db.collection("geofenceSchedule")
+                .document(geofenceId)
+                .set(geofenceData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("SchedUpload", "Successs");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the failure
+                    }
+                });
+    }
+
+
+
+
+
+
+
 
     public static boolean isButtonClicked() {
         return isButtonClicked;

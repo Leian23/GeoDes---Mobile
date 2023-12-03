@@ -1,55 +1,67 @@
-// DataModel3.java
-
 package com.example.geodes_mobile.main_app.alert_settings_adaptor;
 
 public class DataModel3 {
-    private String schedTitle;
+    private String alertName;
+    private String notesAlert;
     private String distance;
-    private String note;
-    private int iconCal;
-    private int entryImage;
-    private int iconMarker;
-    private boolean isAlertSwitchOn;
-    // Add other fields as needed
+    private Boolean alertEnabled;
+    private String unid;
 
-    public DataModel3(String schedTitle, String distance, String note, int iconCal, int entryImage, int iconMarker, boolean isAlertSwitchOn) {
-        this.schedTitle = schedTitle;
+    private int setAlertStat;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    private Double outerRadius;
+
+
+
+    public DataModel3(String alertName, String notesAlert, String distance, Boolean alertEnabled, String unid, int setAlertStat, Double latitude, Double longitude, Double outerRadius) {
+        this.alertName = alertName;
+        this.notesAlert = notesAlert;
         this.distance = distance;
-        this.note = note;
-        this.iconCal = iconCal;
-        this.entryImage = entryImage;
-        this.iconMarker = iconMarker;
-        this.isAlertSwitchOn = isAlertSwitchOn;
-        // Initialize other fields as needed
+        this.alertEnabled = alertEnabled;
+        this.unid = unid;
+        this.setAlertStat = setAlertStat;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.outerRadius = outerRadius;
     }
 
-    public String getSchedTitle() {
-        return schedTitle;
+    public String getAlertName() {
+        return alertName;
+    }
+
+    public String getNotesAlert() {
+        return notesAlert;
     }
 
     public String getDistance() {
         return distance;
     }
 
-    public String getNote() {
-        return note;
+    public Boolean getAlertEnabled() {
+        return alertEnabled;
     }
 
-    public int getIconCal() {
-        return iconCal;
+    public void setAlertEnabled(Boolean alertEnabled) {
+        this.alertEnabled = alertEnabled;
     }
 
-    public int getEntryImage() {
-        return entryImage;
+    public String getId() { return unid;}
+
+    public int getSetAlertStat() { return setAlertStat;}
+
+    public Double getLatitude() {
+        return latitude;
     }
 
-    public int getIconMarker() {
-        return iconMarker;
+    public Double getLongitude() {
+        return longitude;
     }
 
-    public boolean isAlertSwitchOn() {
-        return isAlertSwitchOn;
+    public Double getOuterRadius() {
+        return outerRadius;
     }
-
-    // Add getters and setters for other fields
 }

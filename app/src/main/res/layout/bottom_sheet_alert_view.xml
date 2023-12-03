@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:id="@+id/viewAlert"
+    android:id="@+id/viewAlert1"
     android:background="@android:color/transparent"
     app:behavior_hideable="true"
     app:behavior_peekHeight="80dp"
@@ -51,7 +51,7 @@
 
 
                 <ImageView
-                    android:id="@+id/imageIcon"
+                    android:id="@+id/imageIcon1"
                     android:layout_width="wrap_content"
                     android:layout_height="34dp"
                     android:layout_centerVertical="true"
@@ -59,7 +59,7 @@
                     android:src="@drawable/baseline_volume_up_24" />
 
                 <TextView
-                    android:id="@+id/VolumeStats"
+                    android:id="@+id/VolumeStats1"
                     android:layout_width="wrap_content"
                     android:layout_height="31dp"
                     android:layout_alignParentTop="true"
@@ -67,28 +67,28 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="16dp"
-                    android:layout_toEndOf="@+id/imageIcon"
-                    android:layout_toRightOf="@id/imageIcon"
+                    android:layout_toEndOf="@+id/imageIcon1"
+                    android:layout_toRightOf="@id/imageIcon1"
                     android:text="5/10"
                     android:textColor="#888888"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/ringtonechosen"
+                    android:id="@+id/ringtonechosen1"
                     android:layout_width="wrap_content"
                     android:layout_height="31dp"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
                     android:layout_marginStart="65dp"
                     android:layout_marginBottom="16dp"
-                    android:layout_toEndOf="@+id/imageIcon"
-                    android:layout_toRightOf="@id/imageIcon"
+                    android:layout_toEndOf="@+id/imageIcon1"
+                    android:layout_toRightOf="@id/imageIcon1"
                     android:text="Dingdong"
                     android:textColor="#888888"
                     android:textSize="16sp" />
 
                 <ImageView
-                    android:id="@+id/imageView15"
+                    android:id="@+id/imageView151"
                     android:layout_width="wrap_content"
                     android:layout_height="35dp"
                     android:layout_alignParentTop="true"
@@ -103,7 +103,7 @@
 
 
             <TextView
-                android:id="@+id/ViewAlertTitle"
+                android:id="@+id/ViewAlertTitle1"
                 android:layout_width="194dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="10dp"
@@ -119,7 +119,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/viewAlertTitle"
+                android:id="@+id/viewAlertTitle1"
                 android:layout_width="86dp"
                 android:layout_height="25dp"
                 android:layout_marginLeft="10dp"
@@ -134,7 +134,7 @@
             </TextView>
 
             <ImageButton
-                android:id="@+id/EditAlertIcon"
+                android:id="@+id/EditAlertIcon1"
                 android:layout_width="30dp"
                 android:layout_height="32dp"
                 android:background="@color/white"
@@ -146,7 +146,7 @@
                 app:srcCompat="@drawable/baseline_edit_24" />
 
             <ImageButton
-                android:id="@+id/DeleteAlert"
+                android:id="@+id/DeleteAlert1"
                 android:layout_width="30dp"
                 android:layout_height="32dp"
                 android:background="@color/white"
@@ -158,7 +158,7 @@
                 app:srcCompat="@drawable/baseline_delete_24" />
 
             <ImageButton
-                android:id="@+id/CloseAlert"
+                android:id="@+id/CloseAlert1"
                 android:layout_width="39dp"
                 android:background="@color/white"
                 android:layout_height="34dp"
@@ -170,19 +170,130 @@
                 app:layout_constraintVertical_bias="0.0"
                 app:srcCompat="@drawable/baseline_close_24" />
 
-            <View
-                android:id="@+id/colorBox"
+            <FrameLayout
+                android:id="@+id/WeatherView1"
                 android:layout_width="180dp"
                 android:layout_height="94dp"
                 android:layout_marginStart="32dp"
                 android:background="@drawable/round_weather"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.214" />
+                app:layout_constraintTop_toBottomOf="@+id/ViewAlertTitle1"
+                app:layout_constraintVertical_bias="0.050">
+
+                <FrameLayout
+                    android:id="@+id/idLoad1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/progressBar1"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="35dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="10dp"
+                        android:indeterminateTint="#737373" />
+
+                    <TextView
+                        android:id="@+id/textFetching"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="35dp"
+                        android:gravity="center"
+                        android:text="Fetching Weather..."
+                        android:textColor="#000000"
+                        android:textSize="14sp" />
+                </FrameLayout>
+
+
+                <FrameLayout
+                    android:id="@+id/NotAvail1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/imageView81"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="12dp"
+                        app:srcCompat="@drawable/wifi_off" />
+
+
+                    <TextView
+                        android:id="@+id/NoIntnet"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="35dp"
+                        android:gravity="center"
+                        android:text="Connection Problem"
+                        android:textColor="#000000"
+                        android:textSize="14sp" />
+                </FrameLayout>
+
+
+                <RelativeLayout
+                    android:id="@+id/infoLayout1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/weatherIconImageView1"
+                        android:layout_width="55dp"
+                        android:layout_height="55dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginEnd="116dp"
+                        android:layout_marginBottom="22dp" />
+
+                    <TextView
+                        android:id="@+id/weatherTemp1"
+                        android:layout_width="94dp"
+                        android:layout_height="57dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="65dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginEnd="14dp"
+                        android:layout_marginBottom="31dp"
+                        android:gravity="center"
+                        android:text="27.0 C"
+                        android:textColor="#000000"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/weatherCon1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="75dp"
+                        android:layout_marginTop="51dp"
+                        android:layout_marginEnd="14dp"
+                        android:layout_marginBottom="22dp"
+                        android:text="Partly Cloudy"
+                        android:textColor="#000000"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </FrameLayout>
 
             <TextView
-                android:id="@+id/colorBox2"
+                android:id="@+id/AlertNoteView"
                 android:layout_width="297dp"
                 android:layout_height="64dp"
                 android:layout_marginStart="64dp"
@@ -196,52 +307,52 @@
                 app:layout_constraintVertical_bias="0.86" />
 
             <TextView
-                android:id="@+id/coordinatesValue1"
-                android:layout_width="113dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="90dp"
+                android:id="@+id/valueCoordinates1"
+                android:layout_width="119dp"
+                android:layout_height="74dp"
+                android:layout_marginTop="72dp"
                 android:text="14.257702, \n121.143250"
                 android:textColor="#000000"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.325"
-                app:layout_constraintStart_toEndOf="@+id/colorBox"
+                app:layout_constraintHorizontal_bias="0.35"
+                app:layout_constraintStart_toEndOf="@+id/WeatherView1"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/coordinatesLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
-                android:layout_marginTop="64dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="48dp"
                 android:text="Coordinates"
                 android:textColor="#888888"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/colorBox"
+                app:layout_constraintStart_toEndOf="@+id/WeatherView1"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
-                android:id="@+id/imageView14"
+                android:id="@+id/imageView141"
                 android:layout_width="17dp"
                 android:layout_height="29dp"
 
                 android:layout_marginBottom="125dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/viewAlertTitle"
+                app:layout_constraintEnd_toStartOf="@+id/viewAlertTitle1"
                 app:layout_constraintHorizontal_bias="0.780"
                 app:layout_constraintStart_toStartOf="parent"
                 app:srcCompat="@drawable/pinalerts" />
 
             <ImageView
-                android:id="@+id/imageView16"
+                android:id="@+id/imageView161"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView14"
+                app:layout_constraintTop_toBottomOf="@+id/imageView141"
                 app:layout_constraintVertical_bias="0.401"
                 app:srcCompat="@drawable/baseline_note_alt_24" />
 

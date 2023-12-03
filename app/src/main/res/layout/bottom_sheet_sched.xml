@@ -53,7 +53,7 @@
 
 
             <Button
-                android:id="@+id/btnSave1"
+                android:id="@+id/btnSaveSched"
                 android:layout_width="82dp"
                 android:layout_height="46dp"
                 android:layout_marginEnd="35dp"
@@ -95,7 +95,6 @@
                 android:paddingLeft="18dp"
                 android:paddingTop="12dp"
                 android:text="Select Time"
-
                 android:textColor="#888888"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -165,43 +164,43 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ToggleButton
-                    android:id="@+id/toggleMon"
+                    android:id="@+id/toggleMon1"
                     style="@style/CircleToggleButton"
                     android:textOff="mon"
                     android:textOn="mon" />
 
                 <ToggleButton
-                    android:id="@+id/toggleTue"
+                    android:id="@+id/toggleTue2"
                     style="@style/CircleToggleButton"
                     android:textOff="tue"
                     android:textOn="tue" />
 
                 <ToggleButton
-                    android:id="@+id/toggleWed"
+                    android:id="@+id/toggleWed3"
                     style="@style/CircleToggleButton"
                     android:textOff="wed"
                     android:textOn="wed" />
 
                 <ToggleButton
-                    android:id="@+id/toggleThu"
+                    android:id="@+id/toggleThu4"
                     style="@style/CircleToggleButton"
                     android:textOff="thu"
                     android:textOn="thu" />
 
                 <ToggleButton
-                    android:id="@+id/toggleFri"
+                    android:id="@+id/toggleFri5"
                     style="@style/CircleToggleButton"
                     android:textOff="fri"
                     android:textOn="fri" />
 
                 <ToggleButton
-                    android:id="@+id/toggleSat"
+                    android:id="@+id/toggleSat6"
                     style="@style/CircleToggleButton"
                     android:textOff="sat"
                     android:textOn="sat" />
 
                 <ToggleButton
-                    android:id="@+id/toggleSun"
+                    android:id="@+id/toggleSun7"
                     style="@style/CircleToggleButton"
                     android:textOff="sun"
                     android:textOn="sun" />
