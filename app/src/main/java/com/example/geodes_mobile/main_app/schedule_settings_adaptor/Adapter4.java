@@ -1,5 +1,3 @@
-// Adapter4.java
-
 package com.example.geodes_mobile.main_app.schedule_settings_adaptor;
 
 import android.content.Context;

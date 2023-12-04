@@ -24,7 +24,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="350dp"
-        android:layout_height="374dp"
+        android:layout_height="368dp"
         android:orientation="vertical"
         android:paddingTop="12dp">
 
@@ -60,13 +60,12 @@
             app:layout_constraintVertical_bias="0.044" />
 
         <EditText
-            android:id="@+id/NameAlertBox"
+            android:id="@+id/NameAlertBox12"
             android:layout_width="296dp"
             android:layout_height="48dp"
             android:background="@drawable/round_alert_title"
             android:hint="Alert Title"
             android:padding="10dp"
-
             android:textColor="#888888"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"

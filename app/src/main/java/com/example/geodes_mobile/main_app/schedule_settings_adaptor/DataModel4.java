@@ -20,7 +20,7 @@ public class DataModel4 {
         this.entryImage = entryImage;
         this.iconMarker = iconMarker;
         this.isAlertSwitchOn = isAlertSwitchOn;
-        // Initialize other fields as needed
+
     }
 
     public String getSchedTitle() {
@@ -49,5 +49,4 @@ public class DataModel4 {
         return isAlertSwitchOn;
     }
 
-    // Add getters and setters for other fields
 }

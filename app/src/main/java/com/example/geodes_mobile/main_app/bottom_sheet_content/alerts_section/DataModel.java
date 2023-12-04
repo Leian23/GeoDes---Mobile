@@ -11,6 +11,8 @@ public class DataModel {
     private GeoPoint geoPoint; // New field to store GeoPoint
 
 
+
+
     public DataModel(String distance, int imageResource, String alertTitle, String note, int imageResource1, GeoPoint geoPoint) {
         this.distance = distance;
         this.imageResource = imageResource;

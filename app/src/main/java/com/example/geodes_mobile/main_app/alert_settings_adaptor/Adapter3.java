@@ -13,7 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.map_home;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.osmdroid.util.GeoPoint;
 
 import java.util.List;
 
@@ -23,10 +26,13 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
     private OnItemClickListener listener;
     private FirebaseFirestore firestore;
 
-    public Adapter3(List<DataModel3> dataList, Context context) {
+    private static map_home mapHome;
+
+    public Adapter3(List<DataModel3> dataList, Context context, map_home mapHome) {
         this.dataList = dataList;
         this.context = context;
         this.firestore = FirebaseFirestore.getInstance();
+        this.mapHome = mapHome;
     }
 
     @NonNull
@@ -89,10 +95,30 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
                 DataModel3 data = adapter.dataList.get(getAdapterPosition());
                 data.setAlertEnabled(isCheckedNew);
 
+                if(isCheckedNew) {
+                    GeoPoint Point = new GeoPoint(data.getLatitude(), data.getLongitude());
+
+                    if (data.getEntryType()) {
+                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getAlertName(), true);
+                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getInnerCode(), data.getAlertName(), true);
+
+                    } else {
+                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getOuterCode(),false);
+                    }
+
+                } else if (!isCheckedNew) {
+                    if (data.getEntryType()) {
+                        mapHome.clearGeo(data.getInnerCode(), data.getOuterCode());
+                    } else {
+                        mapHome.removeGeofence(data.getOuterCode());
+                    }
+                }
                 // Save the updated state to Firestore or perform other actions
-                adapter.updateAlertEnabledInFirestore(data.getId(), isCheckedNew);
+                adapter.updateAlertEnabledInFirestore(data.getId(), isCheckedNew, data.getEntryType());
             });
         }
+
+
 
         // Add this method to set up the Switch listener
         public void setupSwitchListener() {
@@ -101,7 +127,7 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
                 DataModel3 data = adapter.dataList.get(getAdapterPosition());
                 data.setAlertEnabled(isChecked);
                 // Save the updated state to Firestore or perform other actions
-                adapter.updateAlertEnabledInFirestore(data.getId(), isChecked);
+                adapter.updateAlertEnabledInFirestore(data.getId(), isChecked, data.getEntryType());
             });
         }
     }
@@ -121,12 +147,12 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    private void updateAlertEnabledInFirestore(String alertName, boolean isEnabled) {
-        updateAlertEnabledInCollection("geofencesEntry", alertName, isEnabled);
-        updateAlertEnabledInCollection("geofencesExit", alertName, isEnabled);
+    private void updateAlertEnabledInFirestore(String alertName, boolean isEnabled, boolean entrytype) {
+        updateAlertEnabledInCollection("geofencesEntry", alertName, isEnabled, entrytype);
+        updateAlertEnabledInCollection("geofencesExit", alertName, isEnabled, entrytype);
     }
 
-    private void updateAlertEnabledInCollection(String collectionName, String alertName, boolean isEnabled) {
+    private void updateAlertEnabledInCollection(String collectionName, String alertName, boolean isEnabled, boolean typeEntry) {
         firestore.collection(collectionName).document(alertName)
                 .update("alertEnabled", isEnabled)
                 .addOnSuccessListener(aVoid -> {

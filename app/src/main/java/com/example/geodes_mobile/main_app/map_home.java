@@ -2,6 +2,7 @@ package com.example.geodes_mobile.main_app;
 
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -28,11 +29,11 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -51,14 +52,16 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.AlertsFragment;
 import com.example.geodes_mobile.fragments.FeedbackFragment;
 import com.example.geodes_mobile.fragments.HelpFragment;
-import com.example.geodes_mobile.fragments.OfflineMapFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
-import com.example.geodes_mobile.fragments.UserProfile_Fragment;
+import com.example.geodes_mobile.fragments.userProfileFragment;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.addingSchedule.add_sched_dialog;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.adding_alerts_sched.Adapter5;
 import com.example.geodes_mobile.main_app.bottom_sheet_content.adding_alerts_sched.DataModel5;
@@ -70,7 +73,6 @@ import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceBroa
 import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceHelper;
 import com.example.geodes_mobile.main_app.create_geofence_functions.GeofenceSetup;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
-import com.example.geodes_mobile.main_app.homebtn_functions.AlertEditDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.SchedEditDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.TilesLayout;
@@ -98,6 +100,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
@@ -116,7 +120,6 @@ import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -149,6 +152,10 @@ public class map_home extends AppCompatActivity {
     private ConstraintLayout changePosLayout;
     private NavigationView navigationView;
     private GeofenceSetup setup;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAUth = FirebaseAuth.getInstance();
+    private String userId = mAUth.getCurrentUser().getUid();
 
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
@@ -228,6 +235,19 @@ public class map_home extends AppCompatActivity {
 
     private boolean isEntryorExit = false;
 
+    public ImageButton editalert;
+
+    public EditText alertEditName;
+
+    public ImageButton deleteAlert;
+
+    public RelativeLayout bottomsheetclose;
+
+    private final RequestOptions glideOptions = new RequestOptions().transform(new CircleCrop());
+
+
+
+
 
 
     @Override
@@ -300,6 +320,7 @@ public class map_home extends AppCompatActivity {
             }
 
 
+
             // Set up location request
             locationRequest = new LocationRequest();
             locationRequest.setInterval(10000); // 10 seconds
@@ -359,6 +380,18 @@ public class map_home extends AppCompatActivity {
         ViewAlerttitle = findViewById(R.id.ViewAlertTitle1);
         coordinatesValueAlertView = findViewById(R.id.valueCoordinates1);
         notesView = findViewById(R.id.AlertNoteView);
+        alertEditName = findViewById(R.id.NameAlertBox12);
+        deleteAlert = findViewById(R.id.DeleteAlert1);
+        navigationView = findViewById(R.id.nav_view);
+
+
+
+        View headerView = navigationView.getHeaderView(0);
+        ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
+
+        loadUserProfilePicture(headerImageView);
+        getUserFromFirestore();
+
 
 
         toggleMon = findViewById(R.id.toggleMon1);
@@ -511,7 +544,6 @@ public class map_home extends AppCompatActivity {
                     isEntryorExit = true;
 
 
-
                     //ito yung code para ma store yung geofence data na sa similar sa local
                     saveEntryGeofenceDataToFirestore(currentUser, enteredText, retrievedGeoPoint, outer, inner, outerCode, innerCode, notesText, alertEnabled, isEntryorExit);
 
@@ -573,6 +605,8 @@ public class map_home extends AppCompatActivity {
                 } else {
                     saveGeofenceDataToLocal();
                 }
+                showElements();
+                locationHandler.dropPinOnMap1();
             }
         });
 
@@ -767,12 +801,13 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+         bottomsheetclose = findViewById(R.id.viewAlert1);
         //close alerts ng view alerts layout (bottomsheet)
         closeAlerts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                findViewById(R.id.viewAlert1).setVisibility(View.GONE);
+                bottomsheetclose.setVisibility(View.GONE);
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
                 getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -799,17 +834,9 @@ public class map_home extends AppCompatActivity {
 
 
         //edit the view alert
-        ImageButton editalert = findViewById(R.id.EditAlertIcon1);
-        editalert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Log statement indicating that the ImageButton was tapped
-                Log.d("ImageButton", "EditAlertIcon tapped");
+        editalert = findViewById(R.id.EditAlertIcon1);
 
-                AlertEditDialog alertEditDialog = new AlertEditDialog(map_home.this);
-                alertEditDialog.show();
-            }
-        });
+
 
 
         //edit the viewsched
@@ -989,7 +1016,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
         //dito maglalagay ng list of active schedules
         List<DataModel2> dataForSched = new ArrayList<>();
         dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
@@ -1037,11 +1063,19 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-        navigationView = findViewById(R.id.nav_view);
+
 
         NavigationView navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+
+
+
+
+
+
+
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.alerts) {
@@ -1051,10 +1085,6 @@ public class map_home extends AppCompatActivity {
                 } else if (item.getItemId() == R.id.schedules) {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.frame_layout, new ScheduleFragment())
-                            .commit();
-                } else if (item.getItemId() == R.id.offline) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new OfflineMapFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.settings) {
                     getSupportFragmentManager().beginTransaction()
@@ -1070,7 +1100,7 @@ public class map_home extends AppCompatActivity {
                             .commit();
                 } else if (item.getItemId() == R.id.userprof) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, new UserProfile_Fragment())
+                            .replace(R.id.frame_layout, new userProfileFragment())
                             .commit();
                 } else if (item.getItemId() == R.id.logout) {
 
@@ -1139,10 +1169,9 @@ public class map_home extends AppCompatActivity {
                 if (currentFragment instanceof AlertsFragment ||
                         currentFragment instanceof ScheduleFragment ||
                         currentFragment instanceof SettingsFragment ||
-                        currentFragment instanceof OfflineMapFragment ||
                         currentFragment instanceof FeedbackFragment ||
                         currentFragment instanceof HelpFragment ||
-                        currentFragment instanceof UserProfile_Fragment) {
+                        currentFragment instanceof userProfileFragment) {
 
                     // If the ScheduleFragment is hidden, show it
                     if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()
@@ -1630,7 +1659,7 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void addGeofence(GeoPoint latLng, float radius, String requestId, String geofenceName, boolean addEntryGeofence) {
+    public void addGeofence(GeoPoint latLng, float radius, String requestId, String geofenceName, boolean addEntryGeofence) {
         Geofence geofenceExit = geofenceHelper.createExitGeofence(latLng, radius, requestId);
         // Create GeofencingRequest for exit geofence
         GeofencingRequest.Builder geofencingRequestBuilder = new GeofencingRequest.Builder()
@@ -1663,7 +1692,7 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void clearGeo(String inner, String outer) {
+    public void clearGeo(String inner, String outer) {
         List<String> innerList = Collections.singletonList(inner);
         List<String> outerList = Collections.singletonList(outer);
 
@@ -1685,19 +1714,19 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void removeGeofence(String geofenceName) {
+    public void removeGeofence(String id) {
         // Get the PendingIntent associated with the geofence
-        PendingIntent geofencePendingIntent = getGeofencePendingIntent(geofenceName);
+        PendingIntent geofencePendingIntent = getGeofencePendingIntent(id);
 
         // Remove the geofence using the geofencingClient
         geofencingClient.removeGeofences(geofencePendingIntent)
                 .addOnSuccessListener(aVoid -> {
                     // Geofence removal was successful
-                    Log.i("GeofenceRemoval", "Geofence removed successfully: " + geofenceName);
+                    Log.i("GeofenceRemoval", "Geofence removed successfully: " + id);
                 })
                 .addOnFailureListener(e -> {
                     // Geofence removal failed
-                    Log.e("GeofenceRemoval", "Failed to remove geofence " + geofenceName + ": " + e.getMessage());
+                    Log.e("GeofenceRemoval", "Failed to remove geofence " + id + ": " + e.getMessage());
                 });
     }
 
@@ -1747,6 +1776,7 @@ public class map_home extends AppCompatActivity {
                         // Data added successfully to Firestore
                         // You can add a Toast or other UI feedback here if needed
                         Log.d("Firestore", "Geofence data stored successfully: " + geofenceId);
+                        Toast.makeText(map_home.this, "Geofence Successfully Saved", Toast.LENGTH_SHORT).show();
 
                     }
                 })
@@ -1755,6 +1785,7 @@ public class map_home extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         // Handle the failure
                         Log.e("Firestore", "Error storing geofence data: " + e.getMessage());
+                        Toast.makeText(map_home.this, "Failed to save Geofence", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -1831,7 +1862,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-    private void removeGeofencesAndMarker(String uniID) {
+    public void removeGeofencesAndMarker(String uniID) {
         Pair<Polygon, Polygon> geofencesPair = geofencesMapEntry.get(uniID);
         if (geofencesPair != null) {
             removeGeofence1(geofencesPair.first);
@@ -1851,7 +1882,7 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void removeGeofencesAndMarkerExit(String uniID) {
+    public void removeGeofencesAndMarkerExit(String uniID) {
         Pair<Polygon, Polygon> geofences = geofencesMapExit.get(uniID);
         if (geofences != null) {
             removeGeofence1(geofences.first);
@@ -1868,10 +1899,6 @@ public class map_home extends AppCompatActivity {
 
         mapView.invalidate();
     }
-
-
-
-
 
 
 
@@ -1950,10 +1977,58 @@ public class map_home extends AppCompatActivity {
     }
 
 
+    private void loadUserProfilePicture(ImageView imageView) {
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
+
+                    if (profilePictureUrl != null && !profilePictureUrl.isEmpty()) {
+                        // Load the user profile picture using Glide with circle crop transformation
+                        Glide.with(getApplicationContext())
+                                .load(profilePictureUrl)
+                                .apply(glideOptions)  // Apply the circle crop transformation
+                                .into(imageView);
+                    } else {
+                        // Load the default profile picture (replace "default_picture_url" with the actual URL of your default picture)
+                        Glide.with(getApplicationContext())
+                                .load("default_picture_url")
+                                .apply(glideOptions)  // Apply the circle crop transformation
+                                .into(imageView);
+                    }
+                }
+            }
+        });
+    }
 
 
 
+    private void getUserFromFirestore() {
+        // Assuming you have a "users" collection in Firestore
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+        firestore.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Retrieve the user's name
+                        String userName = documentSnapshot.getString("firstName");
+
+                        TextView userInfoTextView= findViewById(R.id.UserInfo);
+
+                        // Set the TextView text with the user's name
+                        userInfoTextView.setText("Hello, " + userName);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure
+                    Log.e(TAG, "Error getting user data from Firestore", e);
+                });
+    }
 
 
     public static boolean isButtonClicked() {

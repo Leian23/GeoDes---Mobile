@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
@@ -26,10 +27,12 @@ import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.Adapter3;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.DataModel3;
 import com.example.geodes_mobile.main_app.create_geofence_functions.MapFunctionHandler;
+import com.example.geodes_mobile.main_app.homebtn_functions.AlertEditDialog;
 import com.example.geodes_mobile.main_app.map_home;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -63,6 +66,8 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
     private Context context;
 
+    private ImageButton deleteAlert;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragments_alerts, container, false);
@@ -83,7 +88,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         RecyclerView recyclerView = rootView.findViewById(R.id.settingsAlert);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        adapter = new Adapter3(data, getContext());
+        adapter = new Adapter3(data, getContext(), mainActivity);
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
 
@@ -121,7 +126,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         ((map_home) requireActivity()).coordinatesValueAlertView.setText(data.getLatitude() + "\n" + data.getLongitude());
         ((map_home) requireActivity()). notesView.setText(data.getNotesAlert());
 
-
         ((map_home) requireActivity()). notesView.setText(data.getNotesAlert());
 
 
@@ -134,6 +138,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         FrameLayout layoutt = ((map_home) requireActivity()).findViewById(R.id.NotAvail1);
 
       //  ((map_home) requireActivity()).mapView.getController().animateTo(point);
+
 
 
         if(data.getAlertEnabled()) {
@@ -154,9 +159,35 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         layoutt.setVisibility(View.GONE);
         updateWeatherView(point);
 
+        ImageButton editAlert = ((map_home) requireActivity()).editalert.findViewById(R.id.EditAlertIcon1);
+        editAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Log statement indicating that the ImageButton was tapped
+                Log.d("ImageButton", "EditAlertIcon tapped");
+                AlertEditDialog editDialog = new AlertEditDialog(context, data.getId());
+                editDialog.show();
+            }
+        });
+
+        ImageButton deleteAnAlert = ((map_home) requireActivity()). deleteAlert.findViewById(R.id.DeleteAlert1);
+
+        deleteAnAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Log statement indicating that the ImageButton was tapped
+                Log.d("ImageButton", "DeleteAlert1 tapped");
+
+
+                showConfirmationDialog(data.getId());
+            }
+        });
+
+
+
+
+
     }
-
-
 
 
     private void loadAlerts() {
@@ -193,8 +224,18 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
             String alertNotes = documentChange.getDocument().getString("notes");
             Boolean alertEnabled = documentChange.getDocument().getBoolean("alertEnabled");
             Boolean alertStat = documentChange.getDocument().getBoolean("EntryType");
+            Boolean alertEntryType = documentChange.getDocument().getBoolean("EntryType");
             String uniID = documentChange.getDocument().getString("uniqueID");
             Double outerRad = documentChange.getDocument().getDouble("outerRadius");
+            Double innerRad = documentChange.getDocument().getDouble("innerRadius");
+            String innerCode = documentChange.getDocument().getString("innerCode");
+            String outerCode = documentChange.getDocument().getString("outerCode");
+
+            float outerRadii = outerRad != null ? outerRad.floatValue() : Float.NaN;
+            float innerRadii = innerRad != null ? innerRad.floatValue() : Float.NaN;
+
+
+
 
             Location currentLocation = mainActivity.getCurrentLocation();
             Map<String, Object> location = (Map<String, Object>) documentChange.getDocument().get("location");
@@ -219,8 +260,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 } else {
                     alerstatus = R.drawable.get_out;
                 }
-
-                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRad));
+                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRadii, innerRadii, alertEntryType,innerCode, outerCode ));
 
             }
         }
@@ -396,6 +436,67 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         return new BoundingBox(pinLatitude, maxLon, center.getLatitude(), minLon);
     }
+
+
+
+    private void deleteAlertFromFirestore(String alertId) {
+        // Get the reference to the documents you want to delete
+        DocumentReference entryAlertDocRef = firestore.collection("geofencesEntry").document(alertId);
+        DocumentReference exitAlertDocRef = firestore.collection("geofencesExit").document(alertId);
+
+        // Use a batch write to delete documents from both collections atomically
+        firestore.runBatch(batch -> {
+                    batch.delete(entryAlertDocRef);
+                    batch.delete(exitAlertDocRef);
+                })
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(context, "Alert deleted", Toast.LENGTH_SHORT).show();
+                    // Refresh the alerts after deletion
+                    loadAlerts();
+
+                    View viewAlert1 = requireActivity().findViewById(R.id.viewAlert1);
+                    if (viewAlert1 != null) {
+                        viewAlert1.setVisibility(View.GONE);
+                    }
+
+                    Fragment currentFragment = requireActivity().getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+                    if (currentFragment != null) {
+                        requireActivity().getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                    }
+
+                    ((map_home) requireActivity()).setLongPressEnabled(true);
+                    ((map_home) requireActivity()).showElements();
+
+                    ((map_home) requireActivity()).removeGeofencesAndMarker(alertId);
+
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AlertsFragment", "Error deleting alert from Firestore: " + e.getMessage());
+                    Toast.makeText(context, "Failed to delete alert", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    private void showConfirmationDialog(String alertId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete this alert?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    // User clicked Delete, proceed with deletion
+                    deleteAlertFromFirestore(alertId);
+
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // User clicked Cancel, do nothing
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+
+
+
 
 
 

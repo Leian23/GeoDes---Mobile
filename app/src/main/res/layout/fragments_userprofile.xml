@@ -13,17 +13,6 @@
         android:layout_height="match_parent"
         >
 
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="484dp"
-            android:text="Change Password"
-            android:textSize="13dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <ImageButton
             android:id="@+id/menu_button"
             android:layout_width="60dp"
@@ -51,58 +40,69 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-
-
         <ImageView
             android:id="@+id/profileImageView"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="72dp"
+            android:layout_marginTop="120dp"
             android:src="@drawable/avatar_image"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
         <EditText
-            android:id="@+id/confirmPasswordEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
+            android:id="@+id/emailEditText"
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:hint="Email"
             android:paddingLeft="12dp"
+            android:background="@drawable/round_weather"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
+            app:layout_constraintTop_toBottomOf="@id/lastNameEditText" />
+
+        <Button
+            android:id="@+id/changeProfileButton"
+            android:layout_width="223dp"
+            android:layout_height="39dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_corner"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="Change Profile Picture"
+            android:textSize="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.494"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profileImageView" />
 
         <EditText
-            android:id="@+id/passwordEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:hint="Password"
-            android:inputType="textPassword"
+            android:id="@+id/firstNameEditText"
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="52dp"
+            android:background="@drawable/round_weather"
+            android:hint="First Name"
             android:paddingLeft="12dp"
-            app:layout_constraintBottom_toTopOf="@+id/confirmPasswordEditText"
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailEditText"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintTop_toBottomOf="@id/changeProfileButton" />
 
         <EditText
             android:id="@+id/lastNameEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_weather"
             android:hint="Last Name"
             android:paddingLeft="12dp"
-            android:text="Existing Last Name"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/firstNameEditText" />
 
@@ -110,71 +110,40 @@
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="276dp"
+            android:layout_marginStart="36dp"
+            android:layout_marginTop="324dp"
             android:text="General Information"
             android:textSize="13dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/emailEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Email"
-            android:paddingLeft="12dp"
-            android:text="Existing Email"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lastNameEditText" />
-
-        <EditText
-            android:id="@+id/firstNameEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:hint="First Name"
-            android:textSize="18dp"
-            android:paddingLeft="12dp"
-            android:text="Existing First Name"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/changeProfileButton" />
-
         <Button
-            android:id="@+id/changeProfileButton"
-            android:layout_width="223dp"
-            android:layout_height="39dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/rounded_corner"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="Change Profile Picture"
+            android:id="@+id/ChangePasswordButt"
+            android:layout_width="168dp"
+            android:layout_height="38dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/rounded_corner_nav2"
+            android:text="Change Password"
             android:textSize="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintHorizontal_bias="0.818"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profileImageView" />
+            app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
 
         <Button
             android:id="@+id/applyChangesButton"
             android:layout_width="148dp"
             android:layout_height="37dp"
-            android:layout_marginTop="68dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/rounded_corner_nav"
             android:text="Apply Changes"
             android:textSize="15dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.06"
+            app:layout_constraintHorizontal_bias="0.136"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
+            app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 </androidx.drawerlayout.widget.DrawerLayout>

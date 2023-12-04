@@ -4,7 +4,6 @@
     <dimen name="height_btm_add">360dp</dimen>
     <dimen name="btn_height">200dp</dimen>
 
-
     <string-array name="distance_units">
         <item>Kilometers</item>
         <item>Miles</item>
@@ -45,7 +44,9 @@
         <item>Ringtone 3</item>
     </string-array>
 
-
+    <!-- New string resources -->
+    <string name="ringtone_label">Ringtone</string>
+    <string name="alarm_ringtone_label">Alarm Ringtone</string>
 
     <string name="mapbox_access_token">pk.eyJ1IjoibGVhbjIzIiwiYSI6ImNsbjF3MXBmbTAydDcyanIzODJpMTBzNWwifQ.OXSDLVAWX9HS2Bos3k6Igw</string>
 </resources>

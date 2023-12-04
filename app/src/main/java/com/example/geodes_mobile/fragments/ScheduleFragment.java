@@ -70,7 +70,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                 ((map_home) requireActivity()).BottomSheetAddSched();
             }
         });
-
         return rootView;
     }
 

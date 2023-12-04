@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
+
 
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -17,6 +21,12 @@
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+
+
 
 
 
@@ -86,6 +96,28 @@
                 <action android:name="com.example.geodes_mobile.main_app.create_geofence_functions.ACTION_GEOFENCE_TRANSITION"/>
             </intent-filter>
         </receiver>
+
+
+        <receiver
+            android:name=".main_app.create_geofence_functions.DismissReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.geodes_mobile.ACTION_DISMISS_ALARM"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".main_app.create_geofence_functions.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+
+
 
 
 

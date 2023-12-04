@@ -159,6 +159,8 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <include layout="@layout/bottom_sheet"/>
@@ -182,7 +184,7 @@
 
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        app:headerLayout="@menu/header_navbar"
+        app:headerLayout="@layout/header_layout"
         app:menu="@menu/nav_menu"
         android:id="@+id/nav_view"
         android:layout_gravity="start"
