@@ -712,8 +712,7 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
 
                 locateUser();
-
-
+                connectToSmartwatch();
             }
         });
 
