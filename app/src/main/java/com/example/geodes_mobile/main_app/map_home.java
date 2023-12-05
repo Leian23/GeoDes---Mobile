@@ -1095,7 +1095,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
         CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
         CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
