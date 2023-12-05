@@ -2,14 +2,10 @@ package com.example.geodes_mobile.main_app;
 
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.Manifest;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -62,6 +58,7 @@ import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.AlertsFragment;
 import com.example.geodes_mobile.fragments.FeedbackFragment;
 import com.example.geodes_mobile.fragments.HelpFragment;
+import com.example.geodes_mobile.fragments.MyPreferenceFragment;
 import com.example.geodes_mobile.fragments.ScheduleFragment;
 import com.example.geodes_mobile.fragments.SettingsFragment;
 import com.example.geodes_mobile.fragments.userProfileFragment;
@@ -125,7 +122,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -135,7 +132,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -160,7 +156,7 @@ public class map_home extends AppCompatActivity {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth mAUth = FirebaseAuth.getInstance();
-    private String userId = mAUth.getCurrentUser().getUid();
+    private String userId;
 
     private static final double MIN_ZOOM_LEVEL = 4.0;
     private static final double MAX_ZOOM_LEVEL = 21.0;
@@ -223,13 +219,6 @@ public class map_home extends AppCompatActivity {
 
     private Set<String> existingGeofenceIds = new HashSet<>();
 
-    private static final String TAG = "map_home";
-    private static final String DEVICE_NAME = "Galaxy Watch4 (ZAEW)";
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothDevice smartwatchDevice;
-    private BluetoothSocket bluetoothSocket;
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     Map<String, Pair<Polygon, Polygon>> geofencesMapEntry = new HashMap<>();
 
     Map<String, Pair<Polygon, Polygon>> geofencesMapExit = new HashMap<>();
@@ -277,16 +266,15 @@ public class map_home extends AppCompatActivity {
         db.setFirestoreSettings(settings);
 
 
-
-
         mAuth = FirebaseAuth.getInstance();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
 
         firestore = FirebaseFirestore.getInstance();
         alertsQuery = firestore.collection("geofencesEntry");
-
 
 
         mapView = findViewById(R.id.map);
@@ -402,9 +390,9 @@ public class map_home extends AppCompatActivity {
         ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
 
         loadUserProfilePicture(headerImageView);
+
+
         getUserFromFirestore();
-
-
 
         toggleMon = findViewById(R.id.toggleMon1);
         toggleTue = findViewById(R.id.toggleTue2);
@@ -413,17 +401,6 @@ public class map_home extends AppCompatActivity {
         toggleFri = findViewById(R.id.toggleFri5);
         toggleSat = findViewById(R.id.toggleSat6);
         toggleSun = findViewById(R.id.toggleSun7);
-
-        //bluetooth
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            // Device doesn't support Bluetooth
-            Log.e(TAG, "Device doesn't support Bluetooth");
-        }
-
-
-
-
 
         //toggle conditions
         toggleMon.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -478,7 +455,6 @@ public class map_home extends AppCompatActivity {
                 saveSchedToFirestore(currentUser);
             }
         });
-
 
 
 
@@ -712,7 +688,8 @@ public class map_home extends AppCompatActivity {
             public void onClick(View view) {
 
                 locateUser();
-                connectToSmartwatch();
+
+
             }
         });
 
@@ -854,8 +831,6 @@ public class map_home extends AppCompatActivity {
         editalert = findViewById(R.id.EditAlertIcon1);
 
 
-
-
         //edit the viewsched
         ImageButton editsched = findViewById(R.id.EditSchedule);
         editsched.setOnClickListener(new View.OnClickListener() {
@@ -901,8 +876,6 @@ public class map_home extends AppCompatActivity {
                 changePosLayout.setTranslationY(-offset);
             }
         });
-
-
 
 
 
@@ -1033,34 +1006,133 @@ public class map_home extends AppCompatActivity {
 
 
 
-        //dito maglalagay ng list of active schedules
+
         List<DataModel2> dataForSched = new ArrayList<>();
-        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-        dataForSched.add(new DataModel2("Work", R.drawable.schedule_ic, R.drawable.calendar_ic, "10:00 AM", "Every day", R.drawable.alarm_ic, "Alert List 1"));
-
+        Adapter2 adapter2 = new Adapter2(dataForSched, this);
         RecyclerView recyclerVieww = findViewById(R.id.sched_recyclerView);
+
+        CollectionReference geofencesSchedCollection = firestore.collection("geofenceSchedule");
+        geofencesSchedCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+            if (e != null) {
+                // Handle error
+                return;
+            }
+
+            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                    String uniID = document.getString("uniqueID");
+                    String SchedName = document.getString("Sched");
+                    String TimeStart = document.getString("Time");
+
+                    boolean Monday = document.getBoolean("Monday");
+                    boolean Tuesday = document.getBoolean("Tuesday");
+                    boolean Wednesday = document.getBoolean("Wednesday");
+                    boolean Thursday = document.getBoolean("Thursday");
+                    boolean Friday = document.getBoolean("Friday");
+                    boolean Saturday = document.getBoolean("Saturday");
+                    boolean Sunday = document.getBoolean("Sunday");
+
+                    StringBuilder selectedDays = new StringBuilder();
+
+                    if (Monday) {
+                        selectedDays.append("Mon, ");
+                    }
+                    if (Tuesday) {
+                        selectedDays.append("Tue, ");
+                    }
+                    if (Wednesday) {
+                        selectedDays.append("Wed, ");
+                    }
+                    if (Thursday) {
+                        selectedDays.append("Thu, ");
+                    }
+                    if (Friday) {
+                        selectedDays.append("Fri, ");
+                    }
+                    if (Saturday) {
+                        selectedDays.append("Sat, ");
+                    }
+                    if (Sunday) {
+                        selectedDays.append("Sun, ");
+                    }
+                    String result = selectedDays.toString().trim();
+
+                    // Fetch selectedItemsIds array
+                    List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
+
+                    if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
+                        // Concatenate the elements of the list into a single string
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (String itemId : selectedItemsIds) {
+                            stringBuilder.append(itemId).append("\n");
+                        }
+
+                        // Remove the last newline character
+                        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
+                        // Log the concatenated string
+
+                    } else {
+                        // Log a message if the list is null or empty
+                        Log.d(TAG, "No selected items");
+                    }
+
+
+                    // Now you can use selectedItemsIds as needed
+
+                    dataForSched.add(new DataModel2(SchedName, R.drawable.schedule_ic, R.drawable.calendar_ic, TimeStart, result, R.drawable.alarm_ic, selectedItemsIds));
+                }
+            }
+
+            adapter2.notifyDataSetChanged();
+        });
+
         recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        Adapter2 adapter1 = new Adapter2(dataForSched, this);
-        recyclerVieww.setAdapter(adapter1);
+        recyclerVieww.setAdapter(adapter2);
 
 
 
-        //dito yung list of selected alerts sa schedules
+
+
+
+        CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
+        CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
+
         List<DataModel5> dataList = new ArrayList<>();
 
-        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
-        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
-        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
-        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
-        dataList.add(new DataModel5("Alert 1", R.drawable.get_in));
+        geofenceEntryCollection.get().addOnSuccessListener(entrySnapshots -> {
+            for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
+                String alertTitle = documentSnapshot.getString("alertName");
+                String unID = documentSnapshot.getString("uniqueID");
+                int imageResource = R.drawable.get_in;
 
-        RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
-        recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+                // Create DataModel5 object and add it to the list
+                dataList.add(new DataModel5(alertTitle, imageResource, unID));
+            }
 
-        Adapter5 adapterSched = new Adapter5(dataList, this);
-        recyclerViewSched.setAdapter(adapterSched);
+            geofenceExitCollection.get().addOnSuccessListener(exitSnapshots -> {
+                for (QueryDocumentSnapshot documentSnapshot : exitSnapshots) {
+                    String alertTitle = documentSnapshot.getString("alertName");
+                    String unID = documentSnapshot.getString("uniqueID");
+                    int imageResource = R.drawable.get_out;
+
+                    dataList.add(new DataModel5(alertTitle, imageResource, unID));
+                }
+
+                RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
+                recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+                Adapter5 adapterSched = new Adapter5(dataList, map_home.this);
+                recyclerViewSched.setAdapter(adapterSched);
+
+            }).addOnFailureListener(e -> {
+                // Handle errors
+            });
+
+        }).addOnFailureListener(e -> {
+            // Handle errors
+        });
+
 
 
 
@@ -1188,7 +1260,8 @@ public class map_home extends AppCompatActivity {
                         currentFragment instanceof SettingsFragment ||
                         currentFragment instanceof FeedbackFragment ||
                         currentFragment instanceof HelpFragment ||
-                        currentFragment instanceof userProfileFragment) {
+                        currentFragment instanceof userProfileFragment ||
+                        currentFragment instanceof MyPreferenceFragment) {
 
                     // If the ScheduleFragment is hidden, show it
                     if (currentFragment instanceof ScheduleFragment && currentFragment.isHidden()
@@ -1749,7 +1822,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
     private PendingIntent getGeofencePendingIntent(String geofenceName) {
         Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
         int flags = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
@@ -1847,7 +1919,6 @@ public class map_home extends AppCompatActivity {
     }
 
 
-
     private void saveGeofenceDataToLocal() {
         // Get or create SharedPreferences
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -1923,36 +1994,37 @@ public class map_home extends AppCompatActivity {
 
     private void saveSchedToFirestore(FirebaseUser currentUser) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String monday = "false";
-        String tuesday = "false";
-        String wednesday = "false";
-        String thursday = "false";
-        String friday = "false";
-        String saturday = "false";
-        String sunday = "false";
+        Boolean monday = false;
+        Boolean tuesday = false;
+        Boolean wednesday = false;
+        Boolean thursday = false;
+        Boolean friday = false;
+        Boolean saturday = false;
+        Boolean sunday = false;
 
         String geofenceId = geofenceHelper.generateRequestId();
+        Boolean SchedStat = false;
 
         if ("true".equals(togmon)) {
-            monday = "true";
+            monday = true;
         }
         if ("true".equals(togtue)) {
-            tuesday = "true";
+            tuesday = true;
         }
         if ("true".equals(togwed)) {
-            wednesday = "true";
+            wednesday = true;
         }
         if ("true".equals(togthu)) {
-            thursday = "true";
+            thursday = true;
         }
         if ("true".equals(togfri)) {
-            friday = "true";
+            friday = true;
         }
         if ("true".equals(togsat)) {
-            saturday = "true";
+            saturday = true;
         }
         if ("true".equals(togsun)) {
-            sunday = "true";
+            sunday = true;
         }
 
         // Get values from UI elements
@@ -1963,6 +2035,7 @@ public class map_home extends AppCompatActivity {
         TextView txtTimePicker = findViewById(R.id.txtTimePicker);
         String selectedTime = txtTimePicker.getText().toString();
 
+        // Create a new geofenceData Map
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("Sched", schedName);
         geofenceData.put("Time", selectedTime);
@@ -1975,7 +2048,18 @@ public class map_home extends AppCompatActivity {
         geofenceData.put("Sunday", sunday);
         geofenceData.put("Email", currentUser.getEmail());
         geofenceData.put("uniqueID", geofenceId);
+        geofenceData.put("SchedStat", SchedStat);
 
+        RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
+        Adapter5 adapterSched = (Adapter5) recyclerViewSched.getAdapter();
+
+        // Include the selected items' unique IDs in your Firestore data
+        Set<String> selectedItemsIds = adapterSched.getSelectedItemsIds();
+        if (!selectedItemsIds.isEmpty()) {
+            geofenceData.put("selectedItemsIds", new ArrayList<>(selectedItemsIds));
+        }
+
+        // Add the geofenceData to Firestore
         db.collection("geofenceSchedule")
                 .document(geofenceId)
                 .set(geofenceData)
@@ -1983,6 +2067,7 @@ public class map_home extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("SchedUpload", "Successs");
+                        Toast.makeText(map_home.this, schedName, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1994,156 +2079,74 @@ public class map_home extends AppCompatActivity {
     }
 
 
+
+
     private void loadUserProfilePicture(ImageView imageView) {
-        DocumentReference userRef = db.collection("users").document(userId);
+        FirebaseUser user = mAuth.getCurrentUser();
 
-        userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.exists()) {
-                    String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
+        if (user != null) {
+            String userId = user.getUid();
 
-                    if (profilePictureUrl != null && !profilePictureUrl.isEmpty()) {
-                        // Load the user profile picture using Glide with circle crop transformation
-                        Glide.with(getApplicationContext())
-                                .load(profilePictureUrl)
-                                .apply(glideOptions)  // Apply the circle crop transformation
-                                .into(imageView);
-                    } else {
-                        // Load the default profile picture (replace "default_picture_url" with the actual URL of your default picture)
-                        Glide.with(getApplicationContext())
-                                .load("default_picture_url")
-                                .apply(glideOptions)  // Apply the circle crop transformation
-                                .into(imageView);
+            DocumentReference userRef = db.collection("users").document(userId);
+
+            userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (documentSnapshot.exists()) {
+                        String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
+
+                        if (profilePictureUrl != null && !profilePictureUrl.isEmpty()) {
+                            // Load the user profile picture using Glide with circle crop transformation
+                            Glide.with(getApplicationContext())
+                                    .load(profilePictureUrl)
+                                    .apply(glideOptions)  // Apply the circle crop transformation
+                                    .into(imageView);
+                        } else {
+                            // Load the default profile picture (replace "default_picture_url" with the actual URL of your default picture)
+                            Glide.with(getApplicationContext())
+                                    .load("default_picture_url")
+                                    .apply(glideOptions)  // Apply the circle crop transformation
+                                    .into(imageView);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
-
 
 
     private void getUserFromFirestore() {
-        // Assuming you have a "users" collection in Firestore
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseUser user = mAuth.getCurrentUser();
 
-        firestore.collection("users")
-                .document(userId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        // Retrieve the user's name
-                        String userName = documentSnapshot.getString("firstName");
+        if (user != null) {
+            String userId = user.getUid();
 
-                        TextView userInfoTextView= findViewById(R.id.UserInfo);
+            if (userId != null && !userId.isEmpty()) {
+                DocumentReference userRef = firestore.collection("users").document(userId);
 
-                        // Set the TextView text with the user's name
-                        userInfoTextView.setText("Hello, " + userName);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failure
-                    Log.e(TAG, "Error getting user data from Firestore", e);
-                });
-    }
-    private void connectToSmartwatch() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-
-            // Request Bluetooth permissions if not granted
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN
-            }, REQUEST_ENABLE_BT);
-            return;
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // Request Bluetooth permission if not granted
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_ENABLE_BT);
-            return;
-        }
-
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice device : pairedDevices) {
-            if (device.getName().equals(DEVICE_NAME)) {
-                smartwatchDevice = device;
-                break;
-            }
-        }
-
-        if (smartwatchDevice == null) {
-            // Smartwatch not found
-            Log.e(TAG, "Smartwatch not found");
-            return;
-        }
-
-        try {
-            bluetoothSocket = smartwatchDevice.createRfcommSocketToServiceRecord(MY_UUID);
-            bluetoothSocket.connect();
-
-            // Send login credentials to smartwatch
-            try (OutputStream outputStream = bluetoothSocket.getOutputStream()) {
-                // Retrieve user email and password from Firestore
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                // Assuming you have a "users" collection in Firestore
-                DocumentReference userRef = db.collection("users").document(userId);
-                userRef.get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            String email = document.getString("email");
-                            String password = document.getString("password");
-
-                            try {
-                                // Send login credentials to smartwatch
-                                String loginCredentials = email + ":" + password;
-                                outputStream.write(loginCredentials.getBytes());
-                                outputStream.flush();
-                            } catch (IOException e) {
-                                Log.e(TAG, "Error writing to OutputStream: " + e.getMessage());
+                userRef.get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                // Your existing logic to retrieve and display user data
+                            } else {
+                                // Handle the case where the document doesn't exist
+                                Log.e(TAG, "User's document does not exist in Firestore");
                             }
-                        } else {
-                            Log.e(TAG, "No such document");
-                        }
-                    } else {
-                        Log.e(TAG, "Error getting documents: " + task.getException());
-                    }
-                });
-            } catch (IOException e) {
-                Log.e(TAG, "Error obtaining OutputStream: " + e.getMessage());
+                        })
+                        .addOnFailureListener(e -> {
+                            // Handle failure
+                            Log.e(TAG, "Error getting user data from Firestore", e);
+                        });
+            } else {
+                // Handle the case where UID is null or empty
+                Log.e(TAG, "UID is null or empty");
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Error connecting to smartwatch: " + e.getMessage());
-
-            // Close the socket on connection error
-            try {
-                if (bluetoothSocket != null) {
-                    bluetoothSocket.close();
-                }
-            } catch (IOException ex) {
-                Log.e(TAG, "Error closing Bluetooth socket on connection error: " + ex.getMessage());
-            }
-        }
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // Close the Bluetooth socket explicitly
-        if (bluetoothSocket != null) {
-            try {
-                bluetoothSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Error closing Bluetooth socket: " + e.getMessage());
-            }
+        } else {
+            // Handle the case where user is null (not signed in)
+            Log.e(TAG, "User is not signed in");
         }
     }
 
-    // Add this constant for Bluetooth permission request
-    private static final int REQUEST_ENABLE_BT = 1;
 
 
     public static boolean isButtonClicked() {
