@@ -7,6 +7,9 @@ import static androidx.core.content.ContentProviderCompat.requireContext;
 import android.Manifest;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -122,6 +125,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -131,6 +135,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -217,6 +222,13 @@ public class map_home extends AppCompatActivity {
     private boolean alertEnabled = false;
 
     private Set<String> existingGeofenceIds = new HashSet<>();
+
+    private static final String TAG = "map_home";
+    private static final String DEVICE_NAME = "Galaxy Watch4 (ZAEW)";
+    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothDevice smartwatchDevice;
+    private BluetoothSocket bluetoothSocket;
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     Map<String, Pair<Polygon, Polygon>> geofencesMapEntry = new HashMap<>();
 
@@ -402,7 +414,12 @@ public class map_home extends AppCompatActivity {
         toggleSat = findViewById(R.id.toggleSat6);
         toggleSun = findViewById(R.id.toggleSun7);
 
-
+        //bluetooth
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            // Device doesn't support Bluetooth
+            Log.e(TAG, "Device doesn't support Bluetooth");
+        }
 
 
 
@@ -461,6 +478,7 @@ public class map_home extends AppCompatActivity {
                 saveSchedToFirestore(currentUser);
             }
         });
+
 
 
 
@@ -2029,6 +2047,104 @@ public class map_home extends AppCompatActivity {
                     Log.e(TAG, "Error getting user data from Firestore", e);
                 });
     }
+    private void connectToSmartwatch() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+
+            // Request Bluetooth permissions if not granted
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN
+            }, REQUEST_ENABLE_BT);
+            return;
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            // Request Bluetooth permission if not granted
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_ENABLE_BT);
+            return;
+        }
+
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        for (BluetoothDevice device : pairedDevices) {
+            if (device.getName().equals(DEVICE_NAME)) {
+                smartwatchDevice = device;
+                break;
+            }
+        }
+
+        if (smartwatchDevice == null) {
+            // Smartwatch not found
+            Log.e(TAG, "Smartwatch not found");
+            return;
+        }
+
+        try {
+            bluetoothSocket = smartwatchDevice.createRfcommSocketToServiceRecord(MY_UUID);
+            bluetoothSocket.connect();
+
+            // Send login credentials to smartwatch
+            try (OutputStream outputStream = bluetoothSocket.getOutputStream()) {
+                // Retrieve user email and password from Firestore
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                // Assuming you have a "users" collection in Firestore
+                DocumentReference userRef = db.collection("users").document(userId);
+                userRef.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            String email = document.getString("email");
+                            String password = document.getString("password");
+
+                            try {
+                                // Send login credentials to smartwatch
+                                String loginCredentials = email + ":" + password;
+                                outputStream.write(loginCredentials.getBytes());
+                                outputStream.flush();
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error writing to OutputStream: " + e.getMessage());
+                            }
+                        } else {
+                            Log.e(TAG, "No such document");
+                        }
+                    } else {
+                        Log.e(TAG, "Error getting documents: " + task.getException());
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Error obtaining OutputStream: " + e.getMessage());
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error connecting to smartwatch: " + e.getMessage());
+
+            // Close the socket on connection error
+            try {
+                if (bluetoothSocket != null) {
+                    bluetoothSocket.close();
+                }
+            } catch (IOException ex) {
+                Log.e(TAG, "Error closing Bluetooth socket on connection error: " + ex.getMessage());
+            }
+        }
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Close the Bluetooth socket explicitly
+        if (bluetoothSocket != null) {
+            try {
+                bluetoothSocket.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Error closing Bluetooth socket: " + e.getMessage());
+            }
+        }
+    }
+
+    // Add this constant for Bluetooth permission request
+    private static final int REQUEST_ENABLE_BT = 1;
 
 
     public static boolean isButtonClicked() {
