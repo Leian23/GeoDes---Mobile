@@ -13,6 +13,11 @@
             android:layout_marginTop="60dp">
 
 
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/settingsSchedd"
                 android:layout_width="match_parent"
@@ -20,6 +25,8 @@
                 android:orientation="vertical"
                 android:paddingLeft="30dp"
                 android:scrollbars="vertical" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
         </LinearLayout>
 
 

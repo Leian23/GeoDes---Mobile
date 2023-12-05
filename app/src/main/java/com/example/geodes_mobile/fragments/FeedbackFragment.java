@@ -31,7 +31,6 @@ public class FeedbackFragment extends Fragment {
                 }
             }
         });
-
         return rootView;
     }
 }

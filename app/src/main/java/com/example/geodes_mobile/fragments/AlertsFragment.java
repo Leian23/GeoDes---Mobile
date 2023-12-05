@@ -42,11 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -80,7 +78,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         List<DataModel3> data = new ArrayList<>();
 
-        // Setup SwipeRefreshLayout
         swipeRefreshLayout = rootView.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(this::loadAlerts);
 
@@ -141,7 +138,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
 
 
-        if(data.getAlertEnabled()) {
+        if (data.getAlertEnabled()) {
             BoundingBox boundingBox = calculateBoundingBox(point, data.getOuterRadius());
             ((map_home) requireActivity()).mapView.setMapOrientation(0);
             ((map_home) requireActivity()).mapView.zoomToBoundingBox(boundingBox, true);
@@ -182,16 +179,10 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 showConfirmationDialog(data.getId());
             }
         });
-
-
-
-
-
     }
 
 
     private void loadAlerts() {
-        // Fetch data from "geofencesEntry"
         Query entryQuery = firestore.collection("geofencesEntry");
         Query exitQuery = firestore.collection("geofencesExit");
 
@@ -418,9 +409,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
 
 
-
-
-
     private BoundingBox calculateBoundingBox(GeoPoint center, double radius) {
         double halfDistanceInMeters = radius * 1.5; // Adjust as needed for better visibility
         double latPerMeter = 1.0 / 111319.9; // Approximate value for latitude degrees per meter
@@ -431,8 +419,8 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         // Set latitude to the maximum latitude for the pin to be further at the top
         double pinLatitude = center.getLatitude() + deltaLat;
 
-        double minLon = center.getLongitude() - deltaLon ; // Adjust to center the bounding box
-        double maxLon = center.getLongitude() + deltaLon ; // Adjust to center the bounding box
+        double minLon = center.getLongitude() - deltaLon ;
+        double maxLon = center.getLongitude() + deltaLon ;
 
         return new BoundingBox(pinLatitude, maxLon, center.getLatitude(), minLon);
     }

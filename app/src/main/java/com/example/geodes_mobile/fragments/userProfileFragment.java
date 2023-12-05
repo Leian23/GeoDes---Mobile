@@ -45,9 +45,8 @@ public class userProfileFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private String userId = mAuth.getCurrentUser().getUid();
-    private View rootView; // Add this field
+    private View rootView;
 
-    // Constants for image selection
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
 

@@ -1,4 +1,7 @@
 package com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section;
+
+import java.util.List;
+
 public class DataModel2 {
     private String schedTitle;
     private int schedImage;
@@ -6,16 +9,16 @@ public class DataModel2 {
     private String time;
     private String repeatTime;
     private int alarmIcon;
-    private String alertLists;
+    private List<String> selectedItemsIds;
 
-    public DataModel2(String schedTitle, int schedImage, int calendarImage, String time, String repeatTime, int alarmIcon, String alertLists) {
+    public DataModel2(String schedTitle, int schedImage, int calendarImage, String time, String repeatTime, int alarmIcon, List<String> selectedItemsIds) {
         this.schedTitle = schedTitle;
         this.schedImage = schedImage;
         this.calendarImage = calendarImage;
         this.time = time;
         this.repeatTime = repeatTime;
         this.alarmIcon = alarmIcon;
-        this.alertLists = alertLists;
+        this.selectedItemsIds = selectedItemsIds;
     }
 
     public String getSchedTitle() {
@@ -42,7 +45,7 @@ public class DataModel2 {
         return alarmIcon;
     }
 
-    public String getAlertLists() {
-        return alertLists;
+    public List<String> getSelectedItemsIds() {
+        return selectedItemsIds;
     }
 }
