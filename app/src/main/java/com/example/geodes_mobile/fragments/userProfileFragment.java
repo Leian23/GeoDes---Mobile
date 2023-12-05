@@ -43,8 +43,8 @@ import java.util.Map;
 public class userProfileFragment extends Fragment {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private String userId = mAuth.getCurrentUser().getUid();
+    private FirebaseAuth mAuth;
+    private String userId;
     private View rootView;
 
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -55,6 +55,16 @@ public class userProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragments_userprofile, container, false);
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            userId = user.getUid();
+        } else {
+            Log.e("UserProfileFragment", "User not authenticated");
+            return rootView;
+        }
+
 
         fetchUserData(rootView);
 
