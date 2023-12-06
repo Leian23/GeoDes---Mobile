@@ -31,7 +31,8 @@
         </item>
         <item android:id="@+id/logout"
             android:icon="@drawable/logout_ic"
-            android:title="Log out" >
+            android:title="Log out"
+            android:visible="true">
         </item>
     </group>
 </menu>

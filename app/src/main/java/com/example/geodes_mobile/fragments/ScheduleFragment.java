@@ -57,10 +57,9 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
             ((map_home) requireActivity()).BottomSheetAddSched();
         });
 
-        // Set up swipe-to-refresh listener
         swipeRefreshLayout.setOnRefreshListener(() -> {
             fetchDataFromFirestore(rootView);
-            swipeRefreshLayout.setRefreshing(false); // Stop the refreshing indicator
+            swipeRefreshLayout.setRefreshing(false);
         });
 
         return rootView;
@@ -126,9 +125,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                                 if (stringBuilder.length() > 0) {
                                     stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                                 }
-
-
-                                // Now you can use `stringBuilder.toString()` wherever needed
                                 int iconCal = R.drawable.calendar_ic;
                                 int entryImage = R.drawable.alarm_ic;
                                 int iconMarker = R.drawable.clock_ic;

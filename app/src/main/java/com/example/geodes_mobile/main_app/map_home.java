@@ -248,9 +248,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -763,8 +760,6 @@ public class map_home extends AppCompatActivity {
                                 // Convert 24-hour format to 12-hour format
                                 int hourOfDay = selectedHour % 12;
                                 String amPm = (selectedHour >= 12) ? "PM" : "AM";
-
-                                // Handle the selected time, e.g., update the TextView
                                 txtTimePicker.setText(String.format(Locale.getDefault(), "%02d:%02d %s", hourOfDay, selectedMinute, amPm));
                             }
                         },
@@ -879,13 +874,12 @@ public class map_home extends AppCompatActivity {
 
 
 
+       //bottom sheet recycle view for alerts
         List<DataModel> dataForAlerts = new ArrayList<>();
         RecyclerView recyclerView = findViewById(R.id.alerts_recyclerView);
         Adapter adapter4 = new Adapter(dataForAlerts, this, new Adapter.OnItemClickListener() {
             @Override
             public void onItemClick(GeoPoint geoPoint) {
-                // Handle item click here
-                // Perform the animation and set center logic here using geoPoint
                 double latitude = geoPoint.getLatitude();
                 double longitude = geoPoint.getLongitude();
 
@@ -944,8 +938,6 @@ public class map_home extends AppCompatActivity {
                     }
                 }
             }
-
-            // Notify adapter after processing geofencesEntry data
             adapter4.notifyDataSetChanged();
         });
 
@@ -996,7 +988,6 @@ public class map_home extends AppCompatActivity {
                 }
             }
 
-            // Notify adapter after processing geofencesExit data
             adapter4.notifyDataSetChanged();
         });
 
@@ -1006,7 +997,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-
+        //bottom sheet recycle view for schedule
         List<DataModel2> dataForSched = new ArrayList<>();
         Adapter2 adapter2 = new Adapter2(dataForSched, this);
         RecyclerView recyclerVieww = findViewById(R.id.sched_recyclerView);
@@ -1094,7 +1085,7 @@ public class map_home extends AppCompatActivity {
 
 
 
-
+        //list of selectable alerts under add schedule bottom sheet
         CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
         CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
@@ -1157,11 +1148,6 @@ public class map_home extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-
-
-
-
-
 
 
 
@@ -1330,8 +1316,6 @@ public class map_home extends AppCompatActivity {
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                // Update the vertical position of the ConstraintLayout with buttons
-
                 int offset = (int) ((slideOffset));
                 changePosLayout.setTranslationY(-offset);
             }
@@ -1355,20 +1339,17 @@ public class map_home extends AppCompatActivity {
         bottomSheetBehavior.setPeekHeight(customHeight);
         changePosLayout = findViewById(R.id.changePos);
 
-        // Initially hide the bottom sheet off-screen
         linearLayout.setTranslationY(customHeight);
 
-        // Animate the appearance of the bottom sheet
         linearLayout.animate()
-                .translationY(0)  // Animate to the original position
-                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .translationY(0)
+                .setDuration(500)
                 .start();
 
-        // Set the BottomSheet callback
+
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                // Handle state changes if needed
             }
 
             @Override
@@ -1395,13 +1376,12 @@ public class map_home extends AppCompatActivity {
         bottomSheetBehavior.setPeekHeight(customHeight);
         changePosLayout = findViewById(R.id.changePos);
 
-        // Initially hide the bottom sheet off-screen
+
         linearLayout.setTranslationY(customHeight);
 
-        // Animate the appearance of the bottom sheet
         linearLayout.animate()
-                .translationY(0)  // Animate to the original position
-                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .translationY(0)
+                .setDuration(500)
                 .start();
     }
 
@@ -1425,8 +1405,8 @@ public class map_home extends AppCompatActivity {
 
         // Animate the appearance of the bottom sheet
         linearLayout.animate()
-                .translationY(0)  // Animate to the original position
-                .setDuration(500)  // Set the duration of the animation in milliseconds
+                .translationY(0)
+                .setDuration(500)
                 .start();
     }
 
@@ -1471,7 +1451,6 @@ public class map_home extends AppCompatActivity {
             ArrayList<LocationResultt> results = new ArrayList<>();
             OkHttpClient client = new OkHttpClient();
 
-            // Replace "YOUR_GOOGLE_API_KEY" with your actual Google API key
             String apiKey = "AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc";
             String url = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
                     "?query=" + params[0] +
@@ -1519,17 +1498,13 @@ public class map_home extends AppCompatActivity {
             adapter.setData(results);
 
             if (results.isEmpty() && !searchView.getQuery().toString().isEmpty()) {
-                // Show "no results" message if the results list is empty and the search query is not empty
                 findViewById(R.id.noRes).setVisibility(View.VISIBLE);
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
             } else {
-                // Hide "no results" message if there are search results or the search query is empty
                 findViewById(R.id.noRes).setVisibility(View.GONE);
             }
 
-            // Set the click listener for the search results
             adapter.setOnItemClickListener(locationResult -> {
-                // Handle the click action here, display coordinates as a toast
                 GeoPoint point = new GeoPoint(locationResult.getLatitude(), locationResult.getLongitude());
                 locationHandler.dropPinOnMap(point);
 
@@ -1862,8 +1837,6 @@ public class map_home extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        // Data added successfully to Firestore
-                        // You can add a Toast or other UI feedback here if needed
                         Log.d("Firestore", "Geofence data stored successfully: " + geofenceId);
                         Toast.makeText(map_home.this, "Geofence Successfully Saved", Toast.LENGTH_SHORT).show();
 
@@ -1883,10 +1856,8 @@ public class map_home extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = currentUser.getUid();
 
-        // Create a unique ID for the geofence or use your own logic
         String geofenceId = geofenceHelper.generateRequestId();
 
-        // Create a map to store geofence data
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("alertName", AlertName);
@@ -1898,8 +1869,6 @@ public class map_home extends AppCompatActivity {
         geofenceData.put("alertEnabled", alertenabled);
         geofenceData.put("EntryType", isExit);
 
-
-        // Add data to Firestore
         db.collection("geofencesExit")
                 .document(geofenceId)
                 .set(geofenceData)
@@ -1924,16 +1893,13 @@ public class map_home extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
-        // Replace "defaultValue" with default values if needed
         String geofenceId = preferences.getString(KEY_UNIQUE_ID, "defaultValue");
         String geoName = preferences.getString(KEY_GEO_NAME, "defaultValue");
         String email = preferences.getString(KEY_EMAIL, "defaultValue");
 
-        // Your existing geofence data
         String newGeofenceId = geofenceHelper.generateRequestId();
         String newGeoName = "YourGeofenceName"; // Replace with your geofence name
 
-        // Save the new geofence data locally
         editor.putString(KEY_UNIQUE_ID, newGeofenceId);
         editor.putString(KEY_GEO_NAME, newGeoName);
 
@@ -1942,12 +1908,9 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    // Modify the removeGeofence method to handle Polygon objects
     private void removeGeofence1(Polygon geofence) {
         mapView.getOverlayManager().remove(geofence);
     }
-
-
 
 
     public void removeGeofencesAndMarker(String uniID) {
@@ -1963,7 +1926,6 @@ public class map_home extends AppCompatActivity {
             mapView.getOverlays().remove(marker);
         }
 
-        // Remove the ID from the set to mark it as removed
         existingGeofenceIds.remove(uniID);
 
         mapView.invalidate();
@@ -1987,8 +1949,6 @@ public class map_home extends AppCompatActivity {
 
         mapView.invalidate();
     }
-
-
 
 
 
@@ -2035,7 +1995,6 @@ public class map_home extends AppCompatActivity {
         TextView txtTimePicker = findViewById(R.id.txtTimePicker);
         String selectedTime = txtTimePicker.getText().toString();
 
-        // Create a new geofenceData Map
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("Sched", schedName);
         geofenceData.put("Time", selectedTime);
@@ -2059,7 +2018,7 @@ public class map_home extends AppCompatActivity {
             geofenceData.put("selectedItemsIds", new ArrayList<>(selectedItemsIds));
         }
 
-        // Add the geofenceData to Firestore
+
         db.collection("geofenceSchedule")
                 .document(geofenceId)
                 .set(geofenceData)
@@ -2077,8 +2036,6 @@ public class map_home extends AppCompatActivity {
                     }
                 });
     }
-
-
 
 
     private void loadUserProfilePicture(ImageView imageView) {
@@ -2127,22 +2084,17 @@ public class map_home extends AppCompatActivity {
                 userRef.get()
                         .addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()) {
-                                // Your existing logic to retrieve and display user data
                             } else {
-                                // Handle the case where the document doesn't exist
                                 Log.e(TAG, "User's document does not exist in Firestore");
                             }
                         })
                         .addOnFailureListener(e -> {
-                            // Handle failure
                             Log.e(TAG, "Error getting user data from Firestore", e);
                         });
             } else {
-                // Handle the case where UID is null or empty
                 Log.e(TAG, "UID is null or empty");
             }
         } else {
-            // Handle the case where user is null (not signed in)
             Log.e(TAG, "User is not signed in");
         }
     }

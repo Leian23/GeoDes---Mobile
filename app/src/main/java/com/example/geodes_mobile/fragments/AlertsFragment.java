@@ -134,10 +134,9 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         FrameLayout layoutt = ((map_home) requireActivity()).findViewById(R.id.NotAvail1);
 
-      //  ((map_home) requireActivity()).mapView.getController().animateTo(point);
 
-
-
+       //when the items is clicked the bottom sheet viwewing for alerts will appear and the current fragment
+        //will dissapear
         if (data.getAlertEnabled()) {
             BoundingBox boundingBox = calculateBoundingBox(point, data.getOuterRadius());
             ((map_home) requireActivity()).mapView.setMapOrientation(0);
@@ -155,6 +154,8 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         layoutt.setVisibility(View.GONE);
         updateWeatherView(point);
+
+
 
         ImageButton editAlert = ((map_home) requireActivity()).editalert.findViewById(R.id.EditAlertIcon1);
         editAlert.setOnClickListener(new View.OnClickListener() {
@@ -481,12 +482,5 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 })
                 .show();
     }
-
-
-
-
-
-
-
 
 }

@@ -46,10 +46,8 @@ public class userProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private String userId;
     private View rootView;
-
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
-
     private final RequestOptions glideOptions = new RequestOptions().transform(new CircleCrop());
 
     @Override
@@ -87,7 +85,7 @@ public class userProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 updateUserData(rootView);
-                uploadProfilePicture(); // Call the function to upload the profile picture
+                uploadProfilePicture();
             }
         });
 
