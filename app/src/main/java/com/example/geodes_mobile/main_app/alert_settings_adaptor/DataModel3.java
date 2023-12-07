@@ -90,7 +90,7 @@ public class DataModel3 {
         return innerCode;
     }
     public String getOuterCode() {
-        return innerCode;
+        return outerCode;
     }
 
 }

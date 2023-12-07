@@ -350,7 +350,6 @@ public class map_home extends AppCompatActivity {
 
 
 
-        clearGeo("3590","1963");
 
         maptile = findViewById(R.id.maptiles);
         landmarks = findViewById(R.id.landmarks);
@@ -382,13 +381,12 @@ public class map_home extends AppCompatActivity {
         navigationView = findViewById(R.id.nav_view);
 
 
-
         View headerView = navigationView.getHeaderView(0);
         ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
 
         loadUserProfilePicture(headerImageView);
 
-
+        //initialize if theres user
         getUserFromFirestore();
 
         toggleMon = findViewById(R.id.toggleMon1);

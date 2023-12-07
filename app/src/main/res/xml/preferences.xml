@@ -34,9 +34,9 @@
             android:max="100" />
 
         <CheckBoxPreference
-            android:key="vibration"
-            android:title="Vibration"
-            android:summary="Enable vibration"
+            android:key="enable_vibration"
+            android:title="Enable Vibration"
+            android:summary="Enable vibration along with the alarm"
             android:defaultValue="true" />
 
         <ListPreference

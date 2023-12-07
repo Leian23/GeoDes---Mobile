@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.main_app.alert_settings_adaptor;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,7 +101,22 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
 
                     if (data.getEntryType()) {
                         mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getAlertName(), true);
-                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getInnerCode(), data.getAlertName(), true);
+                        mapHome.addGeofence(Point, data.getInnerRadius(), data.getInnerCode(), data.getAlertName(), true);
+
+                        Log.d("GeofenceLog", "Adding outer geofence: " +
+                                "Point: " + Point +
+                                ", OuterRadius: " + data.getOuterRadius() +
+                                ", OuterCode: " + data.getOuterCode() +
+                                ", AlertName: " + data.getAlertName() +
+                                ", Enabled: true");
+
+                        Log.d("GeofenceLog", "Adding inner geofence: " +
+                                "Point: " + Point +
+                                ", OuterRadius: " + data.getInnerRadius() +
+                                ", InnerCode: " + data.getInnerCode() +
+                                ", AlertName: " + data.getAlertName() +
+                                ", Enabled: true");
+
 
                     } else {
                         mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getOuterCode(),false);

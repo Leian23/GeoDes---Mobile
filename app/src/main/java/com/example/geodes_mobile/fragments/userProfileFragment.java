@@ -138,7 +138,6 @@ public class userProfileFragment extends Fragment {
                                 .apply(glideOptions)
                                 .into(profileImageView);
                     } else {
-                        // Load the default profile picture (you may need to replace the "default_picture_url" with the actual URL of your default picture)
                         Glide.with(requireContext())
                                 .load("default_picture_url")
                                 .apply(glideOptions)

@@ -20,7 +20,6 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
     private static final String PREF_RINGTONE = "ringtone";
     private static final String KEY_SELECTED_RINGTONE_URI = "selected_ringtone_uri";
     private static final int REQUEST_RINGTONE_PICKER = 1;
-
     private static final String PREF_ALARM_RINGTONE = "alarm_ringtone";
     private static final String KEY_SELECTED_ALARM_RINGTONE_URI = "selected_alarm_ringtone_uri";
     private static final int REQUEST_ALARM_RINGTONE_PICKER = 2;
@@ -31,7 +30,6 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-
 
         Preference ringtonePreference = findPreference(PREF_RINGTONE);
 
@@ -120,7 +118,16 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
                 String name = getRingtoneName(uri);
                 preference.setSummary((name != null ? name : "None"));
             } else {
-                preference.setSummary("Select custom " + defaultSummary.toLowerCase());
+                // Set a default ringtone here
+                Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                String defaultRingtoneName = getRingtoneName(defaultRingtoneUri);
+
+                if (defaultRingtoneName != null) {
+                    preference.setSummary(defaultRingtoneName);
+                    savePreference(uriKey, defaultRingtoneUri);
+                } else {
+                    preference.setSummary("Select custom " + defaultSummary.toLowerCase());
+                }
             }
         }
     }
