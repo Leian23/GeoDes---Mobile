@@ -146,7 +146,9 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         // Handle exit events if needed
         Log.d(TAG, "onReceive: EXIT from " + geofenceName);
         Toast.makeText(context, "Exit event from: " + geofenceName, Toast.LENGTH_SHORT).show();
-        // Additional logic for exit, if needed
+
+        scheduleAlarm(context, geofenceName);
+        showDismissNotificationExit(context);
     }
 
     private void scheduleAlarm(Context context, String geofenceName) {
@@ -189,7 +191,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         // Build the notification
         Notification dismissNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("You are on" + " " + fenceName)
+                .setContentTitle("You are near on:" + " " + fenceName)
                 .setContentText("Click to dismiss the alert")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSmallIcon(R.drawable.marker_loc)
@@ -234,10 +236,36 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     }
 
 
+    private void showDismissNotificationExit(Context context) {
+        // Create a notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Dismiss Notifications", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
 
+        // Create an intent for the dismiss action
+        Intent dismissIntent = new Intent(context, DismissReceiver.class);
+        dismissIntent.setAction("com.example.geodes_mobile.ACTION_DISMISS_ALARM");
 
+        // Use PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+        int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 0, dismissIntent, flags);
 
+        // Build the notification
+        Notification dismissNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle("You have exited:" + " " + fenceName)
+                .setContentText("Click to dismiss the alert")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(R.drawable.marker_loc)
+                .addAction(R.drawable.marker_loc, "Dismiss", dismissPendingIntent)
+                .build();
 
+        // Show the notification
+        NotificationManagerCompat.from(context).notify(DISMISS_NOTIFICATION_ID, dismissNotification);
+    }
 
 
 

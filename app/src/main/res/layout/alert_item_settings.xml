@@ -22,7 +22,7 @@
             android:layout_height="22dp"
             android:layout_marginStart="18dp"
 
-            android:layout_marginBottom="22dp"
+            android:layout_marginBottom="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/SchedsetAlert"
             app:layout_constraintHorizontal_bias="0.235"
@@ -33,9 +33,9 @@
 
         <TextView
             android:id="@+id/distanceLabel"
-            android:layout_width="59dp"
+            android:layout_width="100dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="196dp"
+            android:layout_marginEnd="155dp"
             android:layout_marginBottom="7dp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -51,7 +51,7 @@
             android:layout_width="127dp"
             android:layout_height="20dp"
             android:layout_marginEnd="128dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="20dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="No Schedule"
@@ -108,7 +108,7 @@
             android:layout_width="16dp"
             android:layout_height="26dp"
             android:layout_marginStart="25dp"
-            android:layout_marginBottom="47dp"
+            android:layout_marginBottom="45dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/distanceLabel"
             app:layout_constraintHorizontal_bias="0.0"
