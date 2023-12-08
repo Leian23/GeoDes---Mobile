@@ -28,6 +28,12 @@ public class AlarmReceiver extends BroadcastReceiver {
         Uri alarmRingtoneUri = intent.getParcelableExtra("ALARM_RINGTONE_URI");
         Log.d("AlarmReceiver", "Alarm ringtone URI: " + alarmRingtoneUri);
 
+        // Check if the alarmRingtoneUri is null
+        if (alarmRingtoneUri == null) {
+            Log.e("AlarmReceiver", "Alarm ringtone URI is null");
+            return;
+        }
+
         // Retrieve the user's preference for vibration
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean enableVibration = sharedPreferences.getBoolean("enable_vibration", true);

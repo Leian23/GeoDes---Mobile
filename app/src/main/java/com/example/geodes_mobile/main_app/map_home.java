@@ -19,6 +19,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -122,7 +123,6 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -245,6 +245,9 @@ public class map_home extends AppCompatActivity {
     public RelativeLayout bottomsheetclose;
 
     private final RequestOptions glideOptions = new RequestOptions().transform(new CircleCrop());
+
+    private Location currentLocation;
+    private LocationListener locationListener;
 
 
 

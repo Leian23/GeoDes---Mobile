@@ -1,4 +1,3 @@
-// GeofenceBroadcastReceiver.java
 package com.example.geodes_mobile.main_app.create_geofence_functions;
 
 import android.app.AlarmManager;
@@ -10,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -183,8 +183,10 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         if (uriString != null) {
             return Uri.parse(uriString);
         } else {
-            // Return a default URI or null, depending on your requirements
-            return null;
+            // If URI is null, use the default ringtone URI
+            Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            return defaultRingtoneUri;
         }
     }
+
 }
