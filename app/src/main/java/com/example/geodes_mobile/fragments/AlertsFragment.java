@@ -194,10 +194,10 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         Task<QuerySnapshot> entryTask = entryQuery
-                .whereEqualTo("Email",currentUser.getEmail())
+                .whereEqualTo("email",currentUser.getEmail())
                 .get();
         Task<QuerySnapshot> exitTask = exitQuery
-                .whereEqualTo("Email",currentUser.getEmail())
+                .whereEqualTo("email",currentUser.getEmail())
                 .get();
 
         Tasks.whenAllSuccess(entryTask, exitTask)

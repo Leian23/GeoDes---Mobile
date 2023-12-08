@@ -893,7 +893,7 @@ public class map_home extends AppCompatActivity {
 
         FirebaseUser alertEmail = mAuth.getCurrentUser();
         CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
-        geofencesEntryCollection.whereEqualTo("Email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+        geofencesEntryCollection.whereEqualTo("email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
             if (e != null) {
                 // Handle error
                 return;
@@ -1096,7 +1096,7 @@ public class map_home extends AppCompatActivity {
 
         List<DataModel5> dataList = new ArrayList<>();
 
-        geofenceEntryCollection.whereEqualTo("Email",scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
+        geofenceEntryCollection.whereEqualTo("email",scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
             for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
                 String alertTitle = documentSnapshot.getString("alertName");
                 String unID = documentSnapshot.getString("uniqueID");
