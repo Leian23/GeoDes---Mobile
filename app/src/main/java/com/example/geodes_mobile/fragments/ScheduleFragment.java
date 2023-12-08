@@ -18,6 +18,8 @@ import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.map_home;
 import com.example.geodes_mobile.main_app.schedule_settings_adaptor.Adapter4;
 import com.example.geodes_mobile.main_app.schedule_settings_adaptor.DataModel4;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -28,6 +30,9 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
     private static final String TAG = "ScheduleFragment";
     private FirebaseFirestore db;
     private SwipeRefreshLayout swipeRefreshLayout;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,7 +71,9 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
     }
 
     private void fetchDataFromFirestore(View rootView) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         db.collection("geofenceSchedule")
+                .whereEqualTo("Email",currentUser.getEmail())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

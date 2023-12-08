@@ -891,9 +891,9 @@ public class map_home extends AppCompatActivity {
             }
         });
 
-
+        FirebaseUser alertEmail = mAuth.getCurrentUser();
         CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
-        geofencesEntryCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        geofencesEntryCollection.whereEqualTo("Email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
             if (e != null) {
                 // Handle error
                 return;
@@ -943,7 +943,7 @@ public class map_home extends AppCompatActivity {
         });
 
         CollectionReference geofencesExitCollection = firestore.collection("geofencesExit");
-        geofencesExitCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        geofencesExitCollection.whereEqualTo("Email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
             if (e != null) {
                 // Handle error
                 return;
@@ -1003,8 +1003,10 @@ public class map_home extends AppCompatActivity {
         Adapter2 adapter2 = new Adapter2(dataForSched, this);
         RecyclerView recyclerVieww = findViewById(R.id.sched_recyclerView);
 
+        FirebaseUser botschedEmail = mAuth.getCurrentUser();
+
         CollectionReference geofencesSchedCollection = firestore.collection("geofenceSchedule");
-        geofencesSchedCollection.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        geofencesSchedCollection.whereEqualTo("Email",botschedEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
             if (e != null) {
                 // Handle error
                 return;
@@ -1087,12 +1089,14 @@ public class map_home extends AppCompatActivity {
 
 
         //list of selectable alerts under add schedule bottom sheet
+        FirebaseUser scheduleEmail = mAuth.getCurrentUser();
+
         CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
         CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
         List<DataModel5> dataList = new ArrayList<>();
 
-        geofenceEntryCollection.get().addOnSuccessListener(entrySnapshots -> {
+        geofenceEntryCollection.whereEqualTo("Email",scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
             for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
                 String alertTitle = documentSnapshot.getString("alertName");
                 String unID = documentSnapshot.getString("uniqueID");

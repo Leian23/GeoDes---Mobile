@@ -31,6 +31,8 @@ import com.example.geodes_mobile.main_app.homebtn_functions.AlertEditDialog;
 import com.example.geodes_mobile.main_app.map_home;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -65,6 +67,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
     private Context context;
 
     private ImageButton deleteAlert;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -187,8 +190,15 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         Query entryQuery = firestore.collection("geofencesEntry");
         Query exitQuery = firestore.collection("geofencesExit");
 
-        Task<QuerySnapshot> entryTask = entryQuery.get();
-        Task<QuerySnapshot> exitTask = exitQuery.get();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        Task<QuerySnapshot> entryTask = entryQuery
+                .whereEqualTo("Email",currentUser.getEmail())
+                .get();
+        Task<QuerySnapshot> exitTask = exitQuery
+                .whereEqualTo("Email",currentUser.getEmail())
+                .get();
 
         Tasks.whenAllSuccess(entryTask, exitTask)
                 .addOnCompleteListener(task -> {
