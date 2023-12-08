@@ -26,16 +26,15 @@
     </string-array>
 
     <string-array name="audio_outputs">
-        <item>Speaker</item>
         <item>Headphones</item>
         <item>Both Speaker and Headphones</item>
     </string-array>
 
     <string-array name="audio_outputs_values">
-        <item>speaker</item>
         <item>headphones</item>
-        <item>both speaker and headphones</item>
+        <item>both_speaker_and_headphones</item>
     </string-array>
+
 
     <string-array name="ringtones_array">
         <item>Ringtone 1</item>
@@ -48,4 +47,5 @@
     <string name="alarm_ringtone_label">Alarm Ringtone</string>
 
     <string name="mapbox_access_token">pk.eyJ1IjoibGVhbjIzIiwiYSI6ImNsbjF3MXBmbTAydDcyanIzODJpMTBzNWwifQ.OXSDLVAWX9HS2Bos3k6Igw</string>
+    <string name="audio_output_label">Audio Output</string>
 </resources>

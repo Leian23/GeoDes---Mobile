@@ -53,9 +53,9 @@
             android:title="Audio Output"
             android:summary="Select audio output"
             android:dialogTitle="Select Audio Output"
-            android:entries="@array/audio_outputs_values"
+            android:entries="@array/audio_outputs"
             android:entryValues="@array/audio_outputs_values"
-            android:defaultValue="speaker" />
+            android:defaultValue="both_speaker_and_headphones" />
 
     </PreferenceCategory>
 

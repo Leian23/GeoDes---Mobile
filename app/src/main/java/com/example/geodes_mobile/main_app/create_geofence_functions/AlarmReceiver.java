@@ -39,15 +39,36 @@ public class AlarmReceiver extends BroadcastReceiver {
         boolean enableVibration = sharedPreferences.getBoolean("enable_vibration", true);
         Log.d("AlarmReceiver", "Enable Vibration: " + enableVibration);
 
+        // Retrieve the user's preference for audio output
+        String selectedAudioOutput = sharedPreferences.getString("audio_output", "both_speaker_and_headphones");
+
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
             try {
                 mediaPlayer.setDataSource(context, alarmRingtoneUri);
                 mediaPlayer.setLooping(true);
-                mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build());
+
+                // Set the audio attributes based on the selected output
+                if (selectedAudioOutput.equals("speaker")) {
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build());
+                } else if (selectedAudioOutput.equals("headphones")) {
+                    // Set audio attributes for headphones
+                    // You may need to customize this based on your requirements
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build());
+                } else if (selectedAudioOutput.equals("both_speaker_and_headphones")) {
+                    // Set audio attributes for both speaker and headphones
+                    // You may need to customize this based on your requirements
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build());
+                }
 
                 // Retrieve the user's preference for volume
                 int volume = sharedPreferences.getInt("volume", 50); // Default volume if not set
@@ -78,6 +99,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             }
         }
     }
+
 
     static void stopAlarm() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {

@@ -58,6 +58,8 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         updateRingtonePreferenceSummary();
         updateAlarmRingtonePreferenceSummary();
         updateAlertTypePreferenceSummary();
+        updateAudioOutputPreferenceSummary();
+
     }
 
 
@@ -167,6 +169,14 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString("alert_type", "outer Alert");
     }
+
+    private void updateAudioOutputPreferenceSummary() {
+        ListPreference audioOutputPreference = findPreference("audio_output");
+        if (audioOutputPreference != null) {
+            updatePreferenceSummary(audioOutputPreference, "audio_output", getString(R.string.audio_output_label));
+        }
+    }
+
 
 
 
