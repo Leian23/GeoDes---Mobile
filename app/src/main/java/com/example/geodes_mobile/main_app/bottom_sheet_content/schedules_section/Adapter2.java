@@ -41,9 +41,16 @@ public class Adapter2 extends RecyclerView.Adapter<Adapter2.ViewHolder> {
         holder.imageView.setImageResource(data.getSchedImage());
         holder.calendarImageView.setImageResource(data.getCalendarImage());
         holder.alarmIconImageView.setImageResource(data.getAlarmIcon());
-        String selectedItemsText = TextUtils.join(", ", data.getSelectedItemsIds());
-        holder.alertListsTextView.setText(selectedItemsText);
+
+        // Check if selectedItemsIds is not null before joining
+        if (data.getSelectedItemsIds() != null) {
+            String selectedItemsText = TextUtils.join(", ", data.getSelectedItemsIds());
+            holder.alertListsTextView.setText(selectedItemsText);
+        } else {
+            holder.alertListsTextView.setText("");
+        }
     }
+
 
     @Override
     public int getItemCount() {

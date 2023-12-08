@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -10,6 +11,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -54,6 +57,7 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
 
         updateRingtonePreferenceSummary();
         updateAlarmRingtonePreferenceSummary();
+        updateAlertTypePreferenceSummary();
     }
 
 
@@ -149,4 +153,21 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         String uriString = sharedPreferences.getString(KEY_SELECTED_ALARM_RINGTONE_URI, null);
         return uriString != null ? Uri.parse(uriString) : null;
     }
+
+
+    private void updateAlertTypePreferenceSummary() {
+        ListPreference alertTypePreference = findPreference("alert_type");
+        if (alertTypePreference != null) {
+            String alertType = sharedPreferences.getString("alert_type", "outer Alert"); // Default to "outer Alert"
+            alertTypePreference.setSummary(alertType);
+        }
+    }
+
+    public String getAlertTypePreference(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString("alert_type", "outer Alert");
+    }
+
+
+
 }

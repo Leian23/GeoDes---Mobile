@@ -16,15 +16,13 @@
     </string-array>
 
     <string-array name="alert_types">
-        <item>Type 1</item>
-        <item>Type 2</item>
-        <item>Type 3</item>
+        <item>Alert When Entered Inner Fence</item>
+        <item>Alert When Entered Outer Fence</item>
     </string-array>
 
     <string-array name="alert_types_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
+        <item>inner Alert</item>
+        <item>outer Alert</item>
     </string-array>
 
     <string-array name="audio_outputs">
