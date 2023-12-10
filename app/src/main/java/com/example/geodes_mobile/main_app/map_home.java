@@ -225,6 +225,7 @@ public class map_home extends AppCompatActivity {
     Map<String, Marker> markersMap = new HashMap<>();
 
 
+
     private String togmon="", togtue="", togwed="", togthu="", togfri="", togsat="", togsun="";
     private ToggleButton toggleMon, toggleTue, toggleWed, toggleThu, toggleFri, toggleSat, toggleSun;
 
@@ -246,8 +247,8 @@ public class map_home extends AppCompatActivity {
 
     private final RequestOptions glideOptions = new RequestOptions().transform(new CircleCrop());
 
-    private Location currentLocation;
-    private LocationListener locationListener;
+    List<DataModel> dataForAlerts;
+    Adapter adapter4;
 
 
 
@@ -875,10 +876,16 @@ public class map_home extends AppCompatActivity {
 
 
 
+
+
+
+
+
+
        //bottom sheet recycle view for alerts
-        List<DataModel> dataForAlerts = new ArrayList<>();
+        dataForAlerts = new ArrayList<>();
         RecyclerView recyclerView = findViewById(R.id.alerts_recyclerView);
-        Adapter adapter4 = new Adapter(dataForAlerts, this, new Adapter.OnItemClickListener() {
+       adapter4 = new Adapter(dataForAlerts, this, new Adapter.OnItemClickListener() {
             @Override
             public void onItemClick(GeoPoint geoPoint) {
                 double latitude = geoPoint.getLatitude();
@@ -891,109 +898,124 @@ public class map_home extends AppCompatActivity {
             }
         });
 
+
+
+
         FirebaseUser alertEmail = mAuth.getCurrentUser();
-        CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
-        geofencesEntryCollection.whereEqualTo("email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
-            if (e != null) {
-                // Handle error
-                return;
-            }
+        if(alertEmail != null ) {
 
-            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    String uniID = document.getString("uniqueID");
-                    Boolean alertEnabled = document.getBoolean("alertEnabled");
+            CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
+            geofencesEntryCollection.whereEqualTo("email", alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+                if (e != null) {
+                    // Handle error
+                    return;
+                }
 
-                    // Check if the geofence with this ID has already been added
-                    if (!existingGeofenceIds.contains(uniID)) {
-                        String alertName = document.getString("alertName");
-                        String alertNotes = document.getString("notes");
-                        Double inner = document.getDouble("innerRadius");
-                        Double outer = document.getDouble("outerRadius");
-                        String innerCode = document.getString("innerCode");
-                        String outerCode = document.getString("outerCode");
+                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        String uniID = document.getString("uniqueID");
+                        Boolean alertEnabled = document.getBoolean("alertEnabled");
 
-                        Map<String, Object> location = (Map<String, Object>) document.get("location");
+                        // Check if the geofence with this ID has already been added
+                        if (!existingGeofenceIds.contains(uniID)) {
+                            String alertName = document.getString("alertName");
+                            String alertNotes = document.getString("notes");
+                            Double inner = document.getDouble("innerRadius");
+                            Double outer = document.getDouble("outerRadius");
+                            String innerCode = document.getString("innerCode");
+                            String outerCode = document.getString("outerCode");
 
-                        double latitude = (double) location.get("latitude");
-                        double longitude = (double) location.get("longitude");
+                            Map<String, Object> location = (Map<String, Object>) document.get("location");
 
-                        float innerFloat = inner.floatValue();
-                        float outerFloat = outer.floatValue();
+                            double latitude = (double) location.get("latitude");
+                            double longitude = (double) location.get("longitude");
 
-                        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+                            float innerFloat = inner.floatValue();
+                            float outerFloat = outer.floatValue();
 
-                        if (alertEnabled != null && alertEnabled) {
-                            dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, alertName, alertNotes, R.drawable.pinalerts, geoPoint));
-                            createGeofences(uniID, geoPoint, alertName, outerFloat, innerFloat, outerCode, innerCode);
+                            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 
-                            // Add the ID to the set to mark it as added
-                            existingGeofenceIds.add(uniID);
+
+
+                            if (alertEnabled != null && alertEnabled) {
+                                dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, alertName, alertNotes, R.drawable.pinalerts, geoPoint, uniID));
+                                createGeofences(uniID, geoPoint, alertName, outerFloat, innerFloat, outerCode, innerCode);
+
+                                // Add the ID to the set to mark it as added
+                                existingGeofenceIds.add(uniID);
+                            }
+                        } else {
+                            // Geofence with this ID already exists, check if it needs to be removed
+                            if (alertEnabled != null && !alertEnabled) {
+                                // If alert is disabled, remove the geofence
+                                removeGeofencesAndMarker(uniID);
+                                removeItemFromList(uniID);
+                            }
                         }
-                    } else {
-                        // Geofence with this ID already exists, check if it needs to be removed
-                        if (alertEnabled != null && !alertEnabled) {
-                            // If alert is disabled, remove the geofence
-                            removeGeofencesAndMarker(uniID);
-                        }
+
+
+
                     }
                 }
-            }
-            adapter4.notifyDataSetChanged();
-        });
+                adapter4.notifyDataSetChanged();
+            });
 
-        CollectionReference geofencesExitCollection = firestore.collection("geofencesExit");
-        geofencesExitCollection.whereEqualTo("Email",alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
-            if (e != null) {
-                // Handle error
-                return;
-            }
+            CollectionReference geofencesExitCollection = firestore.collection("geofencesExit");
+            geofencesExitCollection.whereEqualTo("email", alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+                if (e != null) {
+                    // Handle error
+                    return;
+                }
 
-            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                // Process the updated data for geofencesExit
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    String uniID = document.getString("uniqueID");
-                    Boolean alertEnabled = document.getBoolean("alertEnabled");
+                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                    // Process the updated data for geofencesExit
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        String uniID = document.getString("uniqueID");
+                        Boolean alertEnabled = document.getBoolean("alertEnabled");
 
-                    // Check if the geofence with this ID has already been added
-                    if (!existingGeofenceIds.contains(uniID)) {
-                        String alertName = document.getString("alertName");
-                        String alertNotes = document.getString("notes");
-                        Double outer = document.getDouble("outerRadius");
-                        String exCode = document.getString("outerCode"); //EntryType
-
+                        // Check if the geofence with this ID has already been added
+                        if (!existingGeofenceIds.contains(uniID)) {
+                            String alertName = document.getString("alertName");
+                            String alertNotes = document.getString("notes");
+                            Double outer = document.getDouble("outerRadius");
+                            String exCode = document.getString("outerCode"); //EntryType
 
 
-                        Map<String, Object> location = (Map<String, Object>) document.get("location");
+                            Map<String, Object> location = (Map<String, Object>) document.get("location");
 
-                        double latitude = (double) location.get("latitude");
-                        double longitude = (double) location.get("longitude");
-
-
-                        float outerFloat = outer.floatValue();
-                        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+                            double latitude = (double) location.get("latitude");
+                            double longitude = (double) location.get("longitude");
 
 
-                        if (alertEnabled != null && alertEnabled) {
-                            dataForAlerts.add(new DataModel("54 km", R.drawable.get_out, alertName, alertNotes, R.drawable.pinalerts, geoPoint));
+                            float outerFloat = outer.floatValue();
+                            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 
-                            createExitGeofence(uniID, geoPoint, alertName, outerFloat,exCode);
-                            existingGeofenceIds.add(uniID);
-                        }
-                    } else {
+
+                            if (alertEnabled != null && alertEnabled) {
+                                dataForAlerts.add(new DataModel("54 km", R.drawable.get_out, alertName, alertNotes, R.drawable.pinalerts, geoPoint, uniID));
+
+                                createExitGeofence(uniID, geoPoint, alertName, outerFloat, exCode);
+                                existingGeofenceIds.add(uniID);
+                            }
+                        } else {
                             // Geofence with this ID already exists, check if it needs to be removed
                             if (alertEnabled != null && !alertEnabled) {
                                 removeGeofencesAndMarkerExit(uniID);
+                                removeItemFromList(uniID);
                             }
+                        }
                     }
                 }
-            }
 
-            adapter4.notifyDataSetChanged();
-        });
+                adapter4.notifyDataSetChanged();
+            });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recyclerView.setAdapter(adapter4);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            recyclerView.setAdapter(adapter4);
+
+        } else {
+            //user not signed in
+        }
 
 
 
@@ -1005,84 +1027,90 @@ public class map_home extends AppCompatActivity {
 
         FirebaseUser botschedEmail = mAuth.getCurrentUser();
 
-        CollectionReference geofencesSchedCollection = firestore.collection("geofenceSchedule");
-        geofencesSchedCollection.whereEqualTo("Email",botschedEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
-            if (e != null) {
-                // Handle error
-                return;
-            }
 
-            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    String uniID = document.getString("uniqueID");
-                    String SchedName = document.getString("Sched");
-                    String TimeStart = document.getString("Time");
+if(botschedEmail != null) {
+    CollectionReference geofencesSchedCollection = firestore.collection("geofenceSchedule");
+    geofencesSchedCollection.whereEqualTo("Email", botschedEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+        if (e != null) {
+            // Handle error
+            return;
+        }
 
-                    boolean Monday = document.getBoolean("Monday");
-                    boolean Tuesday = document.getBoolean("Tuesday");
-                    boolean Wednesday = document.getBoolean("Wednesday");
-                    boolean Thursday = document.getBoolean("Thursday");
-                    boolean Friday = document.getBoolean("Friday");
-                    boolean Saturday = document.getBoolean("Saturday");
-                    boolean Sunday = document.getBoolean("Sunday");
+        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                String uniID = document.getString("uniqueID");
+                String SchedName = document.getString("Sched");
+                String TimeStart = document.getString("Time");
 
-                    StringBuilder selectedDays = new StringBuilder();
+                boolean Monday = document.getBoolean("Monday");
+                boolean Tuesday = document.getBoolean("Tuesday");
+                boolean Wednesday = document.getBoolean("Wednesday");
+                boolean Thursday = document.getBoolean("Thursday");
+                boolean Friday = document.getBoolean("Friday");
+                boolean Saturday = document.getBoolean("Saturday");
+                boolean Sunday = document.getBoolean("Sunday");
 
-                    if (Monday) {
-                        selectedDays.append("Mon, ");
-                    }
-                    if (Tuesday) {
-                        selectedDays.append("Tue, ");
-                    }
-                    if (Wednesday) {
-                        selectedDays.append("Wed, ");
-                    }
-                    if (Thursday) {
-                        selectedDays.append("Thu, ");
-                    }
-                    if (Friday) {
-                        selectedDays.append("Fri, ");
-                    }
-                    if (Saturday) {
-                        selectedDays.append("Sat, ");
-                    }
-                    if (Sunday) {
-                        selectedDays.append("Sun, ");
-                    }
-                    String result = selectedDays.toString().trim();
+                StringBuilder selectedDays = new StringBuilder();
 
-                    // Fetch selectedItemsIds array
-                    List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
-
-                    if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
-                        // Concatenate the elements of the list into a single string
-                        StringBuilder stringBuilder = new StringBuilder();
-                        for (String itemId : selectedItemsIds) {
-                            stringBuilder.append(itemId).append("\n");
-                        }
-
-                        // Remove the last newline character
-                        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-
-                        // Log the concatenated string
-
-                    } else {
-                        // Log a message if the list is null or empty
-                        Log.d(TAG, "No selected items");
-                    }
-
-
-                    // Now you can use selectedItemsIds as needed
-
-                    dataForSched.add(new DataModel2(SchedName, R.drawable.schedule_ic, R.drawable.calendar_ic, TimeStart, result, R.drawable.alarm_ic, selectedItemsIds));
+                if (Monday) {
+                    selectedDays.append("Mon, ");
                 }
+                if (Tuesday) {
+                    selectedDays.append("Tue, ");
+                }
+                if (Wednesday) {
+                    selectedDays.append("Wed, ");
+                }
+                if (Thursday) {
+                    selectedDays.append("Thu, ");
+                }
+                if (Friday) {
+                    selectedDays.append("Fri, ");
+                }
+                if (Saturday) {
+                    selectedDays.append("Sat, ");
+                }
+                if (Sunday) {
+                    selectedDays.append("Sun, ");
+                }
+                String result = selectedDays.toString().trim();
+
+                // Fetch selectedItemsIds array
+                List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
+
+                if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
+                    // Concatenate the elements of the list into a single string
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (String itemId : selectedItemsIds) {
+                        stringBuilder.append(itemId).append("\n");
+                    }
+
+                    // Remove the last newline character
+                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+
+                    // Log the concatenated string
+
+                } else {
+                    // Log a message if the list is null or empty
+                    Log.d(TAG, "No selected items");
+                }
+
+
+                // Now you can use selectedItemsIds as needed
+
+                dataForSched.add(new DataModel2(SchedName, R.drawable.schedule_ic, R.drawable.calendar_ic, TimeStart, result, R.drawable.alarm_ic, selectedItemsIds));
             }
+        }
 
-            adapter2.notifyDataSetChanged();
-        });
+        adapter2.notifyDataSetChanged();
+    });
 
-        recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recyclerVieww.setAdapter(adapter2);
+    recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+    recyclerVieww.setAdapter(adapter2);
+
+} else {
+    //user not signed in
+}
 
 
 
@@ -1091,44 +1119,49 @@ public class map_home extends AppCompatActivity {
         //list of selectable alerts under add schedule bottom sheet
         FirebaseUser scheduleEmail = mAuth.getCurrentUser();
 
-        CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
-        CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
+        if (scheduleEmail != null) {
 
-        List<DataModel5> dataList = new ArrayList<>();
+            CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
+            CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
-        geofenceEntryCollection.whereEqualTo("email",scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
-            for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
-                String alertTitle = documentSnapshot.getString("alertName");
-                String unID = documentSnapshot.getString("uniqueID");
-                int imageResource = R.drawable.get_in;
+            List<DataModel5> dataList = new ArrayList<>();
 
-                // Create DataModel5 object and add it to the list
-                dataList.add(new DataModel5(alertTitle, imageResource, unID));
-            }
-
-            geofenceExitCollection.get().addOnSuccessListener(exitSnapshots -> {
-                for (QueryDocumentSnapshot documentSnapshot : exitSnapshots) {
+            geofenceEntryCollection.whereEqualTo("email", scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
+                for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
                     String alertTitle = documentSnapshot.getString("alertName");
                     String unID = documentSnapshot.getString("uniqueID");
-                    int imageResource = R.drawable.get_out;
+                    int imageResource = R.drawable.get_in;
 
+                    // Create DataModel5 object and add it to the list
                     dataList.add(new DataModel5(alertTitle, imageResource, unID));
                 }
 
-                RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
-                recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+                geofenceExitCollection.get().addOnSuccessListener(exitSnapshots -> {
+                    for (QueryDocumentSnapshot documentSnapshot : exitSnapshots) {
+                        String alertTitle = documentSnapshot.getString("alertName");
+                        String unID = documentSnapshot.getString("uniqueID");
+                        int imageResource = R.drawable.get_out;
 
-                Adapter5 adapterSched = new Adapter5(dataList, map_home.this);
-                recyclerViewSched.setAdapter(adapterSched);
+                        dataList.add(new DataModel5(alertTitle, imageResource, unID));
+                    }
+
+                    RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
+                    recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+                    Adapter5 adapterSched = new Adapter5(dataList, map_home.this);
+                    recyclerViewSched.setAdapter(adapterSched);
+
+                }).addOnFailureListener(e -> {
+                    // Handle errors
+                });
 
             }).addOnFailureListener(e -> {
                 // Handle errors
             });
 
-        }).addOnFailureListener(e -> {
-            // Handle errors
-        });
-
+        } else {
+            //user not signed in
+        }
 
 
 
@@ -2109,5 +2142,16 @@ public class map_home extends AppCompatActivity {
     public static boolean isButtonClicked() {
         return isButtonClicked;
     }
+
+    private void removeItemFromList(String uniqueID) {
+        for (int i = 0; i < dataForAlerts.size(); i++) {
+            if (dataForAlerts.get(i).getUnId().equals(uniqueID)) {
+                dataForAlerts.remove(i);
+                adapter4.notifyItemRemoved(i);
+                break; // Assuming uniqueID is unique, no need to continue searching
+            }
+        }
+    }
+
 
 }

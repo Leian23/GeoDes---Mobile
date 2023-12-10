@@ -25,6 +25,8 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
     private static final int REQUEST_RINGTONE_PICKER = 1;
     private static final String PREF_ALARM_RINGTONE = "alarm_ringtone";
     private static final String KEY_SELECTED_ALARM_RINGTONE_URI = "selected_alarm_ringtone_uri";
+
+    private static final String PREF_DISTANCE_UNIT = "distance_unit_preference";
     private static final int REQUEST_ALARM_RINGTONE_PICKER = 2;
     private SharedPreferences sharedPreferences;
 
@@ -59,6 +61,7 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         updateAlarmRingtonePreferenceSummary();
         updateAlertTypePreferenceSummary();
         updateAudioOutputPreferenceSummary();
+        updateDistanceUnitPreferenceSummary();
 
     }
 
@@ -177,7 +180,13 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
         }
     }
 
+    private void updateDistanceUnitPreferenceSummary() {
+        ListPreference distanceUnitPreference = findPreference("distance_unit");
+        if (distanceUnitPreference != null) {
+            String distanceUnit = sharedPreferences.getString(PREF_DISTANCE_UNIT, "kilometers");
+            distanceUnitPreference.setSummary(distanceUnit);
+        }
 
 
-
+    }
 }

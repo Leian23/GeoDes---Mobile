@@ -270,10 +270,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
 
 
-
-
-
-
     private Uri getSelectedAlarmRingtoneUri(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String uriString = sharedPreferences.getString("selected_alarm_ringtone_uri", null);

@@ -27,15 +27,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="284dp"
-            android:text="You are in feedbacks page"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+
 
         <TextView
             android:id="@+id/textView4"
@@ -48,6 +40,85 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/FeedbackTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="128dp"
+            android:gravity="center"
+            android:text="Tell Us Your
+            Experience"
+            android:textColor="#000000"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="5.0">
+
+
+            <EditText
+                android:id="@+id/editTextFeedback"
+                android:layout_width="wrap_content"
+                android:layout_height="160dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="38dp"
+                android:layout_marginTop="264dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/round_weather"
+                android:gravity="top"
+                android:hint="Enter your feedback here..."
+                android:inputType="textMultiLine"
+                android:minLines="5"
+                android:padding="20dp"
+                android:paddingLeft="20dp" />
+
+            <Button
+                android:id="@+id/buttonSubmitFeedback"
+                android:layout_width="324dp"
+                android:layout_height="42dp"
+                android:layout_below="@id/editTextFeedback"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="45dp"
+                android:layout_marginTop="70dp"
+                android:layout_marginEnd="42dp"
+                android:background="@drawable/rounded_corner_nav"
+                android:padding="10dp"
+                android:text="Submit"
+                android:textSize="14dp" />
+
+            <Button
+                android:id="@+id/buttonAttachFile"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_below="@+id/editTextFeedback"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="46dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="42dp"
+                android:background="@drawable/rounded_corner_nav4"
+                android:padding="10dp"
+                android:text="Attach File"
+                android:textSize="14dp" />
+
+
+        </RelativeLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

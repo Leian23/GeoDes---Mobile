@@ -46,7 +46,7 @@
             android:dialogTitle="Select Alert Type"
             android:entries="@array/alert_types"
             android:entryValues="@array/alert_types_values"
-            android:defaultValue="1" />
+            android:defaultValue="outer Alert" />
 
         <ListPreference
             android:key="audio_output"

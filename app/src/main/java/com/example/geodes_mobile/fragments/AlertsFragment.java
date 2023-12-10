@@ -3,6 +3,7 @@ package com.example.geodes_mobile.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -44,9 +46,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -56,7 +61,11 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
     private Adapter3 adapter;
     private FirebaseFirestore firestore;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private static final double EARTH_RADIUS = 6371;
+    private static final double EARTH_RADIUS_KM = 6371.0;
+
+    // Earth's radius in miles
+    private static final double EARTH_RADIUS_MILES = 3958.8;
+
     private map_home mainActivity;
     private org.osmdroid.util.GeoPoint Point;
     private String alertName;
@@ -249,9 +258,25 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 double latitude = (double) location.get("latitude");
                 double longitude = (double) location.get("longitude");
 
-                double distanceToAlert = calculateDistance(userLa, userlo, latitude, longitude);
 
-                String computedDistance = String.valueOf(distanceToAlert);
+
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                String distanceUnit = sharedPreferences.getString("distance_unit", "kilometers");
+
+
+                String computedDistance;
+                 if ("miles".equals(distanceUnit)) {
+                     double distanceToAlert = calculateDistance(userLa, userlo, latitude, longitude, true);
+                     computedDistance = String.valueOf(distanceToAlert) + " mi";
+                 } else {
+                     double distanceToAlert = calculateDistance(userLa, userlo, latitude, longitude, false);
+                     computedDistance = String.valueOf(distanceToAlert) + " km";
+                 }
+
+
+
+
 
                 Point = new org.osmdroid.util.GeoPoint(latitude, longitude);
 
@@ -268,7 +293,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         }
     }
 
-    public static double calculateDistance(double userLat, double userLng, Double targetLat, Double targetLng) {
+    public static double calculateDistance(double userLat, double userLng, Double targetLat, Double targetLng, boolean useMiles) {
         if (targetLat == null || targetLng == null) {
             return Double.MAX_VALUE;
         }
@@ -286,8 +311,22 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return EARTH_RADIUS * c;
+        // Convert the result to kilometers or miles based on the specified unit
+        double distanceInRadians = EARTH_RADIUS_KM * c; // Default to kilometers
+        if (useMiles) {
+            distanceInRadians = EARTH_RADIUS_MILES * c;
+        }
+
+        // Round the result to two decimal places
+        return roundToTwoDecimalPlaces(distanceInRadians);
     }
+
+    private static double roundToTwoDecimalPlaces(double value) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        String formattedValue = df.format(value);
+        return Double.parseDouble(formattedValue);
+    }
+
 
 
     public void updateWeatherView(GeoPoint geoPoint) {

@@ -10,16 +10,19 @@ public class DataModel {
     private int imageResource1;
     private GeoPoint geoPoint; // New field to store GeoPoint
 
+    private String unId;
 
 
 
-    public DataModel(String distance, int imageResource, String alertTitle, String note, int imageResource1, GeoPoint geoPoint) {
+
+    public DataModel(String distance, int imageResource, String alertTitle, String note, int imageResource1, GeoPoint geoPoint, String unId) {
         this.distance = distance;
         this.imageResource = imageResource;
         this.alertTitle = alertTitle;
         this.note = note;
         this.imageResource1 = imageResource1;
         this.geoPoint = geoPoint;
+        this.unId = unId;
     }
 
     public String getDistance() {
@@ -44,5 +47,8 @@ public class DataModel {
 
     public GeoPoint getGeoPoint() {
         return geoPoint;
+    }
+    public String getUnId() {
+        return unId;
     }
 }
