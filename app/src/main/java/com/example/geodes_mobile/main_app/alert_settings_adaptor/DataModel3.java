@@ -23,10 +23,12 @@ public class DataModel3 {
 
     private String outerCode;
 
+    private String exitCode;
 
 
 
-    public DataModel3(String alertName, String notesAlert, String distance, Boolean alertEnabled, String unid, int setAlertStat, Double latitude, Double longitude, Float outerRadius, Float innerRadius, Boolean EntryType, String innerCode, String outerCode) {
+
+    public DataModel3(String alertName, String notesAlert, String distance, Boolean alertEnabled, String unid, int setAlertStat, Double latitude, Double longitude, Float outerRadius, Float innerRadius, Boolean EntryType, String innerCode, String outerCode, String exitCode) {
         this.alertName = alertName;
         this.notesAlert = notesAlert;
         this.distance = distance;
@@ -40,6 +42,7 @@ public class DataModel3 {
         this.EntryType = EntryType;
         this.innerCode = innerCode;
         this.outerCode = outerCode;
+        this.exitCode = exitCode;
 
 
     }
@@ -93,4 +96,7 @@ public class DataModel3 {
         return outerCode;
     }
 
+    public String getExitCode() {
+        return exitCode;
+    }
 }

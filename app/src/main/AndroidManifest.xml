@@ -22,7 +22,6 @@
 
 
     <uses-feature android:name="android.hardware.location.gps" />
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
@@ -49,8 +48,6 @@
         android:theme="@style/Theme.GeoDes_Mobile"
         tools:targetApi="31"
         android:networkSecurityConfig="@xml/network_security_config">
-
-
 
 
     <activity

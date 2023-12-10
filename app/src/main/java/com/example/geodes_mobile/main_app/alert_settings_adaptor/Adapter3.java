@@ -29,6 +29,7 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
 
     private static map_home mapHome;
 
+
     public Adapter3(List<DataModel3> dataList, Context context, map_home mapHome) {
         this.dataList = dataList;
         this.context = context;
@@ -119,14 +120,22 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
 
 
                     } else {
-                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getOuterCode(),false);
+                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getExitCode(), data.getAlertName(),false);
+
+                        Log.d("GeofenceLog", "Adding outer geofence: " +
+                                "Point: " + Point +
+                                ", OuterRadius: " + data.getOuterRadius() +
+                                ", OuterCode: " + data.getExitCode() +
+                                ", AlertName: " + data.getAlertName() +
+                                ", Enabled: true");
+
                     }
 
                 } else if (!isCheckedNew) {
                     if (data.getEntryType()) {
                         mapHome.clearGeo(data.getInnerCode(), data.getOuterCode());
                     } else {
-                        mapHome.removeGeofence(data.getOuterCode());
+                        mapHome.removeGeofence(data.getExitCode());
                     }
                 }
                 // Save the updated state to Firestore or perform other actions

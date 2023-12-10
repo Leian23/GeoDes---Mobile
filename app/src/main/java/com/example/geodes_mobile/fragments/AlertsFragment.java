@@ -241,6 +241,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
             Double innerRad = documentChange.getDocument().getDouble("innerRadius");
             String innerCode = documentChange.getDocument().getString("innerCode");
             String outerCode = documentChange.getDocument().getString("outerCode");
+            String exitCode = documentChange.getDocument().getString("exitCode");
 
             float outerRadii = outerRad != null ? outerRad.floatValue() : Float.NaN;
             float innerRadii = innerRad != null ? innerRad.floatValue() : Float.NaN;
@@ -287,7 +288,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 } else {
                     alerstatus = R.drawable.get_out;
                 }
-                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRadii, innerRadii, alertEntryType,innerCode, outerCode ));
+                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRadii, innerRadii, alertEntryType,innerCode, outerCode, exitCode));
 
             }
         }
