@@ -40,11 +40,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            distanceTextView = itemView.findViewById(R.id.distance);
             alertTitleTextView = itemView.findViewById(R.id.alertTitle);
             noteTextView = itemView.findViewById(R.id.note);
-            entryStat = itemView.findViewById(R.id.imageView2);
-            imageView1 = itemView.findViewById(R.id.imageView6);
+            entryStat = itemView.findViewById(R.id.imageView9);
+
 
             // Set click listener
             itemView.setOnClickListener(this);
@@ -71,11 +70,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DataModel data = dataList.get(position);
 
-        holder.distanceTextView.setText(data.getDistance());
+
         holder.alertTitleTextView.setText(data.getAlertTitle());
         holder.noteTextView.setText(data.getNote());
         holder.entryStat.setImageResource(data.getImageResource());
-        holder.imageView1.setImageResource(data.getImageResource1());
     }
 
     @Override

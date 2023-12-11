@@ -90,6 +90,13 @@
         <activity
             android:name=".main_app.MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".main_app.create_geofence_functions.ShowMap"
+            android:exported="false" />
+
+
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc" />
@@ -121,10 +128,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- AndroidManifest.xml -->
-        <service
-            android:name=".main_app.create_geofence_functions.AlarmService"
-            android:stopWithTask="false" />
+
 
 
 

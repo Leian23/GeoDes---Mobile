@@ -250,6 +250,9 @@ public class map_home extends AppCompatActivity {
     List<DataModel> dataForAlerts;
     Adapter adapter4;
 
+    public TextView distanceView;
+    public TextView DisplayTone;
+
 
 
     @Override
@@ -383,6 +386,8 @@ public class map_home extends AppCompatActivity {
         alertEditName = findViewById(R.id.NameAlertBox12);
         deleteAlert = findViewById(R.id.DeleteAlert1);
         navigationView = findViewById(R.id.nav_view);
+        distanceView = findViewById(R.id.viewDistance);
+        DisplayTone = findViewById(R.id.choosenRingtone);
 
 
         View headerView = navigationView.getHeaderView(0);
@@ -938,7 +943,7 @@ public class map_home extends AppCompatActivity {
 
 
                             if (alertEnabled != null && alertEnabled) {
-                                dataForAlerts.add(new DataModel("54 km", R.drawable.get_in, alertName, alertNotes, R.drawable.pinalerts, geoPoint, uniID));
+                                dataForAlerts.add(new DataModel( R.drawable.get_in, alertName, alertNotes, geoPoint, uniID));
                                 createGeofences(uniID, geoPoint, alertName, outerFloat, innerFloat, outerCode, innerCode);
 
                                 // Add the ID to the set to mark it as added
@@ -978,7 +983,7 @@ public class map_home extends AppCompatActivity {
                             String alertName = document.getString("alertName");
                             String alertNotes = document.getString("notes");
                             Double outer = document.getDouble("outerRadius");
-                            String exCode = document.getString("outerCode"); //EntryType
+                            String exCode = document.getString("exitCode"); //EntryType
 
 
                             Map<String, Object> location = (Map<String, Object>) document.get("location");
@@ -992,7 +997,7 @@ public class map_home extends AppCompatActivity {
 
 
                             if (alertEnabled != null && alertEnabled) {
-                                dataForAlerts.add(new DataModel("54 km", R.drawable.get_out, alertName, alertNotes, R.drawable.pinalerts, geoPoint, uniID));
+                                dataForAlerts.add(new DataModel( R.drawable.get_out, alertName, alertNotes, geoPoint, uniID));
 
                                 createExitGeofence(uniID, geoPoint, alertName, outerFloat, exCode);
                                 existingGeofenceIds.add(uniID);
@@ -1902,7 +1907,7 @@ if(botschedEmail != null) {
         geofenceData.put("email", currentUser.getEmail());
         geofenceData.put("notes", Notes);
         geofenceData.put("location",Point);
-        geofenceData.put("outerRadius",outRadius);
+        geofenceData.put("exitCode",outRadius);
         geofenceData.put("outerCode", ExitCode);
         geofenceData.put("alertEnabled", alertenabled);
         geofenceData.put("EntryType", isExit);
@@ -2143,7 +2148,7 @@ if(botschedEmail != null) {
         return isButtonClicked;
     }
 
-    private void removeItemFromList(String uniqueID) {
+    public void removeItemFromList(String uniqueID) {
         for (int i = 0; i < dataForAlerts.size(); i++) {
             if (dataForAlerts.get(i).getUnId().equals(uniqueID)) {
                 dataForAlerts.remove(i);

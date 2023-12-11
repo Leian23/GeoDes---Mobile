@@ -15,12 +15,11 @@ public class DataModel {
 
 
 
-    public DataModel(String distance, int imageResource, String alertTitle, String note, int imageResource1, GeoPoint geoPoint, String unId) {
-        this.distance = distance;
+    public DataModel( int imageResource, String alertTitle, String note, GeoPoint geoPoint, String unId) {
+
         this.imageResource = imageResource;
         this.alertTitle = alertTitle;
         this.note = note;
-        this.imageResource1 = imageResource1;
         this.geoPoint = geoPoint;
         this.unId = unId;
     }
@@ -51,4 +50,7 @@ public class DataModel {
     public String getUnId() {
         return unId;
     }
+
+
+
 }

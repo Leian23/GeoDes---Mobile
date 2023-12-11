@@ -203,7 +203,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     }
 
 
-
     private void showDismissNotificationInner(Context context) {
         // Create a notification channel for Android Oreo and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

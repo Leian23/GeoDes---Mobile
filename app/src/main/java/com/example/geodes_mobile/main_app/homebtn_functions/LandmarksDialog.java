@@ -97,7 +97,7 @@ public class LandmarksDialog extends Dialog {
                 "LRT,Tricycle Terminal,Bus Terminal,Jeepney Terminal,Bus Station,JAC Liner,JAM Liner,Victory Liner",
                 "Shangrila Mall,Vista Mall,Mall of Asia,SM Store,SM City,Robinsons Place,Robinsons,Robinsons Galleria,Savemore",
                 "FamilyMart,7-Eleven,Uncle John's",
-                ""
+                "Park"
         };
 
         String[] prefsKeys = new String[] {
@@ -402,6 +402,9 @@ public class LandmarksDialog extends Dialog {
                         break;
                     case "familymart":
                         resourceId = R.drawable.family_mart_marker;
+                        break;
+                    case "Park":
+                        
                         break;
                     default:
                         resourceId = 0;

@@ -58,28 +58,14 @@
                     android:layout_marginRight="8dp"
                     android:src="@drawable/baseline_volume_up_24" />
 
-                <TextView
-                    android:id="@+id/VolumeStats1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="31dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="16dp"
-                    android:layout_toEndOf="@+id/imageIcon1"
-                    android:layout_toRightOf="@id/imageIcon1"
-                    android:text="5/10"
-                    android:textColor="#888888"
-                    android:textSize="16sp" />
+
 
                 <TextView
-                    android:id="@+id/ringtonechosen1"
+                    android:id="@+id/choosenRingtone"
                     android:layout_width="wrap_content"
                     android:layout_height="31dp"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginStart="65dp"
                     android:layout_marginBottom="16dp"
                     android:layout_toEndOf="@+id/imageIcon1"
                     android:layout_toRightOf="@id/imageIcon1"
@@ -119,7 +105,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/viewAlertTitle1"
+                android:id="@+id/viewDistance"
                 android:layout_width="86dp"
                 android:layout_height="25dp"
                 android:layout_marginLeft="10dp"
@@ -340,8 +326,8 @@
 
                 android:layout_marginBottom="125dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/viewAlertTitle1"
-                app:layout_constraintHorizontal_bias="0.780"
+                app:layout_constraintEnd_toStartOf="@+id/viewDistance"
+                app:layout_constraintHorizontal_bias="0.760"
                 app:layout_constraintStart_toStartOf="parent"
                 app:srcCompat="@drawable/pinalerts" />
 
@@ -349,7 +335,7 @@
                 android:id="@+id/imageView161"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
+                android:layout_marginStart="30dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView141"

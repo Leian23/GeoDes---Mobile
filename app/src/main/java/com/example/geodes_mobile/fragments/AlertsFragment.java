@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +81,11 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
     private ImageButton deleteAlert;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
+    private MyPreferenceFragment preferenceFragment;
+    private SharedPreferences sharedPreferences;
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragments_alerts, container, false);
@@ -137,6 +145,20 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         ((map_home) requireActivity()). notesView.setText(data.getNotesAlert());
 
+        ((map_home) requireActivity()).distanceView.setText(data.getDistance());
+
+        Uri selectedAlarmRingtoneUri = getSelectedAlarmRingtoneUri(context);
+
+        String selectedAlarmRingtoneUriString = selectedAlarmRingtoneUri != null ? selectedAlarmRingtoneUri.toString() : null;
+
+        Log.d("", selectedAlarmRingtoneUriString);
+
+
+      updateUIWithSelectedRingtone(selectedAlarmRingtoneUri);
+
+
+
+
 
         RelativeLayout layout = ((map_home) requireActivity()).findViewById(R.id.infoLayout1);
         layout.setVisibility(View.GONE);
@@ -145,6 +167,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         layout1.setVisibility(View.VISIBLE);
 
         FrameLayout layoutt = ((map_home) requireActivity()).findViewById(R.id.NotAvail1);
+
 
 
        //when the items is clicked the bottom sheet viwewing for alerts will appear and the current fragment
@@ -288,7 +311,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 } else {
                     alerstatus = R.drawable.get_out;
                 }
-                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRadii, innerRadii, alertEntryType,innerCode, outerCode, exitCode));
+                data.add(new DataModel3(alertName, alertNotes, computedDistance, alertEnabled, uniID, alerstatus, latitude, longitude, outerRadii, innerRadii, alertEntryType,innerCode, outerCode, exitCode, userLa, userlo));
 
             }
         }
@@ -507,6 +530,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                     ((map_home) requireActivity()).showElements();
 
                     ((map_home) requireActivity()).removeGeofencesAndMarker(alertId);
+                    ((map_home) requireActivity()).removeItemFromList(alertId);
 
 
                 })
@@ -532,5 +556,54 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 })
                 .show();
     }
+
+
+
+
+    private Uri getSelectedAlarmRingtoneUri(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String uriString = sharedPreferences.getString("selected_alarm_ringtone_uri", null);
+
+        if (uriString != null) {
+            return Uri.parse(uriString);
+        } else {
+            // If URI is null, use the default ringtone URI
+            Uri defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            return defaultRingtoneUri;
+        }
+    }
+
+    private String getRingtoneTitle(Uri ringtoneUri) {
+        if (ringtoneUri == null) {
+            return null;
+        }
+
+        Ringtone ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
+        if (ringtone != null) {
+            return ringtone.getTitle(context);
+        }
+
+        return null;
+    }
+
+
+    private void updateUIWithSelectedRingtone(Uri selectedAlarmRingtoneUri) {
+        String ringtoneTitle = getRingtoneTitle(selectedAlarmRingtoneUri);
+
+        // Update your UI with the ringtone title
+        ((map_home) requireActivity()).DisplayTone.setText(ringtoneTitle);
+    }
+
+
+
+
+    public static AlertsFragment getInstance() {
+        return new AlertsFragment();
+    }
+
+
+
+
+
 
 }
