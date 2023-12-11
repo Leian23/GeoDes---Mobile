@@ -13,6 +13,7 @@ import com.example.geodes_mobile.useraccess.signupActivity;
 import com.example.geodes_mobile.useraccess.useraccessActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -23,6 +24,15 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        // Check if the user is already authenticated
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            // User is already logged in, finish MainActivity and go to the next screen
+            Intent intent = new Intent(MainActivity.this, map_home.class);
+            startActivity(intent);
+            finish();
+        }
 
         Button getStartedbtn = findViewById(R.id.getstartbtn);
         TextView startSigninText = findViewById(R.id.start_signin);

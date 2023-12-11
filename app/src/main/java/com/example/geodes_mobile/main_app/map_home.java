@@ -252,6 +252,7 @@ public class map_home extends AppCompatActivity {
 
     public TextView distanceView;
     public TextView DisplayTone;
+    private TextView userView;
 
 
 
@@ -392,11 +393,16 @@ public class map_home extends AppCompatActivity {
 
         View headerView = navigationView.getHeaderView(0);
         ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
+        userView = headerView.findViewById(R.id.UserInfo);
+
+
+
 
         loadUserProfilePicture(headerImageView);
 
         //initialize if theres user
         getUserFromFirestore();
+
 
         toggleMon = findViewById(R.id.toggleMon1);
         toggleTue = findViewById(R.id.toggleTue2);
@@ -503,8 +509,6 @@ public class map_home extends AppCompatActivity {
 
                 FirebaseUser currentUser = mAuth.getCurrentUser();
 
-                showElements();
-
                 GeoPoint retrievedGeoPoint = MapFunctionHandler.getMarkerLocation();
                 float outer = (float) MapFunctionHandler.getOuterRadius();
                 float inner = (float) MapFunctionHandler.getInnerRadius();
@@ -532,6 +536,13 @@ public class map_home extends AppCompatActivity {
                 String notesText =  NotesText.getText().toString();
 
                 // It's not clear what createGeofences method does, make sure it's using the correct geofenceSetup instance
+
+                if (enteredText.isEmpty() || notesText.isEmpty()) {
+                    Toast.makeText(context, "Please enter both alert name and notes", Toast.LENGTH_SHORT).show();
+                    return; // Do not proceed with saving if inputs are not valid
+                }
+
+                showElements();
 
 
                 if (locationHandler.geTEntryOrExit()) {
@@ -607,6 +618,7 @@ public class map_home extends AppCompatActivity {
                 locationHandler.dropPinOnMap1();
             }
         });
+
 
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -2127,6 +2139,11 @@ if(botschedEmail != null) {
                 userRef.get()
                         .addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()) {
+                                String userName = documentSnapshot.getString("firstName");
+
+                                // Set the user's data to the userView or perform any other actions
+                                userView.setText("Hello, " + userName);
+
                             } else {
                                 Log.e(TAG, "User's document does not exist in Firestore");
                             }
@@ -2141,6 +2158,7 @@ if(botschedEmail != null) {
             Log.e(TAG, "User is not signed in");
         }
     }
+
 
 
 

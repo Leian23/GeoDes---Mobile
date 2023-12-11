@@ -18,7 +18,7 @@
             android:id="@+id/imageView9"
             android:layout_width="47dp"
             android:layout_height="42dp"
-            android:layout_marginStart="100dp"
+            android:layout_marginStart="104dp"
             android:layout_marginTop="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -39,9 +39,8 @@
 
         <TextView
             android:id="@+id/alertTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="92dp"
+            android:layout_width="87dp"
+            android:layout_height="21dp"
             android:alpha="0.7"
             android:ellipsize="end"
             android:maxLines="1"
@@ -51,20 +50,24 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.257"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.145" />
+            app:layout_constraintVertical_bias="0.125" />
 
         <TextView
             android:id="@+id/note"
-            android:layout_width="71dp"
+            android:layout_width="80dp"
             android:layout_height="32dp"
-            android:layout_marginEnd="72dp"
+            android:layout_marginEnd="60dp"
             android:ellipsize="end"
             android:maxLines="2"
             android:text="no note"
             android:textSize="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageView6"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.722" />
 
