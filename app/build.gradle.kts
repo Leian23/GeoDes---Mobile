@@ -92,7 +92,7 @@ dependencies {
     implementation ("com.loopj.android:android-async-http:1.4.11")
     implementation ("com.squareup.picasso:picasso:2.71828")
 
-    implementation ("com.google.android.gms:play-services-location:18.0.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.0")
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation ("com.google.firebase:firebase-storage")
     implementation ("com.github.bumptech.glide:glide:4.12.0")

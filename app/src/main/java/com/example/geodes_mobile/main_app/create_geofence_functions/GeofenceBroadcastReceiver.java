@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,55 +27,75 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-public class GeofenceBroadcastReceiver extends BroadcastReceiver {
+    public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "GeofenceReceiver";
-    private static final String CHANNEL_ID = "GeofenceChannel";
-    private static final int NOTIFICATION_ID_OUTER = 1;
-    private static final int NOTIFICATION_ID_INNER = 2;
-    private static final int ALARM_NOTIFICATION_ID = 3;
-    public static final int DISMISS_NOTIFICATION_ID = 4;
+        private static final String TAG = "GeofenceReceiver";
 
-    private String fenceName;
-    private String alertType;
+        private static final String CHANNEL_ID = "GeofenceChannel";
+        private static final int NOTIFICATION_ID_OUTER = 1;
+        private static final int NOTIFICATION_ID_INNER = 2;
+        private static final int ALARM_NOTIFICATION_ID = 3;
+        public static final int DISMISS_NOTIFICATION_ID = 4;
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, "This is geofence!", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "onReceive: Geofence broadcast received.");
+        private String fenceName;
+        private String alertType;
 
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if (geofencingEvent == null) {
-            Log.e(TAG, "onReceive: GeofencingEvent is null");
-            return;
-        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Acquire a wake lock to ensure the device stays awake during processing
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            if (powerManager == null) {
+                Log.e(TAG, "PowerManager is null");
+                return;
+            }
 
-        if (geofencingEvent.hasError()) {
-            Log.e(TAG, "onReceive: Error receiving geofence event: " + geofencingEvent.getErrorCode());
-            return;
-        }
+            // Update the WakeLock tag with a unique prefix
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "com.example.geodes_mobile:GeofenceWakeLock");
+            wakeLock.acquire();
 
-        List<Geofence> triggeredGeofences = geofencingEvent.getTriggeringGeofences();
-        int transition = geofencingEvent.getGeofenceTransition();
+            try {
+                // Your existing code for handling geofence events
+                Toast.makeText(context, "This is geofence!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onReceive: Geofence broadcast received.");
 
-        for (Geofence geofence : triggeredGeofences) {
-            Log.d(TAG, "onReceive: Triggered Geofence - ID: " + geofence.getRequestId());
-            fenceName = intent.getStringExtra("GEOFENCE_NAME");
-            if (fenceName != null) {
-                if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    // Entry Events
-                    Log.d(TAG, "onReceive: ENTER from " + fenceName);
-                    handleEntryEvent(context, fenceName, geofence);
-                } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                    // Exit Events
-                    Log.d(TAG, "onReceive: EXIT from " + fenceName);
-                    handleExitEvent(context, fenceName);
-                } else {
-                    Log.d(TAG, "onReceive: Unexpected transition type: " + transition);
+                GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+                if (geofencingEvent == null) {
+                    Log.e(TAG, "onReceive: GeofencingEvent is null");
+                    return;
+                }
+
+                if (geofencingEvent.hasError()) {
+                    Log.e(TAG, "onReceive: Error receiving geofence event: " + geofencingEvent.getErrorCode());
+                    return;
+                }
+
+                List<Geofence> triggeredGeofences = geofencingEvent.getTriggeringGeofences();
+                int transition = geofencingEvent.getGeofenceTransition();
+
+                for (Geofence geofence : triggeredGeofences) {
+                    Log.d(TAG, "onReceive: Triggered Geofence - ID: " + geofence.getRequestId());
+                    fenceName = intent.getStringExtra("GEOFENCE_NAME");
+                    if (fenceName != null) {
+                        if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                            // Entry Events
+                            Log.d(TAG, "onReceive: ENTER from " + fenceName);
+                            handleEntryEvent(context, fenceName, geofence);
+                        } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                            // Exit Events
+                            Log.d(TAG, "onReceive: EXIT from " + fenceName);
+                            handleExitEvent(context, fenceName);
+                        } else {
+                            Log.d(TAG, "onReceive: Unexpected transition type: " + transition);
+                        }
+                    }
+                }
+            } finally {
+                // Ensure to release the wake lock when processing is complete
+                if (wakeLock != null && wakeLock.isHeld()) {
+                    wakeLock.release();
                 }
             }
         }
-    }
 
     private void handleEntryEvent(Context context, String geofenceName, Geofence geofence) {
         int value1 = Integer.parseInt(geofence.getRequestId());
