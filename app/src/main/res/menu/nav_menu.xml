@@ -23,7 +23,7 @@
         </item>
         <item android:id="@+id/help"
             android:icon="@drawable/baseline_help_24"
-            android:title="Help" >
+            android:title="Help and Tips" >
         </item>
         <item android:id="@+id/feedback"
             android:icon="@drawable/baseline_feedback_24"

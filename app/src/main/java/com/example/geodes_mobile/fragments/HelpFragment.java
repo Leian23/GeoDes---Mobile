@@ -18,6 +18,7 @@ public class HelpFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragments_help, container, false);
 
+
         ImageButton menuButton = rootView.findViewById(R.id.menu_button);
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
 

@@ -90,7 +90,6 @@ import java.util.List;
                     }
                 }
             } finally {
-                // Ensure to release the wake lock when processing is complete
                 if (wakeLock != null && wakeLock.isHeld()) {
                     wakeLock.release();
                 }
@@ -153,7 +152,6 @@ import java.util.List;
                 if (notificationManager != null) {
                     notificationManager.notify(NOTIFICATION_ID_OUTER, innerNotification);
                 }
-
             }
 
             Log.d(TAG, "onReceive: Entered InnerGeofence. Alarm scheduled.");
