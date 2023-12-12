@@ -19,7 +19,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -957,6 +956,7 @@ public class map_home extends AppCompatActivity {
                             if (alertEnabled != null && alertEnabled) {
                                 dataForAlerts.add(new DataModel( R.drawable.get_in, alertName, alertNotes, geoPoint, uniID));
                                 createGeofences(uniID, geoPoint, alertName, outerFloat, innerFloat, outerCode, innerCode);
+
 
                                 // Add the ID to the set to mark it as added
                                 existingGeofenceIds.add(uniID);
@@ -1919,8 +1919,8 @@ if(botschedEmail != null) {
         geofenceData.put("email", currentUser.getEmail());
         geofenceData.put("notes", Notes);
         geofenceData.put("location",Point);
-        geofenceData.put("exitCode",outRadius);
-        geofenceData.put("outerCode", ExitCode);
+        geofenceData.put("outerRadius",outRadius);
+        geofenceData.put("exitCode", ExitCode);
         geofenceData.put("alertEnabled", alertenabled);
         geofenceData.put("EntryType", isExit);
 

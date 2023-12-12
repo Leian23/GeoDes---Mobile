@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -31,9 +30,6 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
-
-
 
 
 
@@ -91,15 +87,14 @@
             android:name=".main_app.MainActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".main_app.create_geofence_functions.ShowMap"
-            android:exported="false" />
 
 
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc" />
+
+
 
         <receiver
             android:name=".main_app.create_geofence_functions.GeofenceBroadcastReceiver"
@@ -127,8 +122,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-
 
 
 

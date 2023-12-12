@@ -187,7 +187,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         // Use PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 0, dismissIntent, flags);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 5, dismissIntent, flags);
 
         // Build the notification
         Notification dismissNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -219,7 +219,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         // Use PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 0, dismissIntent, flags);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 6, dismissIntent, flags);
 
         // Build the notification
         Notification dismissNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -251,7 +251,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         // Use PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
         int flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 0, dismissIntent, flags);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context, 7, dismissIntent, flags);
 
         // Build the notification
         Notification dismissNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
