@@ -262,6 +262,8 @@ public class map_home extends AppCompatActivity {
 
     public ImageButton editSchedButton;
 
+    public ImageButton deleteSchedule;
+
 
 
     @Override
@@ -402,6 +404,7 @@ public class map_home extends AppCompatActivity {
         schedRep = findViewById(R.id.schedRepeat);
         alarmList = findViewById(R.id.AlarmLists);
         editSchedButton = findViewById(R.id.EditSchedule);
+        deleteSchedule = findViewById(R.id.DeleteSchedule);
 
 
 
@@ -479,6 +482,15 @@ public class map_home extends AppCompatActivity {
             public void onClick(View v) {
                 FirebaseUser currentUser = mAuth.getCurrentUser();
                 saveSchedToFirestore(currentUser);
+
+                findViewById(R.id.add_schedule).setVisibility(View.GONE);
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+                getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+
             }
         });
 

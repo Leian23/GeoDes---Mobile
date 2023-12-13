@@ -115,6 +115,7 @@
             </TextView>
 
 
+
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/horizontalScrollView"
                 android:layout_width="365dp"

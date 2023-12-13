@@ -1,5 +1,6 @@
 package com.example.geodes_mobile.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -45,6 +47,9 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
 
     private String concatenatedString;
 
+    private FirebaseFirestore firestore;
+
+    private View rootView;
 
 
 
@@ -52,7 +57,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragments_schedules, container, false);
+         rootView = inflater.inflate(R.layout.fragments_schedules, container, false);
 
         db = FirebaseFirestore.getInstance();
 
@@ -62,6 +67,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         context = getContext();
 
 
+        firestore = FirebaseFirestore.getInstance();
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
 
         fetchDataFromFirestore(rootView);
@@ -79,6 +85,8 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
             ((map_home) requireActivity()).hideElements(true);
             ((map_home) requireActivity()).BottomSheetAddSched();
         });
+
+
 
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -251,22 +259,87 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         ((map_home) requireActivity()).SchedStart.setText(data.getTimeStart());
         ((map_home) requireActivity()).alarmList.setText(data.getAlarmList());
 
-
-
-
         ImageButton editSched = ((map_home) requireActivity()).editSchedButton.findViewById(R.id.EditSchedule);
-        editSched.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Log statement indicating that the ImageButton was tapped
-                Log.d("ImageButton", "EditAlertIcon tapped");
+        editSched.setOnClickListener(view -> {
+            // Log statement indicating that the ImageButton was tapped
+            Log.d("ImageButton", "EditAlertIcon tapped");
 
-                SchedEditDialog schedDialog = new SchedEditDialog(getActivity(), data.getUniqueId());
-                schedDialog.show();
-            }
+            SchedEditDialog schedDialog = new SchedEditDialog(getActivity(), data.getUniqueId());
+            schedDialog.show();
+        });
+
+        ImageButton deleteASched = ((map_home) requireActivity()).deleteSchedule.findViewById(R.id.DeleteSchedule);
+        deleteASched.setOnClickListener(view -> {
+            // Log statement indicating that the ImageButton was tapped
+            Log.d("ImageButton", "DeleteAlert1 tapped");
+
+            showConfirmationDialog(data.getUniqueId());
         });
     }
+
+
+
+
+    private void deleteAlertFromFirestore(String alertId) {
+        // Get the reference to the document you want to delete
+        DocumentReference entryAlertDocRef = firestore.collection("geofenceSchedule").document(alertId);
+
+        // Use a batch write to delete the document atomically
+        firestore.runBatch(batch -> {
+                    batch.delete(entryAlertDocRef);
+                })
+                .addOnSuccessListener(aVoid -> {
+                    fetchDataFromFirestore(rootView);
+
+
+                    View viewAlert1 = requireActivity().findViewById(R.id.viewSchedule);
+                    if (viewAlert1 != null) {
+                        viewAlert1.setVisibility(View.GONE);
+                    }
+
+                    Fragment currentFragment = requireActivity().getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+                    if (currentFragment != null) {
+                        requireActivity().getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
+                    }
+
+                    ((map_home) requireActivity()).setLongPressEnabled(true);
+                    ((map_home) requireActivity()).showElements();
+
+
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AlertsFragment", "Error deleting alert from Firestore: " + e.getMessage());
+                    Toast.makeText(context, "Failed to delete alert", Toast.LENGTH_SHORT).show();
+                });
     }
+
+    private void showConfirmationDialog(String alertId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete this alert?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    // User clicked Delete, proceed with deletion
+                    deleteAlertFromFirestore(alertId);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // User clicked Cancel, do nothing
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+
+
+
+
+
+
+
+
+
+
+}
 
 
 

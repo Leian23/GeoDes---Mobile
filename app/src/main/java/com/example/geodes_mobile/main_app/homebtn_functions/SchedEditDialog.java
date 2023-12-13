@@ -23,6 +23,7 @@ import com.example.geodes_mobile.main_app.bottom_sheet_content.adding_alerts_sch
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -45,6 +46,24 @@ public class SchedEditDialog extends Dialog {
 
     private FirebaseAuth mAUth;
 
+    private DocumentReference alertDocRef;
+
+   private  EditText scheduleNameEdit;
+
+   private TextView editTimePicker;
+
+
+
+
+    private boolean monday = false;
+    private boolean tuesday = false;
+    private boolean wednesday = false;
+    private boolean thursday = false;
+    private boolean friday = false;
+    private boolean saturday = false;
+    private boolean sunday = false;
+
+
     public SchedEditDialog(Activity activity, String itemId) {
         super(activity);
         this.activity = activity;
@@ -58,11 +77,15 @@ public class SchedEditDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.bottom_sheet_sched_edit);
 
-        EditText scheduleNameEdit = findViewById(R.id.ScheduleNameEdit);
-        TextView editTimePicker = findViewById(R.id.EditTimePicker);
+       scheduleNameEdit = findViewById(R.id.ScheduleNameEdit);
+       editTimePicker = findViewById(R.id.EditTimePicker);
         Button discardButton = findViewById(R.id.discardSchedule);
         Button saveButton = findViewById(R.id.ButtonSaveSched);
         GridLayout daysGridLayout = findViewById(R.id.daysGridLayout);
+
+
+
+
 
         editTimePicker.setOnClickListener(v -> showTimePickerDialog());
 
@@ -131,17 +154,39 @@ public class SchedEditDialog extends Dialog {
             });
 
         } else {
-            //user not signed in
+
         }
 
 
-
-
-
+        loadAlertDataFromFirestore();
         setUpDaysGridLayout(daysGridLayout);
 
         getWindow().setBackgroundDrawableResource(R.drawable.rounded_corner);
     }
+
+
+    private void loadAlertDataFromFirestore() {
+        alertDocRef = FirebaseFirestore.getInstance().collection("geofenceSchedule").document(itemId);
+        alertDocRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                scheduleNameEdit.setText(task.getResult().getString("Sched"));
+                editTimePicker.setText(String.valueOf(task.getResult().getString("Time")));
+
+            } else {
+                Log.e("AlertEditDialog", "Error loading data from Firestore: " + task.getException());
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+
 
     private void showTimePickerDialog() {
         Calendar currentTime = Calendar.getInstance();
