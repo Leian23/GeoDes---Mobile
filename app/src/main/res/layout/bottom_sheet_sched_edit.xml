@@ -11,15 +11,7 @@
     app:behavior_peekHeight="80dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="10dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="10dp"
-        app:cardUseCompatPadding="true"
-        android:layout_marginBottom="-4dp" />
+
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -37,7 +29,7 @@
 
             <!-- Discard Button -->
             <Button
-                android:id="@+id/discardSched"
+                android:id="@+id/discardSchedule"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="22dp"
@@ -53,7 +45,7 @@
 
 
             <Button
-                android:id="@+id/btnSaveSchedEdit"
+                android:id="@+id/ButtonSaveSched"
                 android:layout_width="82dp"
                 android:layout_height="46dp"
                 android:layout_marginEnd="28dp"
@@ -69,7 +61,7 @@
 
 
             <EditText
-                android:id="@+id/notesEditText1"
+                android:id="@+id/ScheduleNameEdit"
                 android:layout_width="202dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="220dp"
@@ -115,19 +107,8 @@
 
             </TextView>
 
-            <ImageButton
-                android:layout_width="27dp"
-                android:layout_height="25dp"
-                android:id="@+id/addAlerts"
-                android:layout_marginBottom="180dp"
-                android:background="@drawable/add_alert_bottom_sheet"
-                android:src="@drawable/add_icon"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.895"
-                app:layout_constraintStart_toStartOf="parent">
 
-            </ImageButton>
+
 
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/horizontalScrollView"
@@ -142,7 +123,7 @@
                 app:layout_constraintVertical_bias="0.795">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/scheds_recyclerView"
+                    android:id="@+id/scheds_recyclerViewedit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
@@ -165,43 +146,43 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ToggleButton
-                    android:id="@+id/toggleMon"
+                    android:id="@+id/MonToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="mon"
                     android:textOn="mon" />
 
                 <ToggleButton
-                    android:id="@+id/toggleTue"
+                    android:id="@+id/TueToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="tue"
                     android:textOn="tue" />
 
                 <ToggleButton
-                    android:id="@+id/toggleWed"
+                    android:id="@+id/WedToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="wed"
                     android:textOn="wed" />
 
                 <ToggleButton
-                    android:id="@+id/toggleThu"
+                    android:id="@+id/ThuToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="thu"
                     android:textOn="thu" />
 
                 <ToggleButton
-                    android:id="@+id/toggleFri"
+                    android:id="@+id/FriToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="fri"
                     android:textOn="fri" />
 
                 <ToggleButton
-                    android:id="@+id/toggleSat"
+                    android:id="@+id/SatToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="sat"
                     android:textOn="sat" />
 
                 <ToggleButton
-                    android:id="@+id/toggleSun"
+                    android:id="@+id/SunToggle"
                     style="@style/CircleToggleButton"
                     android:textOff="sun"
                     android:textOn="sun" />

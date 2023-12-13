@@ -20,8 +20,10 @@ public class DataModel4 {
 
     private List<String> selectedItemsIds;
 
+    private String AlarmList;
 
-    public DataModel4(String schedTitle, String getTime, String schedAlarms, int iconCal, int entryImage, int iconMarker, Boolean isAlertSwitchOn, String uniqueId, String Schedules, List<String> selectedItemsIds) {
+
+    public DataModel4(String schedTitle, String getTime, String schedAlarms, int iconCal, int entryImage, int iconMarker, Boolean isAlertSwitchOn, String uniqueId, String Schedules, List<String> selectedItemsIds, String AlarmList) {
         this.schedTitle = schedTitle;
         this.getTime = getTime;
         this.schedAlarms = schedAlarms;
@@ -32,6 +34,7 @@ public class DataModel4 {
         this.uniqueId = uniqueId;
         this.Schedules = Schedules;
         this.selectedItemsIds = selectedItemsIds;
+        this.AlarmList = AlarmList;
     }
 
     public String getSchedTitle() {
@@ -76,6 +79,10 @@ public class DataModel4 {
 
     public List<String> getSelectedItemsIds() {
         return selectedItemsIds;
+    }
+
+    public String getAlarmList(){
+        return AlarmList;
     }
 }
 

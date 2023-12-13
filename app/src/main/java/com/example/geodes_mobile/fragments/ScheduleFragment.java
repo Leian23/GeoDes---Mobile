@@ -1,6 +1,8 @@
 package com.example.geodes_mobile.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +17,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.homebtn_functions.SchedEditDialog;
 import com.example.geodes_mobile.main_app.map_home;
 import com.example.geodes_mobile.main_app.schedule_settings_adaptor.Adapter4;
 import com.example.geodes_mobile.main_app.schedule_settings_adaptor.DataModel4;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickListener {
@@ -31,6 +39,14 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
     private FirebaseFirestore db;
     private SwipeRefreshLayout swipeRefreshLayout;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    private Context context;
+
+
+    private String concatenatedString;
+
+
+
 
 
 
@@ -43,6 +59,8 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         ImageButton menuButton = rootView.findViewById(R.id.menu_button);
         ImageButton addButton = rootView.findViewById(R.id.btnAdd);
         swipeRefreshLayout = rootView.findViewById(R.id.swipeRefreshLayout);
+        context = getContext();
+
 
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
 
@@ -61,6 +79,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
             ((map_home) requireActivity()).hideElements(true);
             ((map_home) requireActivity()).BottomSheetAddSched();
         });
+
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
             fetchDataFromFirestore(rootView);
@@ -132,13 +151,80 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                                 if (stringBuilder.length() > 0) {
                                     stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                                 }
-                                int iconCal = R.drawable.calendar_ic;
-                                int entryImage = R.drawable.alarm_ic;
-                                int iconMarker = R.drawable.clock_ic;
-                                data.add(new DataModel4(schedTitle, clock, schedAlarms, iconCal, entryImage, iconMarker, isAlertSwitchOn, UniqueId, result, selectedItemsIds));
+
+
+
+                                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                                List<String> concatenatedAlertNames = new ArrayList<>();
+
+                                List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+
+                                for (String id : selectedItemsIds) {
+                                    Task<QuerySnapshot> entryTask = db.collection("geofencesEntry")
+                                            .whereEqualTo("uniqueID", id)
+                                            .get()
+                                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                                    String alertName = documentSnapshot.getString("alertName");
+                                                    if (alertName != null) {
+                                                        Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
+                                                        concatenatedAlertNames.add(alertName);
+                                                        // Match found, no need to check further
+                                                        return;
+                                                    }
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                // Handle failure if needed
+                                            });
+
+                                    tasks.add(entryTask);
+
+                                    Task<QuerySnapshot> exitTask = db.collection("geofencesExit")
+                                            .whereIn("uniqueID", Collections.singletonList(id))
+                                            .get()
+                                            .addOnSuccessListener(queryDocumentSnapshotsExit -> {
+                                                for (DocumentSnapshot documentSnapshotExit : queryDocumentSnapshotsExit) {
+                                                    String alertNameExit = documentSnapshotExit.getString("alertName");
+                                                    if (alertNameExit != null) {
+                                                        Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertNameExit);
+                                                        concatenatedAlertNames.add(alertNameExit);
+                                                        // Match found, no need to check further
+                                                        return;
+                                                    }
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                // Handle failure if needed
+                                            });
+
+                                    tasks.add(exitTask);
+                                }
+
+                                Tasks.whenAllComplete(tasks)
+                                        .addOnSuccessListener(voids -> {
+                                            // All tasks completed successfully
+                                            concatenatedString = concatenatedAlertNames.toString();
+
+                                            // Remove brackets from the string
+                                            concatenatedString = concatenatedString.substring(1, concatenatedString.length() - 1);
+
+                                            // Use the concatenatedString as needed
+                                            Log.d(TAG, "Concatenated Alert Names: " + concatenatedString);
+
+                                            int iconCal = R.drawable.calendar_ic;
+                                            int entryImage = R.drawable.alarm_ic;
+                                            int iconMarker = R.drawable.clock_ic;
+                                            data.add(new DataModel4(schedTitle, clock, schedAlarms, iconCal, entryImage, iconMarker, isAlertSwitchOn, UniqueId, result, selectedItemsIds, concatenatedString));
+                                            updateAdapterWithData(data, rootView);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Handle failure if needed
+                                        });
                             }
                         }
-                        updateAdapterWithData(data, rootView);
+
                     } else {
                         Toast.makeText(getContext(), "Error fetching data from Firestore", Toast.LENGTH_SHORT).show();
                     }
@@ -159,5 +245,28 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         ((map_home) requireActivity()).hideElements(true);
         ((map_home) requireActivity()).ViewSched();
         ((map_home) requireActivity()).setLongPressEnabled(false);
+
+        ((map_home) requireActivity()).SchedTitle.setText(data.getSchedTitle());
+        ((map_home) requireActivity()).schedRep.setText(data.getSchedules());
+        ((map_home) requireActivity()).SchedStart.setText(data.getTimeStart());
+        ((map_home) requireActivity()).alarmList.setText(data.getAlarmList());
+
+
+
+
+        ImageButton editSched = ((map_home) requireActivity()).editSchedButton.findViewById(R.id.EditSchedule);
+        editSched.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Log statement indicating that the ImageButton was tapped
+                Log.d("ImageButton", "EditAlertIcon tapped");
+
+                SchedEditDialog schedDialog = new SchedEditDialog(getActivity(), data.getUniqueId());
+                schedDialog.show();
+            }
+        });
     }
-}
+    }
+
+
+

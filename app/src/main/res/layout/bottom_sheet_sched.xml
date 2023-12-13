@@ -114,19 +114,6 @@
 
             </TextView>
 
-            <ImageButton
-                android:layout_width="27dp"
-                android:layout_height="25dp"
-                android:id="@+id/addAlerts"
-                android:layout_marginBottom="180dp"
-                android:background="@drawable/add_alert_bottom_sheet"
-                android:src="@drawable/add_icon"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.895"
-                app:layout_constraintStart_toStartOf="parent">
-
-            </ImageButton>
 
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/horizontalScrollView"

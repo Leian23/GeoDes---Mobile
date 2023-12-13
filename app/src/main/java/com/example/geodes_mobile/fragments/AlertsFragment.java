@@ -156,10 +156,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
       updateUIWithSelectedRingtone(selectedAlarmRingtoneUri);
 
-
-
-
-
         RelativeLayout layout = ((map_home) requireActivity()).findViewById(R.id.infoLayout1);
         layout.setVisibility(View.GONE);
 

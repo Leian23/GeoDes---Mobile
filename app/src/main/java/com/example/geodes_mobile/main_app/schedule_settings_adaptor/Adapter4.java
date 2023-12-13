@@ -26,6 +26,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
     private List<DataModel4> dataList;
     private Context context;
     private OnItemClickListener listener;
+    private String alertName;
 
     public Adapter4(List<DataModel4> dataList, Context context) {
         this.dataList = dataList;
@@ -50,6 +51,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
         holder.entryImageImageView.setImageResource(data.getEntryImage());
         holder.iconMarkerImageView.setImageResource(data.getIconMarker());
         holder.scheduled.setText(data.getSchedules());
+        holder.listOfAlerts.setText(data.getAlarmList());
 
         // Set an OnCheckedChangeListener for the switch
         holder.alertSwitch.setOnCheckedChangeListener(null); // Remove previous listener to avoid conflicts
@@ -66,7 +68,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
                     Log.e(TAG, data.getSelectedItemsIds().toString());
                     Toast.makeText(context, "" + data.getSelectedItemsIds(), Toast.LENGTH_SHORT).show();
 
-                    compareIdsAndRetrieveAlertName(data.getSelectedItemsIds());
+                   // compareIdsAndRetrieveAlertName(data.getSelectedItemsIds());
                 } else {
                     Log.e(TAG, "ie false");
                 }
@@ -105,6 +107,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
         Switch alertSwitch;
 
         TextView scheduled;
+        TextView listOfAlerts;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,6 +119,8 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
             iconMarkerImageView = itemView.findViewById(R.id.clockSchedIc);
             alertSwitch = itemView.findViewById(R.id.AlertSwitch);
             scheduled = itemView.findViewById(R.id.ScheduleSched);
+            listOfAlerts = itemView.findViewById(R.id.AlertDesc);
+
         }
     }
 
@@ -151,7 +156,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                            String alertName = documentSnapshot.getString("alertName");
+                             alertName = documentSnapshot.getString("alertName");
                             if (alertName != null) {
                                 Toast.makeText(context, "Match found in geofencesEntry. AlertName: " + alertName, Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
@@ -177,7 +182,7 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        String alertName = documentSnapshot.getString("alertName");
+                        alertName = documentSnapshot.getString("alertName");
                         if (alertName != null) {
                             Toast.makeText(context, "Match found in geofencesExit. AlertName: " + alertName, Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertName);
@@ -191,5 +196,11 @@ public class Adapter4 extends RecyclerView.Adapter<Adapter4.ViewHolder> {
                 .addOnFailureListener(e -> {
                     Toast.makeText(context, "Error querying geofencesExit", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+
+
+    public java.lang.String getAlertName() {
+        return alertName;
     }
 }

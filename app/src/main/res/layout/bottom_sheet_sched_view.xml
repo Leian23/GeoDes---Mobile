@@ -81,7 +81,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/ViewAlertTitle"
+                android:id="@+id/ViewSchedTitle"
                 android:layout_width="232dp"
                 android:layout_height="33dp"
                 android:layout_marginTop="7dp"
