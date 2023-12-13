@@ -225,8 +225,6 @@ public class map_home extends AppCompatActivity {
     Map<String, Pair<Polygon, Polygon>> geofencesMapExit = new HashMap<>();
     Map<String, Marker> markersMap = new HashMap<>();
 
-
-
     private String togmon="", togtue="", togwed="", togthu="", togfri="", togsat="", togsun="";
     private ToggleButton toggleMon, toggleTue, toggleWed, toggleThu, toggleFri, toggleSat, toggleSun;
 
@@ -254,6 +252,15 @@ public class map_home extends AppCompatActivity {
     public TextView distanceView;
     public TextView DisplayTone;
     private TextView userView;
+    public TextView SchedTitle;
+
+    public TextView SchedStart;
+
+    public TextView schedRep;
+
+    public TextView alarmList;
+
+    public ImageButton editSchedButton;
 
 
 
@@ -390,11 +397,19 @@ public class map_home extends AppCompatActivity {
         navigationView = findViewById(R.id.nav_view);
         distanceView = findViewById(R.id.viewDistance);
         DisplayTone = findViewById(R.id.choosenRingtone);
+        SchedTitle = findViewById(R.id.ViewSchedTitle);
+        SchedStart = findViewById(R.id.SchedTimeStart);
+        schedRep = findViewById(R.id.schedRepeat);
+        alarmList = findViewById(R.id.AlarmLists);
+        editSchedButton = findViewById(R.id.EditSchedule);
 
 
-        View headerView = navigationView.getHeaderView(0);
+
+                View headerView = navigationView.getHeaderView(0);
         ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
         userView = headerView.findViewById(R.id.UserInfo);
+
+
 
 
 
@@ -690,14 +705,6 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        ImageButton openAddAlertButton = findViewById(R.id.addAlerts);
-        openAddAlertButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                add_sched_dialog alertsAddDialog = new add_sched_dialog(map_home.this);
-                alertsAddDialog.show();
-            }
-        });
 
 
         userloc.setOnClickListener(new View.OnClickListener() {
@@ -846,18 +853,7 @@ public class map_home extends AppCompatActivity {
         editalert = findViewById(R.id.EditAlertIcon1);
 
 
-        //edit the viewsched
-        ImageButton editsched = findViewById(R.id.EditSchedule);
-        editsched.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Log statement indicating that the ImageButton was tapped
-                Log.d("ImageButton", "EditAlertIcon tapped");
 
-                SchedEditDialog schedEditDialog = new SchedEditDialog(map_home.this);
-                schedEditDialog.show();
-            }
-        });
 
 
         // Bottom Sheet
