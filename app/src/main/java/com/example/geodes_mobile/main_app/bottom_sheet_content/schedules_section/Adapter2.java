@@ -1,7 +1,6 @@
 package com.example.geodes_mobile.main_app.bottom_sheet_content.schedules_section;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,14 +40,8 @@ public class Adapter2 extends RecyclerView.Adapter<Adapter2.ViewHolder> {
         holder.imageView.setImageResource(data.getSchedImage());
         holder.calendarImageView.setImageResource(data.getCalendarImage());
         holder.alarmIconImageView.setImageResource(data.getAlarmIcon());
+        holder.alertListsTextView.setText(data.getAlertList());
 
-        // Check if selectedItemsIds is not null before joining
-        if (data.getSelectedItemsIds() != null) {
-            String selectedItemsText = TextUtils.join(", ", data.getSelectedItemsIds());
-            holder.alertListsTextView.setText(selectedItemsText);
-        } else {
-            holder.alertListsTextView.setText("");
-        }
     }
 
 
