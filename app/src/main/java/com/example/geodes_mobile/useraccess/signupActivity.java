@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.useraccess;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.map_home;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -96,7 +98,9 @@ public class signupActivity extends AppCompatActivity {
                                                     if (task.isSuccessful()) {
                                                         // User account created successfully
                                                         Toast.makeText(signupActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-
+                                                        Intent intent = new Intent(signupActivity.this, map_home.class);
+                                                        startActivity(intent);
+                                                        finish();
                                                         // Additional actions if needed (e.g., navigate to another activity)
                                                     } else {
                                                         // If account creation fails, log the error
