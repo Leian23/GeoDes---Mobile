@@ -89,6 +89,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         if (vibrator != null) {
                             long[] pattern = {0, 1000, 1000}; // Vibrate for 1 second, wait for 1 second, repeat
                             vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0));
+
                         }
                     }
                 });

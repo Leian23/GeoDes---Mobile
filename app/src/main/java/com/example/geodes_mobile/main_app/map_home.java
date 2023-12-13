@@ -4,9 +4,11 @@ package com.example.geodes_mobile.main_app;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -274,7 +276,7 @@ public class map_home extends AppCompatActivity {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
 
         firestore = FirebaseFirestore.getInstance();
@@ -311,7 +313,6 @@ public class map_home extends AppCompatActivity {
 
         // Check and request location permissions if needed
 
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // If not granted, request ACCESS_FINE_LOCATION permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
@@ -320,10 +321,11 @@ public class map_home extends AppCompatActivity {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "In order for the app to work properly please enable 'Allow all the time'", Toast.LENGTH_SHORT).show();
                 // If not granted, request ACCESS_BACKGROUND_LOCATION permission
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 456);
+                showPermissionDialog();
             }
 
 
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
             // Set up location request
             locationRequest = new LocationRequest();
@@ -2174,6 +2176,24 @@ if(botschedEmail != null) {
                 break; // Assuming uniqueID is unique, no need to continue searching
             }
         }
+    }
+
+
+
+    private void showPermissionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permission Required")
+                .setMessage("In order for the app to work properly, please enable 'Allow all the time' for location access.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Request ACCESS_BACKGROUND_LOCATION permission
+                        ActivityCompat.requestPermissions(map_home.this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 456);
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false)
+                .show();
     }
 
 
