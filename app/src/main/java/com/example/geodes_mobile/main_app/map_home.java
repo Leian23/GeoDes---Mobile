@@ -632,6 +632,14 @@ public class map_home extends AppCompatActivity {
                 }
                 showElements();
                 locationHandler.dropPinOnMap1();
+
+                BoundingBox boundingBox = locationHandler.centerBoundingBox(retrievedGeoPoint, outer);
+
+                mapView.zoomToBoundingBox(boundingBox, true);
+
+                // Reset map orientation
+                mapView.setMapOrientation(0);
+                mapView.invalidate();
             }
         });
 
@@ -1375,6 +1383,7 @@ public class map_home extends AppCompatActivity {
                         getSupportFragmentManager().beginTransaction().show(currentFragment).commit();
                         locationHandler.setLongPressEnabled(true);
                         findViewById(R.id.add_schedule).setVisibility(View.GONE);
+                        findViewById(R.id.viewSchedule).setVisibility(View.GONE);
                         findViewById(R.id.viewSchedule).setVisibility(View.GONE);
                         findViewById(R.id.viewAlert1).setVisibility(View.GONE);
                     } else {
@@ -2226,13 +2235,6 @@ public class map_home extends AppCompatActivity {
             }
         }
     }
-
-
-
-
-
-
-
 
 
 

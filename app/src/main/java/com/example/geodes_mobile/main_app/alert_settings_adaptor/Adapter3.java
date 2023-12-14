@@ -101,8 +101,6 @@ public class Adapter3 extends RecyclerView.Adapter<Adapter3.ViewHolder> {
                     GeoPoint Point = new GeoPoint(data.getLatitude(), data.getLongitude());
 
                     if (data.getEntryType()) {
-                        mapHome.addGeofence(Point, data.getOuterRadius(), data.getOuterCode(), data.getAlertName(), true);
-                        mapHome.addGeofence(Point, data.getInnerRadius(), data.getInnerCode(), data.getAlertName(), true);
 
                         Log.d("GeofenceLog", "Adding outer geofence: " +
                                 "Point: " + Point +

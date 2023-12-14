@@ -86,6 +86,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
 
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragments_alerts, container, false);
@@ -154,10 +155,7 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
         Log.d("", selectedAlarmRingtoneUriString);
 
 
-      updateUIWithSelectedRingtone(selectedAlarmRingtoneUri);
-
-
-
+        updateUIWithSelectedRingtone(selectedAlarmRingtoneUri);
 
 
         RelativeLayout layout = ((map_home) requireActivity()).findViewById(R.id.infoLayout1);
@@ -211,7 +209,8 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 // Log statement indicating that the ImageButton was tapped
                 Log.d("ImageButton", "DeleteAlert1 tapped");
 
-
+                // Retrieve the data as needed
+                retrieveData(data.getId());
                 showConfirmationDialog(data.getId());
             }
         });
@@ -281,8 +280,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
                 double latitude = (double) location.get("latitude");
                 double longitude = (double) location.get("longitude");
-
-
 
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -513,7 +510,10 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 })
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(context, "Alert deleted", Toast.LENGTH_SHORT).show();
-                    // Refresh the alerts after deletion
+
+
+
+                    //refreshalerts
                     loadAlerts();
 
                     View viewAlert1 = requireActivity().findViewById(R.id.viewAlert1);
@@ -531,14 +531,53 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
                     ((map_home) requireActivity()).removeGeofencesAndMarker(alertId);
                     ((map_home) requireActivity()).removeItemFromList(alertId);
-
-
                 })
                 .addOnFailureListener(e -> {
                     Log.e("AlertsFragment", "Error deleting alert from Firestore: " + e.getMessage());
                     Toast.makeText(context, "Failed to delete alert", Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void retrieveData(String alertId) {
+        firestore.collection("geofencesEntry").document(alertId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String innerCode = documentSnapshot.getString("innerCode");
+                        String outerCode = documentSnapshot.getString("outerCode");
+
+                        mainActivity.clearGeo(innerCode, outerCode);
+
+
+                    } else {
+                        // Document does not exist in geofencesEntry, handle accordingly
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AlertsFragment", "Error retrieving alert data from geofencesEntry: " + e.getMessage());
+                    Toast.makeText(context, "Failed to retrieve alert data from geofencesEntry", Toast.LENGTH_SHORT).show();
+                });
+
+        // Similarly, you can add code to retrieve data from the geofencesExit collection if needed
+        firestore.collection("geofencesExit").document(alertId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+
+                        String exitCode = documentSnapshot.getString("exitCode");
+
+                        mainActivity.removeGeofence(exitCode);
+                    } else {
+                        // Document does not exist in geofencesExit, handle accordingly
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AlertsFragment", "Error retrieving alert data from geofencesExit: " + e.getMessage());
+                    Toast.makeText(context, "Failed to retrieve alert data from geofencesExit", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
 
 
     private void showConfirmationDialog(String alertId) {
@@ -548,7 +587,6 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
                 .setPositiveButton("Delete", (dialog, which) -> {
                     // User clicked Delete, proceed with deletion
                     deleteAlertFromFirestore(alertId);
-
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     // User clicked Cancel, do nothing
