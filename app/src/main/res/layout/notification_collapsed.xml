@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/text_view_expanded"
+        style="@style/TextAppearance.Compat.Notification"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:paddingStart="30dp"
+        android:text="Santa Cruz, Laguna"
+        android:textAlignment="viewStart"
+        android:textColor="#171717"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

@@ -1,6 +1,7 @@
 package com.example.geodes_mobile.fragments;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +19,10 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import com.example.geodes_mobile.Constants;
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.map_home;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MyPreferenceFragment extends PreferenceFragmentCompat {
     private static final String PREF_RINGTONE = "ringtone";
@@ -29,14 +34,21 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
     private static final String PREF_DISTANCE_UNIT = "distance_unit_preference";
     private static final int REQUEST_ALARM_RINGTONE_PICKER = 2;
     private SharedPreferences sharedPreferences;
+    public static final String CHANNEL_ID = "Emergency SOS";
+
+    private FirebaseFirestore db;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        db = FirebaseFirestore.getInstance();
         Preference ringtonePreference = findPreference(PREF_RINGTONE);
+        Preference emergency_sos = findPreference("emergency_sos");
+        Preference contact_number = findPreference("contact_number");
 
         if (ringtonePreference != null) {
             ringtonePreference.setOnPreferenceClickListener(preference -> {
@@ -53,6 +65,33 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
             alarmRingtonePreference.setOnPreferenceClickListener(preference -> {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
                 startActivityForResult(intent, REQUEST_ALARM_RINGTONE_PICKER);
+                return true;
+            });
+        }
+        if (contact_number != null) {
+            contact_number.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    db.collection("users").document(Constants.user_email)
+                            .update("contact_number", sharedPreferences.getString("contact_number", ""));
+                    return true;
+                }
+            });
+        }
+
+        if (emergency_sos != null) {
+            emergency_sos.setOnPreferenceClickListener(preference -> {
+
+                if(prefs.getBoolean("emergency_sos", true)==true){
+                    Log.d("Message", "Emergency SOS ON");
+                    ((map_home)getActivity()).showPersistentNotif();
+                }
+                else {
+                    Log.d("Message", "Emergency SOS OFF");
+                    NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.cancel(77);
+                }
+
                 return true;
             });
         }

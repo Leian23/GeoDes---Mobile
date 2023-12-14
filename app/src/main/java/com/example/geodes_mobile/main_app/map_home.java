@@ -5,6 +5,9 @@ import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -20,10 +23,20 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +47,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +59,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.core.view.GravityCompat;
@@ -57,8 +73,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.geodes_mobile.Constants;
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.AlertsFragment;
+import com.example.geodes_mobile.fragments.CompanionFragment;
 import com.example.geodes_mobile.fragments.FeedbackFragment;
 import com.example.geodes_mobile.fragments.HelpFragment;
 import com.example.geodes_mobile.fragments.MyPreferenceFragment;
@@ -92,6 +110,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -136,6 +155,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -270,6 +291,26 @@ public class map_home extends AppCompatActivity {
     private String concatenatedString;
 
     private Set<String> uniqueIdsSet = new HashSet<>();
+
+    //For Notification Persistent
+    private Location gps_loc;
+    private Location network_loc;
+    private Location final_loc;
+    private double longitude;
+    private double latitude;
+    private String userLocal, userArea;
+    private double get_lat;
+    private double get_long;
+    private String get_alert;
+    private Handler handler;
+    public static final String CHANNEL_ID = "Emergency SOS";
+    private static final String EMAIL_PATTERN =
+            "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+    private static final Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+
+    private NotificationReceiver notificationReceiver;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1081,7 +1122,6 @@ public class map_home extends AppCompatActivity {
                         String result = selectedDays.toString().trim();
 
 
-
                         // Fetch selectedItemsIds array
                         List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
 
@@ -1196,7 +1236,8 @@ public class map_home extends AppCompatActivity {
                                         // Handle overall failure if needed
                                         Log.e(TAG, "Tasks.whenAllComplete failed", overallException);
                                         // Add user feedback for failure if necessary (e.g., display a toast message)
-                                    });;
+                                    });
+                            ;
                         } else {
                             // Log a message if the list is null or empty
                             Log.d(TAG, "No selected items");
@@ -1278,6 +1319,25 @@ public class map_home extends AppCompatActivity {
 
         NavigationView navigationView = findViewById(R.id.nav_view);
 
+        Menu nav_Menu = navigationView.getMenu();
+        TextView navUsername = (TextView) headerView.findViewById(R.id.UserInfo);
+
+        if (isValidEmail(Constants.user_email)) {
+            navUsername.setText(Constants.user_email);
+        } else {
+            navUsername.setText("Anonymous");
+        }
+
+        if (currentUser == null) {
+            nav_Menu.findItem(R.id.smartwatch).setVisible(false);
+            nav_Menu.findItem(R.id.logout).setVisible(false);
+            nav_Menu.findItem(R.id.schedules).setVisible(false);
+            nav_Menu.findItem(R.id.userprof).setVisible(false);
+            nav_Menu.findItem(R.id.settings).setVisible(false);
+        } else {
+            nav_Menu.findItem(R.id.login).setVisible(false);
+        }
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
 
@@ -1307,7 +1367,12 @@ public class map_home extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.frame_layout, new userProfileFragment())
                             .commit();
-                } else if (item.getItemId() == R.id.logout) {
+                }
+                else if (item.getItemId() == R.id.smartwatch) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, new CompanionFragment())
+                            .commit();
+                }else if (item.getItemId() == R.id.logout) {
 
                     mAuth.signOut();
                     mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
@@ -1336,6 +1401,11 @@ public class map_home extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    public static boolean isValidEmail(String email) {
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
 
@@ -1857,6 +1927,16 @@ public class map_home extends AppCompatActivity {
 
         PendingIntent pendingIntent = getGeofencePendingIntent(geofenceName);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         geofencingClient.addGeofences(geofencingRequest, pendingIntent)
                 .addOnSuccessListener(this, new OnSuccessListener<Void>() {
                     @Override
@@ -2217,6 +2297,294 @@ public class map_home extends AppCompatActivity {
         } else {
             Log.e(TAG, "User is not signed in");
         }
+    }
+
+    public void showPersistentNotif(){
+        handler = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                checkAlertIsNear();
+                Handler handler = new Handler();
+                //Need to delay the execution to get the alert
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        showNotification();
+                    }
+                }, 1000);
+                handler.postDelayed(this,7000);
+                Log.d("Message", "Running...");
+            }
+        };
+        handler.post(run);
+    }
+
+    public void callPhone(){
+        Intent clickIntentEmergency = new Intent(Intent.ACTION_CALL);
+        clickIntentEmergency.setData(Uri.parse(Uri.parse("tel:")+ Constants.contact_person));
+        clickIntentEmergency.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getApplication().startActivity(clickIntentEmergency);
+    }
+
+    public void playSos(){
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(context, R.raw.sos);
+            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build());
+
+        }
+
+        if(mediaPlayer.isPlaying()){
+            mediaPlayer.stop();
+
+        }
+        else {
+            mediaPlayer.start();
+
+        }
+
+        // Set volume to maximum
+        AudioManager audioManager = (AudioManager) context.getSystemService(AUDIO_SERVICE);
+        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+
+    }
+    //For Notification Persistent Settings
+    public void showNotification() {
+
+
+        // Create a notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Dismiss Notifications", NotificationManager.IMPORTANCE_LOW);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+        RemoteViews collapsedView = new RemoteViews(this.getPackageName(),
+                R.layout.notification_collapsed);
+        RemoteViews expandedView = new RemoteViews(this.getPackageName(),
+                R.layout.notification_expanded);
+
+        Intent clickIntent = new Intent(this, NotificationReceiver.class);
+        PendingIntent clickPendingIntent = PendingIntent.getBroadcast(this,
+                0, clickIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent clickIntentEmergency = new Intent(this,NotificationReceiver.class);
+        clickIntentEmergency.putExtra("player","play");
+
+        PendingIntent PendingIntentEmergency = PendingIntent.getBroadcast(this,
+                0, clickIntentEmergency, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntentEmergency.isForegroundService();
+        }
+        expandedView.setOnClickPendingIntent(R.id.btn_sos, PendingIntentEmergency);
+
+        //collapsedView.setTextViewText(R.id.text_view_expanded, "Hello World!");
+
+        //expandedView.setImageViewResource(R.id.image_view_expanded, R.drawable.baseline_settings_24);
+        //expandedView.setOnClickPendingIntent(R.id.image_view_expanded, clickPendingIntent);
+
+
+
+
+        expandedView.setTextViewText(R.id.txt_current_location, userLocal + ", " + userArea);
+        collapsedView.setTextViewText(R.id.text_view_expanded, userLocal + ", " + userArea);
+        expandedView.setTextViewText(R.id.txt_expand_alert_near, get_alert);
+
+
+
+
+
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setOngoing(true)
+
+                .setSmallIcon(R.drawable.baseline_settings_24)
+                .setCustomContentView(collapsedView)
+                .setCustomBigContentView(expandedView)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        NotificationManagerCompat.from(this).notify(77, notification);
+
+        //Toast.makeText(getContext(), "Notification Show", Toast.LENGTH_SHORT).show();
+    }
+
+
+    public void checkAlertIsNear(){
+
+        try{
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+
+                return;
+            }
+
+            try {
+
+                gps_loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                network_loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (gps_loc != null) {
+                final_loc = gps_loc;
+                latitude = final_loc.getLatitude();
+                longitude = final_loc.getLongitude();
+            }
+            else if (network_loc != null) {
+                final_loc = network_loc;
+                latitude = final_loc.getLatitude();
+                longitude = final_loc.getLongitude();
+            }
+            else {
+                latitude = 0.0;
+                longitude = 0.0;
+            }
+
+
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE}, 1);
+
+            try {
+
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                if (addresses != null && addresses.size() > 0) {
+                    userLocal = addresses.get(0).getLocality();
+                    userArea = addresses.get(0).getAdminArea();
+
+                }
+                else {
+                    userLocal = "Unknown";
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //Check if alert is near
+
+            db.collection("geofenceSchedule")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@android.support.annotation.NonNull Task<QuerySnapshot> task1) {
+                            if (task1.isSuccessful()) {
+                                for (QueryDocumentSnapshot document1 : task1.getResult()) {
+                                    String email = document1.getString("Email");
+                                    if(email.equalsIgnoreCase(Constants.user_email)){
+
+                                        List<String> selectedItemsIds = (List<String>) document1.get("selectedItemsIds");
+                                        if(!selectedItemsIds.isEmpty()) {
+
+
+                                            for (String itemId : selectedItemsIds) {
+                                                //Get GeoEntry
+                                                db.collection("geofencesEntry")
+                                                        .get()
+                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@android.support.annotation.NonNull Task<QuerySnapshot> task) {
+                                                                if (task.isSuccessful()) {
+
+
+                                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                        String userid = document.getId();
+
+                                                                        if (userid.equalsIgnoreCase(itemId)) {
+
+                                                                            Map<String, Object> location = (Map<String, Object>) document.get("location");
+                                                                            for (Map.Entry<String, Object> e : location.entrySet()) {
+
+                                                                                if (e.getKey().equals("latitude")) {
+                                                                                    Log.d("Message", "Lat: " + e.getValue().toString());
+                                                                                    get_lat = Double.parseDouble(e.getValue().toString());
+                                                                                }
+                                                                                if (e.getKey().equals("longitude")) {
+                                                                                    Log.d("Message", "Long: " + e.getValue().toString());
+                                                                                    get_long = Double.parseDouble(e.getValue().toString());
+                                                                                    if (distance(latitude, longitude, get_lat, get_long) < 2) { // if distance < 2 km we take locations as equal
+                                                                                        Log.d("Message", "Near alert");
+
+                                                                                        CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
+                                                                                        geofenceEntryCollection.whereEqualTo("email", Constants.user_email).get().addOnSuccessListener(entrySnapshots -> {
+                                                                                            for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
+                                                                                                String alertTitle = documentSnapshot.getString("alertName");
+                                                                                                Log.d("Message", "Alert Title: " + alertTitle);
+                                                                                                get_alert = alertTitle;
+
+                                                                                            }
+
+                                                                                        }).addOnFailureListener(ex -> {
+                                                                                            // Handle errors
+                                                                                        });
+                                                                                    }
+                                                                                }
+
+                                                                            }
+
+                                                                        }
+                                                                    }
+                                                                } else {
+
+                                                                }
+                                                            }
+                                                        });
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+
+                            }
+                        }
+                    });
+        }catch (Exception ex){
+
+        }
+
+    }
+
+    /** calculates the distance between two locations in KILOMETERS */
+    private double distance(double lat1, double lng1, double lat2, double lng2) {
+
+        double earthRadius = 6371;
+
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLng = Math.toRadians(lng2-lng1);
+
+        double sindLat = Math.sin(dLat / 2);
+        double sindLng = Math.sin(dLng / 2);
+
+        double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
+                * Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2));
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        double dist = earthRadius * c;
+
+        return dist; // output distance, in MILES
     }
 
 

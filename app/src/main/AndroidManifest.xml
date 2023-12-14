@@ -60,15 +60,6 @@
         <activity
             android:name=".useraccess.forgotPassword.forgot_password"
             android:exported="false" />
-
-        <activity
-            android:name=".useraccess.forgotPassword.forgot_password_changePass"
-            android:exported="false" />
-
-        <activity
-            android:name=".useraccess.forgotPassword.forgot_password_enterPin"
-            android:exported="false" />
-
         <activity
             android:name=".useraccess.signupActivity"
             android:exported="false" />
@@ -88,7 +79,12 @@
             android:name=".main_app.MainActivity"
             android:exported="false" />
 
-
+        <activity
+            android:name=".ScanQRCodeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".main_app.ConfirmationActivity"
+            android:exported="false" />
 
 
         <meta-data

@@ -40,7 +40,7 @@
                 android:layout_marginStart="-5dp"
                 android:layout_marginTop="19dp"
                 android:layout_toEndOf="@+id/menu_button"
-                android:text="Schedules"
+                android:text="Settings"
                 android:textSize="20dp"
                 android:textStyle="bold" />
         </RelativeLayout>

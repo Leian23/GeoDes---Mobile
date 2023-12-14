@@ -4,6 +4,18 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/alert_ic"
+            android:title="Login"></item>
+        <item
+            android:id="@+id/smartwatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/alert_ic"
+            android:title="Smart Watch"></item>
+        <item
             android:id="@+id/userprof"
             android:icon="@drawable/alert_ic"
             android:title="Account">
@@ -23,7 +35,7 @@
         </item>
         <item android:id="@+id/help"
             android:icon="@drawable/baseline_help_24"
-            android:title="Help and Tips" >
+            android:title="Help" >
         </item>
         <item android:id="@+id/feedback"
             android:icon="@drawable/baseline_feedback_24"
@@ -31,7 +43,8 @@
         </item>
         <item android:id="@+id/logout"
             android:icon="@drawable/logout_ic"
-            android:title="Log out">
+            android:title="Log out"
+            android:visible="true">
         </item>
     </group>
 </menu>
