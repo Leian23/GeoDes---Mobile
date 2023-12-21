@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/mainActivityXml"
     android:orientation="vertical"
     tools:context=".main_app.MainActivity">
 
@@ -88,7 +89,7 @@
         android:layout_marginTop="8dp"
         android:clickable="true"
         android:onClick="onTextClick"
-        android:text="Skip this process"
+        android:text="Proceed to Guess Mode"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"

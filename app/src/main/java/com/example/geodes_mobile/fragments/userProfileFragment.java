@@ -121,8 +121,8 @@ public class userProfileFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    String firstName = documentSnapshot.getString("firstName");
-                    String lastName = documentSnapshot.getString("lastName");
+                    String firstName = documentSnapshot.getString("first");
+                    String lastName = documentSnapshot.getString("last");
                     String email = documentSnapshot.getString("email");
                     String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
 
@@ -161,8 +161,8 @@ public class userProfileFragment extends Fragment {
         DocumentReference userRef = db.collection("users").document(userId);
 
         Map<String, Object> userData = new HashMap<>();
-        userData.put("firstName", updatedFirstName);
-        userData.put("lastName", updatedLastName);
+        userData.put("first", updatedFirstName);
+        userData.put("last", updatedLastName);
         userData.put("email", updatedEmail);
 
         userRef.set(userData, SetOptions.merge())

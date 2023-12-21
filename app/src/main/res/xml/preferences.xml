@@ -63,17 +63,6 @@
     <PreferenceCategory
         android:title="Emergency">
 
-        <EditTextPreference
-            android:key="contact_person"
-            android:title="Contact Person"
-            android:summary="Enter contact person's name" />
-
-        <EditTextPreference
-            android:key="contact_number"
-            android:title="Contact Number"
-            android:summary="Enter contact person's number"
-            android:inputType="phone" />
-
         <SwitchPreferenceCompat
             android:key="emergency_sos"
             android:title="Emergency and SOS"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_container"
+    android:id="@+id/fragment_onboardid"
     android:background="@color/white">
 
 
@@ -16,33 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical">
-
-        <ImageButton
-            android:id="@+id/menu_button"
-            android:layout_width="60dp"
-            android:layout_height="20dp"
-            android:layout_gravity="start"
-            android:layout_marginTop="24dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:contentDescription="Menu"
-            android:src="@drawable/menu_ic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="76dp"
-            android:layout_marginTop="19dp"
-            android:text="Help and Tips"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
 
         <TextView
@@ -271,6 +244,29 @@
             android:textAlignment="center"
             android:textColor="#808080"
             android:textSize="17dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/permissionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2150dp"
+            android:background="@drawable/main_corner_btn"
+            android:text="Grant Permissions"
+            android:padding="15dp"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textSpace"
+            android:layout_width="328dp"
+            android:layout_height="47dp"
+            android:layout_marginTop="2200dp"
+            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

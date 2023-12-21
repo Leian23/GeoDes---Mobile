@@ -328,16 +328,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                 })
                 .show();
     }
-
-
-
-
-
-
-
-
-
-
+    
 
 }
 

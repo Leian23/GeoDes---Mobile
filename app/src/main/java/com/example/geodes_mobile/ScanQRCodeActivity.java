@@ -2,6 +2,7 @@ package com.example.geodes_mobile;
 
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.VIBRATE;
+
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -31,6 +33,7 @@ public class ScanQRCodeActivity extends AppCompatActivity {
     private CodeScanner mCodeScanner;
     private TextView scannedTextView;
     private FirebaseFirestore db;
+    FirebaseUser currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

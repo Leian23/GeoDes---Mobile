@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.geodes_mobile.Constants;
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.Adapter3;
 import com.example.geodes_mobile.main_app.alert_settings_adaptor.DataModel3;
@@ -83,6 +84,10 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
     private MyPreferenceFragment preferenceFragment;
     private SharedPreferences sharedPreferences;
+
+    FirebaseUser currentUser = mAuth.getCurrentUser();
+
+    String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
 
 
 
@@ -224,11 +229,13 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+
+
         Task<QuerySnapshot> entryTask = entryQuery
-                .whereEqualTo("email",currentUser.getEmail())
+                .whereEqualTo("email", userEmail)
                 .get();
         Task<QuerySnapshot> exitTask = exitQuery
-                .whereEqualTo("email",currentUser.getEmail())
+                .whereEqualTo("email", userEmail)
                 .get();
 
         Tasks.whenAllSuccess(entryTask, exitTask)

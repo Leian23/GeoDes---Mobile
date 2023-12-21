@@ -2,6 +2,7 @@ package com.example.geodes_mobile.useraccess;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.main_app.map_home;
@@ -54,73 +56,82 @@ public class signupActivity extends AppCompatActivity {
         siButton = findViewById(R.id.siButton);
 
 
-          siButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String firstName = firstNameTxt.getText().toString().trim();
-                    String lastName = lastNameTxt.getText().toString().trim();
-                    String email = emailTxt.getText().toString().trim();
-                    String password = passwordTxt.getText().toString().trim();
-                    String confirmPassword = conpasswordTxt.getText().toString().trim();
+        siButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String firstName = firstNameTxt.getText().toString().trim();
+                String lastName = lastNameTxt.getText().toString().trim();
+                String email = emailTxt.getText().toString().trim();
+                String password = passwordTxt.getText().toString().trim();
+                String confirmPassword = conpasswordTxt.getText().toString().trim();
 
-                    if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                        Toast.makeText(signupActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    if (!password.equals(confirmPassword)) {
-                        Toast.makeText(signupActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    if (!isNetworkAvailable()) {
-                        Toast.makeText(signupActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    Map<String, Object> user = new HashMap<>();
-                    user.put("first", firstName);
-                    user.put("last", lastName);
-                    user.put("email", email);
-
-                    fStore.collection("users")
-                            .add(user)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-
-                                    // After adding user data to Firestore, create a user account with Firebase Authentication
-                                    mAuth.createUserWithEmailAndPassword(email, password)
-                                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                                    if (task.isSuccessful()) {
-                                                        // User account created successfully
-                                                        Toast.makeText(signupActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-                                                        Intent intent = new Intent(signupActivity.this, map_home.class);
-                                                        startActivity(intent);
-                                                        finish();
-                                                        // Additional actions if needed (e.g., navigate to another activity)
-                                                    } else {
-                                                        // If account creation fails, log the error
-                                                        Log.e(TAG, "Error creating user account", task.getException());
-                                                        Toast.makeText(signupActivity.this, "Error creating user account", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }
-                                            });
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error adding document", e);
-                                    Toast.makeText(signupActivity.this, "Error adding user data", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
+                if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                    Toast.makeText(signupActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-            });
+
+                if (!password.equals(confirmPassword)) {
+                    Toast.makeText(signupActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (!isNetworkAvailable()) {
+                    Toast.makeText(signupActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Map<String, Object> user = new HashMap<>();
+                user.put("first", firstName);
+                user.put("last", lastName);
+                user.put("email", email);
+
+                fStore.collection("users")
+                        .add(user)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+
+                                // After adding user data to Firestore, create a user account with Firebase Authentication
+                                mAuth.createUserWithEmailAndPassword(email, password)
+                                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                                if (task.isSuccessful()) {
+                                                    // User account created successfully
+
+                                                    // Save user data to SharedPreferences
+                                                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                                    SharedPreferences.Editor editor = preferences.edit();
+                                                    editor.putString("user_email", email);
+                                                    // Additional user data can be saved here if needed
+                                                    editor.apply();
+
+                                                    Toast.makeText(signupActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                                    Intent intent = new Intent(signupActivity.this, map_home.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                    // Additional actions if needed (e.g., navigate to another activity)
+                                                } else {
+                                                    // If account creation fails, log the error
+                                                    Log.e(TAG, "Error creating user account", task.getException());
+                                                    Toast.makeText(signupActivity.this, "Error creating user account", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                                Toast.makeText(signupActivity.this, "Error adding user data", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+            }
+        });
+
     }
 
     private boolean isNetworkAvailable() {

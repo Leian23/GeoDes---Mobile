@@ -67,6 +67,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -97,6 +98,7 @@ import com.example.geodes_mobile.main_app.homebtn_functions.LandmarksDialog;
 import com.example.geodes_mobile.main_app.homebtn_functions.TilesLayout;
 import com.example.geodes_mobile.main_app.search_location.LocationResultt;
 import com.example.geodes_mobile.main_app.search_location.SearchResultsAdapter;
+import com.example.geodes_mobile.useraccess.useraccessActivity;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -232,7 +234,6 @@ public class map_home extends AppCompatActivity {
     private EditText NotesText;
 
     private DatabaseReference databaseReference;
-    private FirebaseAuth mAuth;
     private static final String PREFS_NAME = "GeofencePrefs";
     private static final String KEY_UNIQUE_ID = "uniqueID";
     private static final String KEY_GEO_NAME = "geoName";
@@ -312,6 +313,10 @@ public class map_home extends AppCompatActivity {
     private NotificationReceiver notificationReceiver;
     private MediaPlayer mediaPlayer;
 
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -325,12 +330,6 @@ public class map_home extends AppCompatActivity {
                 .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
-
-
-        mAuth = FirebaseAuth.getInstance();
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
 
         firestore = FirebaseFirestore.getInstance();
         alertsQuery = firestore.collection("geofencesEntry");
@@ -448,6 +447,8 @@ public class map_home extends AppCompatActivity {
         deleteSchedule = findViewById(R.id.DeleteSchedule);
 
 
+        String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
+
         View headerView = navigationView.getHeaderView(0);
         ImageView headerImageView = headerView.findViewById(R.id.avatarImageView);
         userView = headerView.findViewById(R.id.UserInfo);
@@ -456,7 +457,9 @@ public class map_home extends AppCompatActivity {
         loadUserProfilePicture(headerImageView);
 
         //initialize if theres user
-        getUserFromFirestore();
+       // getUserFromFirestore();
+
+
 
 
         toggleMon = findViewById(R.id.toggleMon1);
@@ -947,11 +950,12 @@ public class map_home extends AppCompatActivity {
         });
 
 
-        FirebaseUser alertEmail = mAuth.getCurrentUser();
-        if (alertEmail != null) {
+
+
+
 
             CollectionReference geofencesEntryCollection = firestore.collection("geofencesEntry");
-            geofencesEntryCollection.whereEqualTo("email", alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+            geofencesEntryCollection.whereEqualTo("email", userEmail).addSnapshotListener((queryDocumentSnapshots, e) -> {
                 if (e != null) {
                     // Handle error
                     return;
@@ -1009,7 +1013,9 @@ public class map_home extends AppCompatActivity {
             });
 
             CollectionReference geofencesExitCollection = firestore.collection("geofencesExit");
-            geofencesExitCollection.whereEqualTo("email", alertEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+
+
+            geofencesExitCollection.whereEqualTo("email", userEmail).addSnapshotListener((queryDocumentSnapshots, e) -> {
                 if (e != null) {
                     // Handle error
                     return;
@@ -1061,9 +1067,14 @@ public class map_home extends AppCompatActivity {
             recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             recyclerView.setAdapter(adapter4);
 
-        } else {
-            //user not signed in
-        }
+
+
+
+
+
+
+
+
 
 
         //bottom sheet recycle view for schedule
@@ -1071,11 +1082,9 @@ public class map_home extends AppCompatActivity {
         Adapter2 adapter2 = new Adapter2(dataForSched, this);
         RecyclerView recyclerVieww = findViewById(R.id.sched_recyclerView);
 
-        FirebaseUser botschedEmail = mAuth.getCurrentUser();
 
-        if (botschedEmail != null) {
             CollectionReference geofencesSchedCollection = firestore.collection("geofenceSchedule");
-            geofencesSchedCollection.whereEqualTo("Email", botschedEmail.getEmail()).addSnapshotListener((queryDocumentSnapshots, e) -> {
+            geofencesSchedCollection.whereEqualTo("Email", userEmail).addSnapshotListener((queryDocumentSnapshots, e) -> {
                 if (e != null) {
                     // Handle error
                     return;
@@ -1249,22 +1258,15 @@ public class map_home extends AppCompatActivity {
             recyclerVieww.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             recyclerVieww.setAdapter(adapter2);
 
-        } else {
-            //user not signed in
-        }
 
 
         //list of selectable alerts under add schedule bottom sheet
-        FirebaseUser scheduleEmail = mAuth.getCurrentUser();
-
-        if (scheduleEmail != null) {
-
             CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
             CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
             List<DataModel5> dataList = new ArrayList<>();
 
-            geofenceEntryCollection.whereEqualTo("email", scheduleEmail.getEmail()).get().addOnSuccessListener(entrySnapshots -> {
+            geofenceEntryCollection.whereEqualTo("email", userEmail).get().addOnSuccessListener(entrySnapshots -> {
                 for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
                     String alertTitle = documentSnapshot.getString("alertName");
                     String unID = documentSnapshot.getString("uniqueID");
@@ -1297,9 +1299,7 @@ public class map_home extends AppCompatActivity {
                 // Handle errors
             });
 
-        } else {
-            //user not signed in
-        }
+
 
 
         //Menu Drawer
@@ -1322,8 +1322,14 @@ public class map_home extends AppCompatActivity {
         Menu nav_Menu = navigationView.getMenu();
         TextView navUsername = (TextView) headerView.findViewById(R.id.UserInfo);
 
-        if (isValidEmail(Constants.user_email)) {
-            navUsername.setText(Constants.user_email);
+        if (isValidEmail(userEmail)) {
+
+            if (currentUser != null ) {
+
+                navUsername.setText(userEmail);
+
+            }
+
         } else {
             navUsername.setText("Anonymous");
         }
@@ -1333,7 +1339,7 @@ public class map_home extends AppCompatActivity {
             nav_Menu.findItem(R.id.logout).setVisible(false);
             nav_Menu.findItem(R.id.schedules).setVisible(false);
             nav_Menu.findItem(R.id.userprof).setVisible(false);
-            nav_Menu.findItem(R.id.settings).setVisible(false);
+           // nav_Menu.findItem(R.id.settings).setVisible(false);
         } else {
             nav_Menu.findItem(R.id.login).setVisible(false);
         }
@@ -1372,7 +1378,12 @@ public class map_home extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.frame_layout, new CompanionFragment())
                             .commit();
-                }else if (item.getItemId() == R.id.logout) {
+                }
+                else if (item.getItemId() == R.id.login) {
+                    Intent intent = new Intent(map_home.this, useraccessActivity.class);
+                    startActivity(intent);
+                }
+                else if (item.getItemId() == R.id.logout) {
 
                     mAuth.signOut();
                     mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
@@ -1381,6 +1392,10 @@ public class map_home extends AppCompatActivity {
                             FirebaseUser user = firebaseAuth.getCurrentUser();
                             if (user == null) {
                                 // The user is successfully signed out
+                                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putString("user_email", "");
+                                editor.apply();
                                 Intent intent = new Intent(map_home.this, MainActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -1393,6 +1408,7 @@ public class map_home extends AppCompatActivity {
                             }
                         }
                     });
+
 
 
                 }
@@ -2006,7 +2022,9 @@ public class map_home extends AppCompatActivity {
 
     private void saveEntryGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, float innRadius, String outerCode, String innerCode, String Notes, boolean alertenabled, boolean isEntry) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String uid = currentUser.getUid();
+        //String uid = currentUser.getUid();
+
+        String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
 
         // Create a unique ID for the geofence or use your own logic
         String geofenceId = geofenceHelper.generateRequestId();
@@ -2015,7 +2033,7 @@ public class map_home extends AppCompatActivity {
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("alertName", AlertName);
-        geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("email", userEmail);
         geofenceData.put("notes", Notes);
         geofenceData.put("location", Point);
         geofenceData.put("outerRadius", outRadius);
@@ -2050,14 +2068,16 @@ public class map_home extends AppCompatActivity {
 
     private void saveExitGeofenceDataToFirestore(FirebaseUser currentUser, String AlertName, GeoPoint Point, float outRadius, String ExitCode, String Notes, boolean alertenabled, boolean isExit) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String uid = currentUser.getUid();
+        //String uid = currentUser.getUid();
+
+        String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
 
         String geofenceId = geofenceHelper.generateRequestId();
 
         Map<String, Object> geofenceData = new HashMap<>();
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("alertName", AlertName);
-        geofenceData.put("email", currentUser.getEmail());
+        geofenceData.put("email", userEmail);
         geofenceData.put("notes", Notes);
         geofenceData.put("location", Point);
         geofenceData.put("outerRadius", outRadius);
@@ -2157,6 +2177,8 @@ public class map_home extends AppCompatActivity {
         Boolean saturday = false;
         Boolean sunday = false;
 
+        String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
+
         String geofenceId = geofenceHelper.generateRequestId();
         Boolean SchedStat = false;
 
@@ -2200,7 +2222,7 @@ public class map_home extends AppCompatActivity {
         geofenceData.put("Friday", friday);
         geofenceData.put("Saturday", saturday);
         geofenceData.put("Sunday", sunday);
-        geofenceData.put("Email", currentUser.getEmail());
+        geofenceData.put("Email", userEmail);
         geofenceData.put("uniqueID", geofenceId);
         geofenceData.put("SchedStat", SchedStat);
 
@@ -2267,19 +2289,19 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private void getUserFromFirestore() {
+   /* private void getUserFromFirestore() {
         FirebaseUser user = mAuth.getCurrentUser();
 
         if (user != null) {
-            String userId = user.getUid();
+            String userMail = user.getEmail();
 
-            if (userId != null && !userId.isEmpty()) {
-                DocumentReference userRef = firestore.collection("users").document(userId);
+            if (userMail != null && !userMail.isEmpty()) {
+                DocumentReference userRef = firestore.collection("users").document(userMail);
 
                 userRef.get()
                         .addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()) {
-                                String userName = documentSnapshot.getString("firstName");
+                                String userName = documentSnapshot.getString("first");
 
                                 // Set the user's data to the userView or perform any other actions
                                 userView.setText("Hello, " + userName);
@@ -2299,6 +2321,8 @@ public class map_home extends AppCompatActivity {
         }
     }
 
+    */
+
     public void showPersistentNotif(){
         handler = new Handler();
         Runnable run = new Runnable() {
@@ -2313,17 +2337,11 @@ public class map_home extends AppCompatActivity {
                     }
                 }, 1000);
                 handler.postDelayed(this,7000);
+
                 Log.d("Message", "Running...");
             }
         };
         handler.post(run);
-    }
-
-    public void callPhone(){
-        Intent clickIntentEmergency = new Intent(Intent.ACTION_CALL);
-        clickIntentEmergency.setData(Uri.parse(Uri.parse("tel:")+ Constants.contact_person));
-        clickIntentEmergency.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getApplication().startActivity(clickIntentEmergency);
     }
 
     public void playSos(){
@@ -2353,8 +2371,6 @@ public class map_home extends AppCompatActivity {
     }
     //For Notification Persistent Settings
     public void showNotification() {
-
-
         // Create a notification channel for Android Oreo and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Dismiss Notifications", NotificationManager.IMPORTANCE_LOW);
@@ -2364,44 +2380,25 @@ public class map_home extends AppCompatActivity {
             }
         }
 
-        RemoteViews collapsedView = new RemoteViews(this.getPackageName(),
-                R.layout.notification_collapsed);
-        RemoteViews expandedView = new RemoteViews(this.getPackageName(),
-                R.layout.notification_expanded);
+        RemoteViews collapsedView = new RemoteViews(this.getPackageName(), R.layout.notification_collapsed);
+        RemoteViews expandedView = new RemoteViews(this.getPackageName(), R.layout.notification_expanded);
 
-        Intent clickIntent = new Intent(this, NotificationReceiver.class);
-        PendingIntent clickPendingIntent = PendingIntent.getBroadcast(this,
-                0, clickIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Intent clickIntentEmergency = new Intent(this,NotificationReceiver.class);
-        clickIntentEmergency.putExtra("player","play");
+        Intent clickIntentEmergency = new Intent(this, NotificationReceiver.class);
+        clickIntentEmergency.setAction("ACTION_SOS_TOGGLE");
+        clickIntentEmergency.putExtra("action", "toggle"); // Use a single action
 
         PendingIntent PendingIntentEmergency = PendingIntent.getBroadcast(this,
                 0, clickIntentEmergency, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntentEmergency.isForegroundService();
-        }
+
         expandedView.setOnClickPendingIntent(R.id.btn_sos, PendingIntentEmergency);
 
-        //collapsedView.setTextViewText(R.id.text_view_expanded, "Hello World!");
-
-        //expandedView.setImageViewResource(R.id.image_view_expanded, R.drawable.baseline_settings_24);
-        //expandedView.setOnClickPendingIntent(R.id.image_view_expanded, clickPendingIntent);
-
-
-
-
-        expandedView.setTextViewText(R.id.txt_current_location, userLocal + ", " + userArea);
+        // Set other content for collapsedView and expandedView
         collapsedView.setTextViewText(R.id.text_view_expanded, userLocal + ", " + userArea);
+        expandedView.setTextViewText(R.id.txt_current_location, userLocal + ", " + userArea);
         expandedView.setTextViewText(R.id.txt_expand_alert_near, get_alert);
 
-
-
-
-
-
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID).setOngoing(true)
-
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setOngoing(true)
                 .setSmallIcon(R.drawable.baseline_settings_24)
                 .setCustomContentView(collapsedView)
                 .setCustomBigContentView(expandedView)
@@ -2410,22 +2407,22 @@ public class map_home extends AppCompatActivity {
                 .build();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            // Handle permission request if needed
             return;
         }
-        NotificationManagerCompat.from(this).notify(77, notification);
 
-        //Toast.makeText(getContext(), "Notification Show", Toast.LENGTH_SHORT).show();
+        NotificationManagerCompat.from(this).notify(77, notification);
     }
 
 
+
+
+
+
+
     public void checkAlertIsNear(){
+
+        String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
 
         try{
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -2493,7 +2490,10 @@ public class map_home extends AppCompatActivity {
                             if (task1.isSuccessful()) {
                                 for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                     String email = document1.getString("Email");
-                                    if(email.equalsIgnoreCase(Constants.user_email)){
+
+                                    if(email.equalsIgnoreCase(userEmail)){
+
+                                        Log.d("Message", "Lat: " + userEmail);
 
                                         List<String> selectedItemsIds = (List<String>) document1.get("selectedItemsIds");
                                         if(!selectedItemsIds.isEmpty()) {
@@ -2528,7 +2528,7 @@ public class map_home extends AppCompatActivity {
                                                                                         Log.d("Message", "Near alert");
 
                                                                                         CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
-                                                                                        geofenceEntryCollection.whereEqualTo("email", Constants.user_email).get().addOnSuccessListener(entrySnapshots -> {
+                                                                                        geofenceEntryCollection.whereEqualTo("email", userEmail).get().addOnSuccessListener(entrySnapshots -> {
                                                                                             for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
                                                                                                 String alertTitle = documentSnapshot.getString("alertName");
                                                                                                 Log.d("Message", "Alert Title: " + alertTitle);

@@ -68,7 +68,7 @@
                 android:background="@drawable/round_alert_title"
                 android:hint="Schedule Name"
                 android:padding="10dp"
-                android:textColor="#888888"
+                android:textColor="#393939"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -88,7 +88,7 @@
                 android:paddingTop="12dp"
                 android:text="Select Time"
 
-                android:textColor="#888888"
+                android:textColor="#393939"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

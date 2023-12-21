@@ -16,12 +16,14 @@ import androidx.preference.PreferenceManager;
 
 import com.example.geodes_mobile.Constants;
 import com.example.geodes_mobile.R;
+import com.example.geodes_mobile.main_app.MainActivity;
 import com.example.geodes_mobile.main_app.map_home;
 import com.example.geodes_mobile.useraccess.forgotPassword.forgot_password;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -32,6 +34,7 @@ public class useraccessActivity extends AppCompatActivity {
     private TextView forgotPassword;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +48,13 @@ public class useraccessActivity extends AppCompatActivity {
         forgotPassword = findViewById(R.id.forgot_pass);
 
         db = FirebaseFirestore.getInstance();
+
+        currentUser = mAuth.getCurrentUser();
+
+        if (currentUser != null) {
+            Intent intent = new Intent(useraccessActivity.this, map_home.class);
+            startActivity(intent);
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,8 +117,9 @@ public class useraccessActivity extends AppCompatActivity {
 
                             Toast.makeText(useraccessActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
-                            Intent intent = new Intent(useraccessActivity.this, map_home.class);
+                            Intent intent = new Intent(useraccessActivity.this, SplashActivity1.class);
                             startActivity(intent);
+                            finish();
                         } else {
                             // User login failed
                             Toast.makeText(useraccessActivity.this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();

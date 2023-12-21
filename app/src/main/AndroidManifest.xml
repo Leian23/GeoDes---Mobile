@@ -31,6 +31,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
 
 
@@ -63,15 +64,21 @@
         <activity
             android:name=".useraccess.signupActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".useraccess.SplashActivity1"
+            android:exported="false">
+        </activity>
+
         <activity
             android:name=".useraccess.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".useraccess.useraccessActivity"
             android:exported="false" />
@@ -119,6 +126,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".main_app.NotificationReceiver" />
+
+
 
 
 
