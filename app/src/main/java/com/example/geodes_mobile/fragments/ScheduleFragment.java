@@ -32,9 +32,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickListener {
     private static final String TAG = "ScheduleFragment";
@@ -57,7 +61,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-         rootView = inflater.inflate(R.layout.fragments_schedules, container, false);
+        rootView = inflater.inflate(R.layout.fragments_schedules, container, false);
 
         db = FirebaseFirestore.getInstance();
 
@@ -100,13 +104,14 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
     private void fetchDataFromFirestore(View rootView) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         db.collection("geofenceSchedule")
-                .whereEqualTo("Email",currentUser.getEmail())
+                .whereEqualTo("Email", currentUser.getEmail())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<DataModel4> data = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            Boolean isSchedEnabled = document.getBoolean("SchedStat");
                             String schedTitle = document.getString("Sched");
                             String clock = document.getString("Time");
                             String UniqueId = document.getString("uniqueID");
@@ -149,18 +154,14 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                             List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
 
                             if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
-                                // Concatenate the elements of the list into a single string
                                 StringBuilder stringBuilder = new StringBuilder();
                                 for (String itemId : selectedItemsIds) {
                                     stringBuilder.append(itemId).append("\n");
                                 }
 
-                                // Remove the last newline character
                                 if (stringBuilder.length() > 0) {
                                     stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                                 }
-
-
 
                                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -178,7 +179,17 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                                                     if (alertName != null) {
                                                         Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
                                                         concatenatedAlertNames.add(alertName);
-                                                        // Match found, no need to check further
+
+                                                        // Capture the correct reference here
+                                                        DocumentReference entryDocumentRef = documentSnapshot.getReference();
+
+
+                                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
+
+                                                            entryDocumentRef.update("alertEnabled", true)
+                                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + entryDocumentRef.getId()))
+                                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + entryDocumentRef.getId(), e));
+                                                        }
                                                         return;
                                                     }
                                                 }
@@ -198,7 +209,12 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                                                     if (alertNameExit != null) {
                                                         Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertNameExit);
                                                         concatenatedAlertNames.add(alertNameExit);
-                                                        // Match found, no need to check further
+
+                                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
+                                                            document.getReference().update("alertEnabled", true)
+                                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + document.getId()))
+                                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + document.getId(), e));
+                                                        }
                                                         return;
                                                     }
                                                 }
@@ -212,15 +228,9 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
 
                                 Tasks.whenAllComplete(tasks)
                                         .addOnSuccessListener(voids -> {
-                                            // All tasks completed successfully
                                             concatenatedString = concatenatedAlertNames.toString();
-
-                                            // Remove brackets from the string
                                             concatenatedString = concatenatedString.substring(1, concatenatedString.length() - 1);
-
-                                            // Use the concatenatedString as needed
                                             Log.d(TAG, "Concatenated Alert Names: " + concatenatedString);
-
                                             int iconCal = R.drawable.calendar_ic;
                                             int entryImage = R.drawable.alarm_ic;
                                             int iconMarker = R.drawable.clock_ic;
@@ -230,14 +240,18 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                                         .addOnFailureListener(e -> {
                                             // Handle failure if needed
                                         });
+
                             }
                         }
 
+                        // Update the adapter with the new data
+                        updateAdapterWithData(data, rootView);
                     } else {
                         Toast.makeText(getContext(), "Error fetching data from Firestore", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
 
     private void updateAdapterWithData(List<DataModel4> data, View rootView) {
         RecyclerView recyclerView = rootView.findViewById(R.id.settingsSchedd);
@@ -245,6 +259,102 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         Adapter4 adapter = new Adapter4(data, getContext());
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
+    }
+
+    private boolean isTimeAndDayMatch(QueryDocumentSnapshot document) {
+        String alertTimeString = document.getString("Time");
+
+        if (alertTimeString != null) {
+
+            try {
+                // Parse the time string into hours and minutes
+                SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                int alertHour = sdf.parse(alertTimeString).getHours();
+                int alertMinute = sdf.parse(alertTimeString).getMinutes();
+
+                // Get the current time
+                Calendar currentTime = Calendar.getInstance();
+                int currentHour = currentTime.get(Calendar.HOUR_OF_DAY);
+                int currentMinute = currentTime.get(Calendar.MINUTE);
+
+                Log.d(TAG, "Current Time: " + getFormattedTime12Hour(currentTime));
+                Log.d(TAG, "Current Day: " + getCurrentDay(currentTime));
+                Log.d(TAG, "Alert Time: " + getFormattedTime12Hour(alertHour, alertMinute));
+                Log.d(TAG, "Alert Day: " + getAlertDay(document));
+
+                //alertDetails
+                String TimeOfAlertHour = getFormattedTime12Hour(alertHour, alertMinute);
+                String DayOfAlert = getAlertDay(document);
+
+                //CurrentDetails
+
+                String CurrentTimeHour =  getFormattedTime12Hour(currentTime);
+                String CurrentDay = getAlertDay(document);
+
+
+                // Compare only the hours, minutes, and days
+                if (CurrentTimeHour.equalsIgnoreCase(TimeOfAlertHour) &&
+                        DayOfAlert.equalsIgnoreCase(CurrentDay) ) {
+
+                    return true;
+                }
+
+
+            } catch (ParseException e) {
+                Log.e(TAG, "Error parsing time: " + alertTimeString, e);
+            }
+        }
+
+        // Return false if time string is null or parsing fails
+        Log.d(TAG, "isTimeAndDayMatch: false (Time string is null or parsing fails)");
+        return false;
+    }
+
+    private String getFormattedTime12Hour(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+
+    private String getCurrentDay(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+
+    private String getFormattedTime12Hour(int hour, int minute) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        return sdf.format(calendar.getTime());
+    }
+
+
+
+    private String getAlertDay(QueryDocumentSnapshot document) {
+        // Determine the selected day from the document
+        if (document.getBoolean("Monday")) {
+            return "Monday";
+        } else if (document.getBoolean("Tuesday")) {
+            return "Tuesday";
+        } else if (document.getBoolean("Wednesday")) {
+            return "Wednesday";
+        } else if (document.getBoolean("Thursday")) {
+            return "Thursday";
+        } else if (document.getBoolean("Friday")) {
+            return "Friday";
+        } else if (document.getBoolean("Saturday")) {
+            return "Saturday";
+        } else if (document.getBoolean("Sunday")) {
+            return "Sunday";
+        }
+
+        return "Unknown";
+    }
+
+
+    private boolean isDayMatch(int currentDayOfWeek, boolean... selectedDays) {
+        // Example: If the alert is set for Monday (selectedDays[0]), and the current day is Monday (currentDayOfWeek == 2), return true
+        return selectedDays[currentDayOfWeek - 1];
     }
 
     @Override
@@ -328,9 +438,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                 })
                 .show();
     }
-    
+
 
 }
-
-
-

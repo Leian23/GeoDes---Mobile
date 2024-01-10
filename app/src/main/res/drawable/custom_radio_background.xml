@@ -5,7 +5,7 @@
     <item android:state_checked="true">
         <shape android:shape="rectangle">
             <corners android:radius="20dp" />
-            <solid android:color="#89F2DF" /> <!-- Entry color -->
+            <solid android:color="#99F1E1" /> <!-- Entry color -->
         </shape>
     </item>
 
@@ -13,7 +13,7 @@
     <item android:state_checked="false">
         <shape android:shape="rectangle">
             <corners android:radius="20dp" />
-            <solid android:color="#F1D99A" /> <!-- Exit color -->
+            <solid android:color="#F4DFA6" /> <!-- Exit color -->
         </shape>
     </item>
 </selector>

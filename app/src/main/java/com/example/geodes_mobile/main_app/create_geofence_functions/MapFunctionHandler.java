@@ -14,10 +14,12 @@ import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -40,6 +42,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
+import org.w3c.dom.Text;
 
 import java.util.Locale;
 
@@ -207,12 +210,21 @@ public class MapFunctionHandler {
         });
 
 
+        TextView switchText = ((map_home) context).findViewById(R.id.switchText);
+
+        switchText.bringToFront();
         // Inside setupSeekBarListeners method
-        ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
+        Switch toggleButton = ((map_home) context).findViewById(R.id.switchButton);
 
         toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isEntryMode = isChecked;
             updateInnerSeekBarState();
+
+            if(isChecked) {
+                switchText.setText("Entry");
+            } else {
+                switchText.setText("Exit");
+            }
 
             // Call the method to update the color of the outer geofence based on the toggle button state
             if (geofenceSetup != null) {
@@ -297,7 +309,7 @@ public class MapFunctionHandler {
         });
 
         // Set the toggle button to true
-        ToggleButton toggleButton = ((map_home) context).findViewById(R.id.toggleButton);
+        Switch toggleButton = ((map_home) context).findViewById(R.id.switchButton);
         toggleButton.setChecked(true);
 
         getpoint(geoPoint);

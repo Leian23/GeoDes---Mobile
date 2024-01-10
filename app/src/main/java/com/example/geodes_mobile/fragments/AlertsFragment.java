@@ -85,6 +85,8 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
     private MyPreferenceFragment preferenceFragment;
     private SharedPreferences sharedPreferences;
 
+    private double userLa;
+    private double userlo;
     FirebaseUser currentUser = mAuth.getCurrentUser();
 
     String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
@@ -278,12 +280,20 @@ public class AlertsFragment extends Fragment implements Adapter3.OnItemClickList
 
 
 
+
             Location currentLocation = mainActivity.getCurrentLocation();
+
+
             Map<String, Object> location = (Map<String, Object>) documentChange.getDocument().get("location");
 
             if (location != null) {
-                double userLa = currentLocation.getLatitude();
-                double userlo = currentLocation.getLongitude();
+
+                if (currentLocation != null) {
+                    userLa = currentLocation.getLatitude();
+                    userlo = currentLocation.getLongitude();
+                }
+
+
 
                 double latitude = (double) location.get("latitude");
                 double longitude = (double) location.get("longitude");

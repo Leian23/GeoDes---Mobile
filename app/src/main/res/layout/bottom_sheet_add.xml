@@ -371,20 +371,43 @@
                 app:layout_constraintTop_toBottomOf="@+id/innerBar" />
 
             <!-- Your layout XML -->
-            <ToggleButton
-                android:id="@+id/toggleButton"
+
+
+            <RelativeLayout
+                android:id="@+id/switchContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="136dp"
-                android:text="ToggleButton"
-                android:checked="true"
-                android:background="@drawable/custom_radio_background"
-                android:textOn="Entry"
-                android:textOff="Exit"
+                android:layout_marginBottom="137dp"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.433"
-                app:layout_constraintStart_toEndOf="@+id/AlertBoxname" />
+                app:layout_constraintHorizontal_bias="0.340"
+                app:layout_constraintStart_toEndOf="@+id/AlertBoxname">
+
+                <TextView
+                    android:id="@+id/switchText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:textSize="40px"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Entry" />
+
+                <Switch
+                    android:id="@+id/switchButton"
+                    android:layout_width="105dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/custom_radio_background"
+                    android:checked="true"
+                    android:paddingRight="10px"
+                    android:textOff=""
+                    android:textOn="" />
+
+
+
+            </RelativeLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
