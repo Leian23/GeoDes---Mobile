@@ -24,8 +24,21 @@ import com.example.geodes_mobile.R;
 import com.example.geodes_mobile.fragments.MyPreferenceFragment;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Date;
 import java.util.List;
+
+import android.support.annotation.NonNull;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 
     public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
@@ -36,9 +49,14 @@ import java.util.List;
         private static final int NOTIFICATION_ID_INNER = 2;
         private static final int ALARM_NOTIFICATION_ID = 3;
         public static final int DISMISS_NOTIFICATION_ID = 4;
+        private FirebaseFirestore db;
+        private static final String PREFS_NAME = "GeofencePrefs";
+        //private SimpleDateFormat timeFormat, currentTime;
+        private Date get_time, get_current;
 
         private String fenceName;
         private String alertType;
+        private String user_email;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,7 +134,7 @@ import java.util.List;
 
             if ("outer Alert".equals(alertType)) {
                 scheduleAlarm(context, geofenceName);
-                showDismissNotificationOuter(context);
+                showDismissNotificationInner(context);
             } else {
                 Notification outerNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setContentTitle("Outer Geofence Entry")
@@ -139,8 +157,120 @@ import java.util.List;
         } else if (value1 <= 2000) {
 
             if ("inner Alert".equals(alertType)) {
-                scheduleAlarm(context, geofenceName);
-                showDismissNotificationInner(context);
+                Log.d(TAG, "GeoFence: Inner");
+                //Get schedule
+                db.collection("geofenceSchedule")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task1) {
+                                if (task1.isSuccessful()) {
+                                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                                    user_email = prefs.getString("user_email", "");
+                                    Log.d(TAG, "Successful: " + user_email);
+                                    for (QueryDocumentSnapshot document1 : task1.getResult()) {
+                                        String email = document1.getString("Email");
+                                        if(email.equalsIgnoreCase(user_email)){
+
+                                            List<String> selectedItemsIds = (List<String>) document1.get("selectedItemsIds");
+                                            for (String itemId : selectedItemsIds) {
+
+                                                //Get GeoEntry
+                                                db.collection("geofencesEntry")
+                                                        .get()
+                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                        String userid = document.getId();
+
+                                                                        if(userid.equalsIgnoreCase(itemId)){
+
+                                                                            //Get day
+                                                                            boolean monday = document1.getBoolean("Monday");
+                                                                            boolean tuesday = document1.getBoolean("Tuesday");
+                                                                            boolean wednesday = document1.getBoolean("Wednesday");
+                                                                            boolean thursday = document1.getBoolean("Thursday");
+                                                                            boolean friday = document1.getBoolean("Friday");
+                                                                            boolean saturday = document1.getBoolean("Saturday");
+                                                                            boolean sunday = document1.getBoolean("Sunday");
+
+                                                                            //Check current time and from database
+                                                                            String time = document1.getString("Time");
+                                                                            SimpleDateFormat sdf1 = new SimpleDateFormat("h:mm a");
+                                                                            String currentTime = sdf1.format(new Date());
+                                                                            String pattern = "h:mm a";
+                                                                            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+
+                                                                            Date time1 = null;
+                                                                            Date time2 = null;
+                                                                            try {
+                                                                                time1 = sdf.parse(currentTime);
+                                                                                time2 = sdf.parse(time);
+                                                                            } catch (ParseException e) {
+                                                                                throw new RuntimeException(e);
+                                                                            }
+                                                                            Calendar cal = Calendar.getInstance();
+                                                                            cal.setTime(new Date());
+
+
+                                                                            if(time1.after(time2)) {
+                                                                                Log.d(TAG, "Time: After");
+                                                                                if(monday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(tuesday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.TUESDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(wednesday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.WEDNESDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(thursday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.THURSDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(friday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.FRIDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(saturday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                if(sunday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+                                                                                    checkIfScheduled(context,geofenceName);
+                                                                                }
+                                                                                else {
+                                                                                    //Nothing to do
+                                                                                    Log.d(TAG, "Time: Before");
+                                                                                }
+                                                                            }
+                                                                            else {
+                                                                                //Nothing to do
+                                                                                Log.d(TAG, "Time: Before");
+                                                                            }
+
+                                                                        }
+                                                                        Log.d(TAG, "Alert: Inside Schedule.");
+                                                                        return;
+                                                                    }
+
+                                                                } else {
+                                                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                                                }
+                                                            }
+                                                        });
+
+                                            }
+
+                                            //Show if alert is not with schedule
+                                            //scheduleAlarm(context, geofenceName);
+                                            //showDismissNotificationOuter(context);
+                                        }
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task1.getException());
+                                }
+                            }
+                        });
             } else {
                 Notification innerNotification = new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setContentTitle("Inner Geofence Entry")
@@ -152,8 +282,11 @@ import java.util.List;
                 if (notificationManager != null) {
                     notificationManager.notify(NOTIFICATION_ID_OUTER, innerNotification);
                 }
-            }
 
+            }
+            Log.d(TAG, "Alert: Not in Schedule.");
+            scheduleAlarm(context, geofenceName);
+            showDismissNotificationInner(context);
             Log.d(TAG, "onReceive: Entered InnerGeofence. Alarm scheduled.");
             Toast.makeText(context, "You have arrived on " + geofenceName, Toast.LENGTH_SHORT).show();
 
@@ -162,12 +295,123 @@ import java.util.List;
 
 
     private void handleExitEvent(Context context, String geofenceName) {
+        //Get schedule
+        db.collection("geofenceSchedule")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task1) {
+                        if (task1.isSuccessful()) {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                            user_email = prefs.getString("user_email", "");
+                            Log.d(TAG, "Successful: " + user_email);
+                            for (QueryDocumentSnapshot document1 : task1.getResult()) {
+                                String email = document1.getString("Email");
+                                if(email.equalsIgnoreCase(user_email)){
+
+                                    List<String> selectedItemsIds = (List<String>) document1.get("selectedItemsIds");
+                                    for (String itemId : selectedItemsIds) {
+
+                                        //Get GeoEntry
+                                        db.collection("geofencesEntry")
+                                                .get()
+                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                        if (task.isSuccessful()) {
+                                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                String userid = document.getId();
+
+                                                                if(userid.equalsIgnoreCase(itemId)){
+
+                                                                    //Get day
+                                                                    boolean monday = document1.getBoolean("Monday");
+                                                                    boolean tuesday = document1.getBoolean("Tuesday");
+                                                                    boolean wednesday = document1.getBoolean("Wednesday");
+                                                                    boolean thursday = document1.getBoolean("Thursday");
+                                                                    boolean friday = document1.getBoolean("Friday");
+                                                                    boolean saturday = document1.getBoolean("Saturday");
+                                                                    boolean sunday = document1.getBoolean("Sunday");
+
+                                                                    //Check current time and from database
+                                                                    String time = document1.getString("Time");
+                                                                    SimpleDateFormat sdf1 = new SimpleDateFormat("h:mm a");
+                                                                    String currentTime = sdf1.format(new Date());
+                                                                    String pattern = "h:mm a";
+                                                                    SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+
+                                                                    Date time1 = null;
+                                                                    Date time2 = null;
+                                                                    try {
+                                                                        time1 = sdf.parse(currentTime);
+                                                                        time2 = sdf.parse(time);
+                                                                    } catch (ParseException e) {
+                                                                        throw new RuntimeException(e);
+                                                                    }
+                                                                    Calendar cal = Calendar.getInstance();
+                                                                    cal.setTime(new Date());
+
+
+                                                                    if(time1.after(time2)) {
+                                                                        Log.d(TAG, "Time: After");
+                                                                        if(monday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(tuesday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.TUESDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(wednesday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.WEDNESDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(thursday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.THURSDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(friday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.FRIDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(saturday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        if(sunday==true&&cal.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+                                                                            checkIfScheduled(context,geofenceName);
+                                                                        }
+                                                                        else {
+                                                                            //Nothing to do
+                                                                            Log.d(TAG, "Time: Before");
+                                                                        }
+                                                                    }
+                                                                    else {
+                                                                        //Nothing to do
+                                                                        Log.d(TAG, "Time: Before");
+                                                                    }
+
+                                                                }
+                                                                Log.d(TAG, "Alert: Inside Schedule.");
+                                                                return;
+                                                            }
+
+                                                        } else {
+                                                            Log.d(TAG, "Error getting documents: ", task.getException());
+                                                        }
+                                                    }
+                                                });
+
+                                    }
+
+                                    //Show if alert is not with schedule
+                                    //scheduleAlarm(context, geofenceName);
+                                    //showDismissNotificationOuter(context);
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task1.getException());
+                        }
+                    }
+                });
+
         // Handle exit events if needed
         Log.d(TAG, "onReceive: EXIT from " + geofenceName);
         Toast.makeText(context, "Exit event from: " + geofenceName, Toast.LENGTH_SHORT).show();
-
-        scheduleAlarm(context, geofenceName);
-        showDismissNotificationExit(context);
     }
 
     private void scheduleAlarm(Context context, String geofenceName) {
@@ -220,6 +464,12 @@ import java.util.List;
         // Show the notification
         NotificationManagerCompat.from(context).notify(DISMISS_NOTIFICATION_ID, dismissNotification);
     }
+        public void checkIfScheduled(Context context, String geofenceName){
+            //Put here condition if user select with alarm inner
+            Log.d(TAG, "Is inside scheduled");
+            scheduleAlarm(context, geofenceName);
+            showDismissNotificationOuter(context);
+        }
 
 
     private void showDismissNotificationInner(Context context) {
