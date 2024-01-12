@@ -129,6 +129,13 @@
 
         <receiver android:name=".main_app.NotificationReceiver" />
 
+        <service
+            android:name=".main_app.create_geofence_functions.TimeChangeService"
+            android:enabled="true"
+            android:exported="false" />
+
+
+
 
 
 

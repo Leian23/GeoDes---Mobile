@@ -2,6 +2,7 @@ package com.example.geodes_mobile.main_app;
 
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -49,6 +50,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -445,6 +447,9 @@ public class map_home extends AppCompatActivity {
         alarmList = findViewById(R.id.AlarmLists);
         editSchedButton = findViewById(R.id.EditSchedule);
         deleteSchedule = findViewById(R.id.DeleteSchedule);
+        TextView switchText = findViewById(R.id.switchText);
+
+
 
 
         String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
@@ -513,6 +518,10 @@ public class map_home extends AppCompatActivity {
                 togsun = isChecked ? "true" : "false";
             }
         });
+
+
+
+
 
 
         Button buttonSchedSave = findViewById(R.id.btnSaveSched);
@@ -718,7 +727,7 @@ public class map_home extends AppCompatActivity {
 
                 // Perform search as the user types
                 if (newText.length() > 2) {
-                    new GooglePlacesTask().execute(newText);
+                    new NominatimTask().execute(newText);
                     findViewById(R.id.search_res_view).setVisibility(View.VISIBLE);
                     findViewById(R.id.noRes).setVisibility(View.GONE); // Hide "no results" message
                 } else {
@@ -1655,17 +1664,13 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private class GooglePlacesTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
+    private class NominatimTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
         @Override
         protected ArrayList<LocationResultt> doInBackground(String... params) {
             ArrayList<LocationResultt> results = new ArrayList<>();
             OkHttpClient client = new OkHttpClient();
 
-            String apiKey = "AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc";
-            String url = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
-                    "?query=" + params[0] +
-                    "&key=" + apiKey;
-
+            String url = "https://nominatim.openstreetmap.org/search?q=" + params[0] + "&format=json";
             Request request = new Request.Builder()
                     .url(url)
                     .build();
@@ -1673,26 +1678,14 @@ public class map_home extends AppCompatActivity {
             try {
                 Response response = client.newCall(request).execute();
                 String jsonData = response.body().string();
-                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONArray jsonArray = new JSONArray(jsonData);
 
-                // Check if the response contains results
-                if (jsonObject.has("results")) {
-                    JSONArray resultsArray = jsonObject.getJSONArray("results");
-
-                    for (int i = 0; i < resultsArray.length(); i++) {
-                        JSONObject resultObject = resultsArray.getJSONObject(i);
-                        JSONObject geometry = resultObject.getJSONObject("geometry");
-                        JSONObject location = geometry.getJSONObject("location");
-                        double latitude = location.optDouble("lat", 0);
-                        double longitude = location.optDouble("lng", 0);
-                        String name = resultObject.optString("name", "");
-                        String address = resultObject.optString("formatted_address", "");
-
-                        // Construct the display name combining name and address if needed
-                        String displayName = name + ", " + address;
-
-                        results.add(new LocationResultt(displayName, latitude, longitude));
-                    }
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String displayName = jsonObject.optString("display_name", "");
+                    double latitude = jsonObject.optDouble("lat", 0);
+                    double longitude = jsonObject.optDouble("lon", 0);
+                    results.add(new LocationResultt(displayName, latitude, longitude));
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -1704,22 +1697,30 @@ public class map_home extends AppCompatActivity {
         protected void onPostExecute(ArrayList<LocationResultt> results) {
             super.onPostExecute(results);
 
+
             SearchResultsAdapter adapter = (SearchResultsAdapter) recyclerViewSearchResults.getAdapter();
             adapter.setData(results);
 
             if (results.isEmpty() && !searchView.getQuery().toString().isEmpty()) {
+                // Show "no results" message if the results list is empty and the search query is not empty
                 findViewById(R.id.noRes).setVisibility(View.VISIBLE);
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
             } else {
+                // Hide "no results" message if there are search results or the search query is empty
                 findViewById(R.id.noRes).setVisibility(View.GONE);
             }
 
+
+            // Set the click listener for the search results
             adapter.setOnItemClickListener(locationResult -> {
-                GeoPoint point = new GeoPoint(locationResult.getLatitude(), locationResult.getLongitude());
+                // Handle the click action here, display coordinates as a toast
+
+                GeoPoint point = new GeoPoint(locationResult.getLatitude(),locationResult.getLongitude());
                 locationHandler.dropPinOnMap(point);
 
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
-                showToast(locationResult.getLatitude() + ", " + locationResult.getLongitude());
+
+                showToast( locationResult.getLatitude()  + ", " + locationResult.getLongitude());
             });
         }
 
@@ -1728,7 +1729,6 @@ public class map_home extends AppCompatActivity {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private boolean isValidCoordinates(String input) {
 
@@ -2323,26 +2323,38 @@ public class map_home extends AppCompatActivity {
 
     */
 
-    public void showPersistentNotif(){
+    public void showPersistentNotif() {
         handler = new Handler();
         Runnable run = new Runnable() {
             @Override
             public void run() {
                 checkAlertIsNear();
-                Handler handler = new Handler();
-                //Need to delay the execution to get the alert
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        showNotification();
-                    }
-                }, 1000);
-                handler.postDelayed(this,7000);
+
+                // Check if emergency_sos is still enabled
+                if (getSharedPreferences().getBoolean("emergency_sos", true)) {
+                    // Schedule the showNotification method with a delay
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            showNotification();
+                        }
+                    }, 1000);
+                }
+
+                // Schedule the run method with a delay of 7 seconds
+                handler.postDelayed(this, 7000);
 
                 Log.d("Message", "Running...");
             }
         };
         handler.post(run);
     }
+
+    private SharedPreferences getSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+
 
     public void playSos(){
         if (mediaPlayer == null) {

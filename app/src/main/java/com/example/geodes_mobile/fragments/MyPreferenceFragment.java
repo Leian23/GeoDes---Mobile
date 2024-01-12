@@ -91,7 +91,6 @@ public class MyPreferenceFragment extends PreferenceFragmentCompat {
                     NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancel(77);
                 }
-
                 return true;
             });
         }
