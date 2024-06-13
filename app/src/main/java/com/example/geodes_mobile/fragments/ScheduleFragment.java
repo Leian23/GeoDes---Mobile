@@ -3,6 +3,7 @@ package com.example.geodes_mobile.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,20 +45,13 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
     private static final String TAG = "ScheduleFragment";
     private FirebaseFirestore db;
     private SwipeRefreshLayout swipeRefreshLayout;
-    FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private Context context;
-
-
     private String concatenatedString;
-
     private FirebaseFirestore firestore;
-
     private View rootView;
-
-
-
-
+    private Handler handler;
+    private static final long CHECK_INTERVAL = 1000; // Check every 1 minute (adjust as needed)
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,7 +63,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         ImageButton addButton = rootView.findViewById(R.id.btnAdd);
         swipeRefreshLayout = rootView.findViewById(R.id.swipeRefreshLayout);
         context = getContext();
-
 
         firestore = FirebaseFirestore.getInstance();
         DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
@@ -84,21 +77,213 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
             }
         });
 
+
         addButton.setOnClickListener(view -> {
             getParentFragmentManager().beginTransaction().hide(ScheduleFragment.this).commit();
             ((map_home) requireActivity()).hideElements(true);
             ((map_home) requireActivity()).BottomSheetAddSched();
         });
 
-
-
-
         swipeRefreshLayout.setOnRefreshListener(() -> {
             fetchDataFromFirestore(rootView);
             swipeRefreshLayout.setRefreshing(false);
         });
 
+        // Initialize handler for periodic checks
+        handler = new Handler();
+
+        // Start periodic checks
+        startPeriodicChecks();
+
+
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        db.collection("geofenceSchedule")
+                .whereEqualTo("Email", currentUser.getEmail())
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        // Handle the error
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    boolean anySchedEnabled = false;
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Boolean isSchedEnabled = document.getBoolean("SchedStat");
+
+                        Log.d(TAG, "isSched is " + isSchedEnabled);
+
+                        if (isSchedEnabled) {
+                            anySchedEnabled = true;
+                            // No need to call startPeriodicChecks here, as it should be already started
+                            Log.w(TAG, "Sched is true");
+                        } else {
+                            // Keep checking other documents
+                            startPeriodicChecks();
+                            Log.w(TAG, "Sched is false");
+                        }
+                    }
+
+                    if (!anySchedEnabled) {
+                        stopPeriodicChecks();
+                        Log.w(TAG, "Stopping periodic checks");
+                    }
+                });
+
         return rootView;
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        // Stop periodic checks when the view is destroyed
+        stopPeriodicChecks();
+        super.onDestroyView();
+    }
+
+    private void startPeriodicChecks() {
+        handler.postDelayed(checkRunnable, CHECK_INTERVAL);
+    }
+
+    private void stopPeriodicChecks() {
+        handler.removeCallbacks(checkRunnable);
+    }
+
+    // Runnable for checking conditions periodically
+    private final Runnable checkRunnable = new Runnable() {
+        @Override
+        public void run() {
+
+
+            // Perform the check
+            checkAlertConditions();
+
+            // Schedule the next check
+            handler.postDelayed(this, CHECK_INTERVAL);
+        }
+    };
+
+    private void checkAlertConditions() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        db.collection("geofenceSchedule")
+                .whereEqualTo("Email", currentUser.getEmail())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Boolean isSchedEnabled = document.getBoolean("SchedStat");
+
+                            if (isSchedEnabled && isTimeAndDayMatch(document)) {
+                                // The alert conditions are met, take appropriate actions
+                                handleAlertConditions(document);
+                            }
+                        }
+                    } else {
+                        // Handle error if needed
+                    }
+                });
+    }
+
+    private void handleAlertConditions(QueryDocumentSnapshot document) {
+        // Implement the logic to handle the alert conditions
+        String UniqueId = document.getString("uniqueID");
+        List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
+        Boolean isSchedEnabled = document.getBoolean("SchedStat");
+
+        // handling actions to perform when conditions are met
+
+        Log.d(TAG, "handle alert conditions met here");
+
+
+        if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
+
+            if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                for (String itemId : selectedItemsIds) {
+                    stringBuilder.append(itemId).append("\n");
+                }
+
+                if (stringBuilder.length() > 0) {
+                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                }
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                List<String> concatenatedAlertNames = new ArrayList<>();
+
+                List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+
+                for (String id : selectedItemsIds) {
+                    Task<QuerySnapshot> entryTask = db.collection("geofencesEntry")
+                            .whereEqualTo("uniqueID", id)
+                            .get()
+                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                    String alertName = documentSnapshot.getString("alertName");
+                                    if (alertName != null) {
+                                        Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
+                                        concatenatedAlertNames.add(alertName);
+
+                                        // Capture the correct reference here
+                                        DocumentReference entryDocumentRef = documentSnapshot.getReference();
+
+
+                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
+
+                                            entryDocumentRef.update("alertEnabled", true)
+                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + entryDocumentRef.getId()))
+                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + entryDocumentRef.getId(), e));
+                                        }
+                                        return;
+                                    }
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                // Handle failure if needed
+                            });
+
+                    tasks.add(entryTask);
+
+                    Task<QuerySnapshot> exitTask = db.collection("geofencesExit")
+                            .whereIn("uniqueID", Collections.singletonList(id))
+                            .get()
+                            .addOnSuccessListener(queryDocumentSnapshotsExit -> {
+                                for (DocumentSnapshot documentSnapshotExit : queryDocumentSnapshotsExit) {
+                                    String alertNameExit = documentSnapshotExit.getString("alertName");
+                                    if (alertNameExit != null) {
+                                        Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertNameExit);
+                                        concatenatedAlertNames.add(alertNameExit);
+
+                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
+                                            document.getReference().update("alertEnabled", true)
+                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + document.getId()))
+                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + document.getId(), e));
+                                        }
+                                        return;
+                                    }
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                // Handle failure if needed
+                            });
+
+                    tasks.add(exitTask);
+                }
+            }
+
+
+
+      /*  if (isSchedEnabled && isTimeAndDayMatch(document)) {
+            document.getReference().update("alertEnabled", true)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + document.getId()))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + document.getId(), e));
+        }
+
+       */
+            return;
+        }
+
     }
 
     private void fetchDataFromFirestore(View rootView) {
@@ -154,104 +339,111 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                             List<String> selectedItemsIds = (List<String>) document.get("selectedItemsIds");
 
                             if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for (String itemId : selectedItemsIds) {
-                                    stringBuilder.append(itemId).append("\n");
-                                }
 
-                                if (stringBuilder.length() > 0) {
-                                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                                }
+                                if (selectedItemsIds != null && !selectedItemsIds.isEmpty()) {
+                                    StringBuilder stringBuilder = new StringBuilder();
+                                    for (String itemId : selectedItemsIds) {
+                                        stringBuilder.append(itemId).append("\n");
+                                    }
 
-                                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                    if (stringBuilder.length() > 0) {
+                                        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                                    }
 
-                                List<String> concatenatedAlertNames = new ArrayList<>();
+                                    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                                List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                                    List<String> concatenatedAlertNames = new ArrayList<>();
 
-                                for (String id : selectedItemsIds) {
-                                    Task<QuerySnapshot> entryTask = db.collection("geofencesEntry")
-                                            .whereEqualTo("uniqueID", id)
-                                            .get()
-                                            .addOnSuccessListener(queryDocumentSnapshots -> {
-                                                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                                                    String alertName = documentSnapshot.getString("alertName");
-                                                    if (alertName != null) {
-                                                        Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
-                                                        concatenatedAlertNames.add(alertName);
+                                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
 
-                                                        // Capture the correct reference here
-                                                        DocumentReference entryDocumentRef = documentSnapshot.getReference();
+                                    for (String id : selectedItemsIds) {
+                                        Task<QuerySnapshot> entryTask = db.collection("geofencesEntry")
+                                                .whereEqualTo("uniqueID", id)
+                                                .get()
+                                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                                        String alertName = documentSnapshot.getString("alertName");
+                                                        if (alertName != null) {
+                                                            Log.d(TAG, "Match found in geofencesEntry. AlertName: " + alertName);
+                                                            concatenatedAlertNames.add(alertName);
+
+                                                            // Capture the correct reference here
+                                                            DocumentReference entryDocumentRef = documentSnapshot.getReference();
 
 
-                                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
+                                                            if (isSchedEnabled && isTimeAndDayMatch(document)) {
 
-                                                            entryDocumentRef.update("alertEnabled", true)
-                                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + entryDocumentRef.getId()))
-                                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + entryDocumentRef.getId(), e));
+                                                                entryDocumentRef.update("alertEnabled", true)
+                                                                        .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + entryDocumentRef.getId()))
+                                                                        .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + entryDocumentRef.getId(), e));
+                                                            }
+                                                            return;
                                                         }
-                                                        return;
                                                     }
-                                                }
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    // Handle failure if needed
+                                                });
+
+                                        tasks.add(entryTask);
+
+                                        Task<QuerySnapshot> exitTask = db.collection("geofencesExit")
+                                                .whereIn("uniqueID", Collections.singletonList(id))
+                                                .get()
+                                                .addOnSuccessListener(queryDocumentSnapshotsExit -> {
+                                                    for (DocumentSnapshot documentSnapshotExit : queryDocumentSnapshotsExit) {
+                                                        String alertNameExit = documentSnapshotExit.getString("alertName");
+                                                        if (alertNameExit != null) {
+                                                            Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertNameExit);
+                                                            concatenatedAlertNames.add(alertNameExit);
+
+                                                            if (isSchedEnabled && isTimeAndDayMatch(document)) {
+                                                                document.getReference().update("alertEnabled", true)
+                                                                        .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + document.getId()))
+                                                                        .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + document.getId(), e));
+                                                            }
+                                                            return;
+                                                        }
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    // Handle failure if needed
+                                                });
+
+                                        tasks.add(exitTask);
+                                    }
+
+                                    Tasks.whenAllComplete(tasks)
+                                            .addOnSuccessListener(voids -> {
+                                                concatenatedString = concatenatedAlertNames.toString();
+                                                concatenatedString = concatenatedString.substring(1, concatenatedString.length() - 1);
+                                                Log.d(TAG, "Concatenated Alert Names: " + concatenatedString);
+                                                int iconCal = R.drawable.calendar_ic;
+                                                int entryImage = R.drawable.alarm_ic;
+                                                int iconMarker = R.drawable.clock_ic;
+                                                data.add(new DataModel4(schedTitle, clock, schedAlarms, iconCal, entryImage, iconMarker, isAlertSwitchOn, UniqueId, result, selectedItemsIds, concatenatedString));
+                                                updateAdapterWithData(data, rootView);
                                             })
                                             .addOnFailureListener(e -> {
-                                                // Handle failure if needed
+
                                             });
 
-                                    tasks.add(entryTask);
-
-                                    Task<QuerySnapshot> exitTask = db.collection("geofencesExit")
-                                            .whereIn("uniqueID", Collections.singletonList(id))
-                                            .get()
-                                            .addOnSuccessListener(queryDocumentSnapshotsExit -> {
-                                                for (DocumentSnapshot documentSnapshotExit : queryDocumentSnapshotsExit) {
-                                                    String alertNameExit = documentSnapshotExit.getString("alertName");
-                                                    if (alertNameExit != null) {
-                                                        Log.d(TAG, "Match found in geofencesExit. AlertName: " + alertNameExit);
-                                                        concatenatedAlertNames.add(alertNameExit);
-
-                                                        if (isSchedEnabled && isTimeAndDayMatch(document)) {
-                                                            document.getReference().update("alertEnabled", true)
-                                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Alert enabled: " + document.getId()))
-                                                                    .addOnFailureListener(e -> Log.e(TAG, "Error enabling alert: " + document.getId(), e));
-                                                        }
-                                                        return;
-                                                    }
-                                                }
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                // Handle failure if needed
-                                            });
-
-                                    tasks.add(exitTask);
                                 }
 
-                                Tasks.whenAllComplete(tasks)
-                                        .addOnSuccessListener(voids -> {
-                                            concatenatedString = concatenatedAlertNames.toString();
-                                            concatenatedString = concatenatedString.substring(1, concatenatedString.length() - 1);
-                                            Log.d(TAG, "Concatenated Alert Names: " + concatenatedString);
-                                            int iconCal = R.drawable.calendar_ic;
-                                            int entryImage = R.drawable.alarm_ic;
-                                            int iconMarker = R.drawable.clock_ic;
-                                            data.add(new DataModel4(schedTitle, clock, schedAlarms, iconCal, entryImage, iconMarker, isAlertSwitchOn, UniqueId, result, selectedItemsIds, concatenatedString));
-                                            updateAdapterWithData(data, rootView);
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            // Handle failure if needed
-                                        });
+
+
+
+
 
                             }
                         }
 
-                        // Update the adapter with the new data
                         updateAdapterWithData(data, rootView);
                     } else {
                         Toast.makeText(getContext(), "Error fetching data from Firestore", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
 
     private void updateAdapterWithData(List<DataModel4> data, View rootView) {
         RecyclerView recyclerView = rootView.findViewById(R.id.settingsSchedd);
@@ -292,7 +484,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                 String CurrentDay = getAlertDay(document);
 
 
-                // Compare only the hours, minutes, and days
                 if (CurrentTimeHour.equalsIgnoreCase(TimeOfAlertHour) &&
                         DayOfAlert.equalsIgnoreCase(CurrentDay) ) {
 
@@ -309,6 +500,7 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         Log.d(TAG, "isTimeAndDayMatch: false (Time string is null or parsing fails)");
         return false;
     }
+
 
     private String getFormattedTime12Hour(Calendar calendar) {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
@@ -351,12 +543,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
         return "Unknown";
     }
 
-
-    private boolean isDayMatch(int currentDayOfWeek, boolean... selectedDays) {
-        // Example: If the alert is set for Monday (selectedDays[0]), and the current day is Monday (currentDayOfWeek == 2), return true
-        return selectedDays[currentDayOfWeek - 1];
-    }
-
     @Override
     public void onItemClick(DataModel4 data) {
         getParentFragmentManager().beginTransaction().hide(this).commit();
@@ -386,9 +572,6 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
             showConfirmationDialog(data.getUniqueId());
         });
     }
-
-
-
 
     private void deleteAlertFromFirestore(String alertId) {
         // Get the reference to the document you want to delete
@@ -438,6 +621,5 @@ public class ScheduleFragment extends Fragment implements Adapter4.OnItemClickLi
                 })
                 .show();
     }
-
 
 }
