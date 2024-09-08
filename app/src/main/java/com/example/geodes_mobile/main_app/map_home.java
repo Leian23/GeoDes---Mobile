@@ -148,6 +148,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -318,6 +319,8 @@ public class map_home extends AppCompatActivity {
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     private FirebaseUser currentUser = mAuth.getCurrentUser();
+    public double getDistance; // Initialize to maximum value
+    private List<Double> distances = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -448,8 +451,6 @@ public class map_home extends AppCompatActivity {
         editSchedButton = findViewById(R.id.EditSchedule);
         deleteSchedule = findViewById(R.id.DeleteSchedule);
         TextView switchText = findViewById(R.id.switchText);
-
-
 
 
         String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
@@ -727,7 +728,7 @@ public class map_home extends AppCompatActivity {
 
                 // Perform search as the user types
                 if (newText.length() > 2) {
-                    new NominatimTask().execute(newText);
+                    new GooglePlacesTask().execute(newText);
                     findViewById(R.id.search_res_view).setVisibility(View.VISIBLE);
                     findViewById(R.id.noRes).setVisibility(View.GONE); // Hide "no results" message
                 } else {
@@ -1664,13 +1665,18 @@ public class map_home extends AppCompatActivity {
     }
 
 
-    private class NominatimTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
+
+    private class GooglePlacesTask extends AsyncTask<String, Void, ArrayList<LocationResultt>> {
         @Override
         protected ArrayList<LocationResultt> doInBackground(String... params) {
             ArrayList<LocationResultt> results = new ArrayList<>();
             OkHttpClient client = new OkHttpClient();
 
-            String url = "https://nominatim.openstreetmap.org/search?q=" + params[0] + "&format=json";
+            String apiKey = "AIzaSyA-PwG-IjCROFu9xXBRizCuyz8L83V8Guc";
+            String url = "https://maps.googleapis.com/maps/api/place/textsearch/json" +
+                    "?query=" + params[0] +
+                    "&key=" + apiKey;
+
             Request request = new Request.Builder()
                     .url(url)
                     .build();
@@ -1678,14 +1684,26 @@ public class map_home extends AppCompatActivity {
             try {
                 Response response = client.newCall(request).execute();
                 String jsonData = response.body().string();
-                JSONArray jsonArray = new JSONArray(jsonData);
+                JSONObject jsonObject = new JSONObject(jsonData);
 
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String displayName = jsonObject.optString("display_name", "");
-                    double latitude = jsonObject.optDouble("lat", 0);
-                    double longitude = jsonObject.optDouble("lon", 0);
-                    results.add(new LocationResultt(displayName, latitude, longitude));
+                // Check if the response contains results
+                if (jsonObject.has("results")) {
+                    JSONArray resultsArray = jsonObject.getJSONArray("results");
+
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        JSONObject resultObject = resultsArray.getJSONObject(i);
+                        JSONObject geometry = resultObject.getJSONObject("geometry");
+                        JSONObject location = geometry.getJSONObject("location");
+                        double latitude = location.optDouble("lat", 0);
+                        double longitude = location.optDouble("lng", 0);
+                        String name = resultObject.optString("name", "");
+                        String address = resultObject.optString("formatted_address", "");
+
+                        // Construct the display name combining name and address if needed
+                        String displayName = name + ", " + address;
+
+                        results.add(new LocationResultt(displayName, latitude, longitude));
+                    }
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -1697,30 +1715,22 @@ public class map_home extends AppCompatActivity {
         protected void onPostExecute(ArrayList<LocationResultt> results) {
             super.onPostExecute(results);
 
-
             SearchResultsAdapter adapter = (SearchResultsAdapter) recyclerViewSearchResults.getAdapter();
             adapter.setData(results);
 
             if (results.isEmpty() && !searchView.getQuery().toString().isEmpty()) {
-                // Show "no results" message if the results list is empty and the search query is not empty
                 findViewById(R.id.noRes).setVisibility(View.VISIBLE);
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
             } else {
-                // Hide "no results" message if there are search results or the search query is empty
                 findViewById(R.id.noRes).setVisibility(View.GONE);
             }
 
-
-            // Set the click listener for the search results
             adapter.setOnItemClickListener(locationResult -> {
-                // Handle the click action here, display coordinates as a toast
-
-                GeoPoint point = new GeoPoint(locationResult.getLatitude(),locationResult.getLongitude());
+                GeoPoint point = new GeoPoint(locationResult.getLatitude(), locationResult.getLongitude());
                 locationHandler.dropPinOnMap(point);
 
                 findViewById(R.id.search_res_view).setVisibility(View.GONE);
-
-                showToast( locationResult.getLatitude()  + ", " + locationResult.getLongitude());
+                showToast(locationResult.getLatitude() + ", " + locationResult.getLongitude());
             });
         }
 
@@ -1729,6 +1739,7 @@ public class map_home extends AppCompatActivity {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private boolean isValidCoordinates(String input) {
 
@@ -2339,16 +2350,21 @@ public class map_home extends AppCompatActivity {
                             showNotification();
                         }
                     }, 1000);
+
+                    // Schedule the run method with a delay of 10 seconds
+                    handler.postDelayed(this, 10000);
+
+                    Log.d("Message", "Running...");
+                } else {
+                    // If emergency_sos is disabled, remove callbacks and stop running
+                    handler.removeCallbacks(this);
+                    Log.d("Message", "Emergency SOS is disabled. Stopping...");
                 }
-
-                // Schedule the run method with a delay of 7 seconds
-                handler.postDelayed(this, 7000);
-
-                Log.d("Message", "Running...");
             }
         };
         handler.post(run);
     }
+
 
     private SharedPreferences getSharedPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(this);
@@ -2392,199 +2408,168 @@ public class map_home extends AppCompatActivity {
             }
         }
 
+        // Create custom views for the notification
         RemoteViews collapsedView = new RemoteViews(this.getPackageName(), R.layout.notification_collapsed);
         RemoteViews expandedView = new RemoteViews(this.getPackageName(), R.layout.notification_expanded);
 
+        // Set up intent for the SOS button in expanded view
         Intent clickIntentEmergency = new Intent(this, NotificationReceiver.class);
         clickIntentEmergency.setAction("ACTION_SOS_TOGGLE");
-        clickIntentEmergency.putExtra("action", "toggle"); // Use a single action
+        clickIntentEmergency.putExtra("action", "toggle");
 
         PendingIntent PendingIntentEmergency = PendingIntent.getBroadcast(this,
                 0, clickIntentEmergency, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         expandedView.setOnClickPendingIntent(R.id.btn_sos, PendingIntentEmergency);
 
-        // Set other content for collapsedView and expandedView
+        // Set content for collapsed and expanded views
         collapsedView.setTextViewText(R.id.text_view_expanded, userLocal + ", " + userArea);
         expandedView.setTextViewText(R.id.txt_current_location, userLocal + ", " + userArea);
         expandedView.setTextViewText(R.id.txt_expand_alert_near, get_alert);
+        // Distance notification
+        DecimalFormat df = new DecimalFormat("#.##"); // Format to 2 decimal places
+        String formattedDistance = df.format(getDistance) + " km"; // Append " km" to the formatted distance
+        expandedView.setTextViewText(R.id.text_distance_to_alert, formattedDistance);
 
+        // Build the notification
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setOngoing(true)
+                .setOngoing(true)  // Persistent notification
                 .setSmallIcon(R.drawable.baseline_settings_24)
                 .setCustomContentView(collapsedView)
                 .setCustomBigContentView(expandedView)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)  // Priority for lock screen
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)  // Show on lock screen
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .build();
 
+        // Check notification permission and display notification
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             // Handle permission request if needed
             return;
         }
 
-        NotificationManagerCompat.from(this).notify(77, notification);
+        NotificationManagerCompat.from(this).notify(77, notification); // ID 77 for the notification
     }
 
 
 
-
-
-
-
-    public void checkAlertIsNear(){
-
+    public void checkAlertIsNear() {
         String userEmail = (currentUser == null) ? Constants.user_email : currentUser.getEmail();
 
-        try{
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-                return;
-            }
-
-            try {
-
-                gps_loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                network_loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            gps_loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            network_loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
             if (gps_loc != null) {
                 final_loc = gps_loc;
                 latitude = final_loc.getLatitude();
                 longitude = final_loc.getLongitude();
-            }
-            else if (network_loc != null) {
+            } else if (network_loc != null) {
                 final_loc = network_loc;
                 latitude = final_loc.getLatitude();
                 longitude = final_loc.getLongitude();
-            }
-            else {
+            } else {
                 latitude = 0.0;
                 longitude = 0.0;
             }
 
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_NETWORK_STATE
+            }, 1);
 
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE}, 1);
-
-            try {
-
-                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                if (addresses != null && addresses.size() > 0) {
-                    userLocal = addresses.get(0).getLocality();
-                    userArea = addresses.get(0).getAdminArea();
-
-                }
-                else {
-                    userLocal = "Unknown";
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && addresses.size() > 0) {
+                userLocal = addresses.get(0).getLocality();
+                userArea = addresses.get(0).getAdminArea();
+            } else {
+                userLocal = "Unknown";
             }
 
-            //Check if alert is near
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            db.collection("geofenceSchedule")
+        try {
+            // Query Firestore for the logged-in user's geofencesEntry
+            db.collection("geofencesEntry")
+                    .whereEqualTo("email", userEmail)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
-                        public void onComplete(@android.support.annotation.NonNull Task<QuerySnapshot> task1) {
-                            if (task1.isSuccessful()) {
-                                for (QueryDocumentSnapshot document1 : task1.getResult()) {
-                                    String email = document1.getString("Email");
+                        public void onComplete(@android.support.annotation.NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                double minDistance = Double.MAX_VALUE;
+                                String nearestAlertName = null;
 
-                                    if(email.equalsIgnoreCase(userEmail)){
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Boolean alertEnabled = document.getBoolean("alertEnabled");
+                                    if (alertEnabled != null && alertEnabled) { // Proceed only if alertEnabled is true
+                                        Map<String, Object> location = (Map<String, Object>) document.get("location");
+                                        if (location != null) {
+                                            double entryLat = 0.0;
+                                            double entryLong = 0.0;
 
-                                        Log.d("Message", "Lat: " + userEmail);
+                                            if (location.containsKey("latitude")) {
+                                                entryLat = Double.parseDouble(location.get("latitude").toString());
+                                            }
 
-                                        List<String> selectedItemsIds = (List<String>) document1.get("selectedItemsIds");
-                                        if(!selectedItemsIds.isEmpty()) {
+                                            if (location.containsKey("longitude")) {
+                                                entryLong = Double.parseDouble(location.get("longitude").toString());
+                                            }
 
+                                            // Calculate the distance
+                                            double distance = distance(latitude, longitude, entryLat, entryLong);
+                                            Log.d("Message", "Distance: " + distance);
 
-                                            for (String itemId : selectedItemsIds) {
-                                                //Get GeoEntry
-                                                db.collection("geofencesEntry")
-                                                        .get()
-                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@android.support.annotation.NonNull Task<QuerySnapshot> task) {
-                                                                if (task.isSuccessful()) {
-
-
-                                                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                                                        String userid = document.getId();
-
-                                                                        if (userid.equalsIgnoreCase(itemId)) {
-
-                                                                            Map<String, Object> location = (Map<String, Object>) document.get("location");
-                                                                            for (Map.Entry<String, Object> e : location.entrySet()) {
-
-                                                                                if (e.getKey().equals("latitude")) {
-                                                                                    Log.d("Message", "Lat: " + e.getValue().toString());
-                                                                                    get_lat = Double.parseDouble(e.getValue().toString());
-                                                                                }
-                                                                                if (e.getKey().equals("longitude")) {
-                                                                                    Log.d("Message", "Long: " + e.getValue().toString());
-                                                                                    get_long = Double.parseDouble(e.getValue().toString());
-                                                                                    if (distance(latitude, longitude, get_lat, get_long) < 2) { // if distance < 2 km we take locations as equal
-                                                                                        Log.d("Message", "Near alert");
-
-                                                                                        CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
-                                                                                        geofenceEntryCollection.whereEqualTo("email", userEmail).get().addOnSuccessListener(entrySnapshots -> {
-                                                                                            for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
-                                                                                                String alertTitle = documentSnapshot.getString("alertName");
-                                                                                                Log.d("Message", "Alert Title: " + alertTitle);
-                                                                                                get_alert = alertTitle;
-
-                                                                                            }
-
-                                                                                        }).addOnFailureListener(ex -> {
-                                                                                            // Handle errors
-                                                                                        });
-                                                                                    }
-                                                                                }
-
-                                                                            }
-
-                                                                        }
-                                                                    }
-                                                                } else {
-
-                                                                }
-                                                            }
-                                                        });
+                                            // Check if this distance is the smallest so far
+                                            if (distance < minDistance) {
+                                                minDistance = distance;
+                                                nearestAlertName = document.getString("alertName");
                                             }
                                         }
                                     }
                                 }
-                            } else {
 
+                                // Store the nearest alert name and its associated distance
+                                if (minDistance != Double.MAX_VALUE && nearestAlertName != null) {
+                                    getDistance = minDistance;
+                                    get_alert = nearestAlertName;
+
+                                    Log.d("Message", "Nearest Alert Title: " + nearestAlertName + ", Distance: " + minDistance);
+                                } else {
+                                    Log.d("Message", "No alert found");
+                                }
+
+                            } else {
+                                Log.e("Error", "Failed to get geofence entries: " + task.getException());
                             }
                         }
+                    })
+                    .addOnFailureListener(ex -> {
+                        Log.e("Error", "An exception occurred while retrieving geofence entries", ex);
                     });
-        }catch (Exception ex){
-
+        } catch (Exception ex) {
+            Log.e("Error", "An exception occurred", ex);
         }
-
     }
 
     /** calculates the distance between two locations in KILOMETERS */
     private double distance(double lat1, double lng1, double lat2, double lng2) {
-
         double earthRadius = 6371;
 
-        double dLat = Math.toRadians(lat2-lat1);
-        double dLng = Math.toRadians(lng2-lng1);
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
 
         double sindLat = Math.sin(dLat / 2);
         double sindLng = Math.sin(dLng / 2);
@@ -2592,13 +2577,10 @@ public class map_home extends AppCompatActivity {
         double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
                 * Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2));
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        double dist = earthRadius * c;
-
-        return dist; // output distance, in MILES
+        return earthRadius * c; // output distance in KILOMETERS
     }
-
 
     public static boolean isButtonClicked() {
         return isButtonClicked;

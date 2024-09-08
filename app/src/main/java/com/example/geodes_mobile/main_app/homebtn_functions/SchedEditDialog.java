@@ -51,8 +51,7 @@ public class SchedEditDialog extends Dialog {
    private  EditText scheduleNameEdit;
 
    private TextView editTimePicker;
-
-
+   
 
 
     private boolean monday = false;
