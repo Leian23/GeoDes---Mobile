@@ -1270,44 +1270,66 @@ public class map_home extends AppCompatActivity {
 
 
 
-        //list of selectable alerts under add schedule bottom sheet
-            CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
-            CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
+        // List of selectable alerts under add schedule bottom sheet
+        CollectionReference geofenceEntryCollection = FirebaseFirestore.getInstance().collection("geofencesEntry");
+        CollectionReference geofenceExitCollection = FirebaseFirestore.getInstance().collection("geofencesExit");
 
-            List<DataModel5> dataList = new ArrayList<>();
+        List<DataModel5> dataList = new ArrayList<>();
 
-            geofenceEntryCollection.whereEqualTo("email", userEmail).get().addOnSuccessListener(entrySnapshots -> {
-                for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
-                    String alertTitle = documentSnapshot.getString("alertName");
-                    String unID = documentSnapshot.getString("uniqueID");
-                    int imageResource = R.drawable.get_in;
+// Set up RecyclerView
+        RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
+        recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-                    // Create DataModel5 object and add it to the list
-                    dataList.add(new DataModel5(alertTitle, imageResource, unID));
-                }
+        Adapter5 adapterSched = new Adapter5(dataList, this);
+        recyclerViewSched.setAdapter(adapterSched);
 
-                geofenceExitCollection.get().addOnSuccessListener(exitSnapshots -> {
-                    for (QueryDocumentSnapshot documentSnapshot : exitSnapshots) {
-                        String alertTitle = documentSnapshot.getString("alertName");
-                        String unID = documentSnapshot.getString("uniqueID");
-                        int imageResource = R.drawable.get_out;
-
-                        dataList.add(new DataModel5(alertTitle, imageResource, unID));
+// Listener for real-time updates on geofence entries
+        geofenceEntryCollection.whereEqualTo("email", userEmail)
+                .addSnapshotListener((entrySnapshots, e) -> {
+                    if (e != null) {
+                        Log.e("Firestore", "Error fetching entry records", e);
+                        return;
                     }
 
-                    RecyclerView recyclerViewSched = findViewById(R.id.scheds_recyclerView);
-                    recyclerViewSched.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+                    dataList.clear(); // Clear existing data
 
-                    Adapter5 adapterSched = new Adapter5(dataList, map_home.this);
-                    recyclerViewSched.setAdapter(adapterSched);
+                    if (entrySnapshots != null) {
+                        for (QueryDocumentSnapshot documentSnapshot : entrySnapshots) {
+                            String alertTitle = documentSnapshot.getString("alertName");
+                            String unID = documentSnapshot.getString("uniqueID");
+                            int imageResource = R.drawable.get_in;
 
-                }).addOnFailureListener(e -> {
-                    // Handle errors
+                            // Add new DataModel5 object to the list
+                            dataList.add(new DataModel5(alertTitle, imageResource, unID));
+                        }
+                    }
+
+                    // Notify the adapter about data changes
+                    adapterSched.notifyDataSetChanged();
                 });
 
-            }).addOnFailureListener(e -> {
-                // Handle errors
-            });
+// Listener for real-time updates on geofence exits
+        geofenceExitCollection.whereEqualTo("email", userEmail)
+                .addSnapshotListener((exitSnapshots, e) -> {
+                    if (e != null) {
+                        Log.e("Firestore", "Error fetching exit records", e);
+                        return;
+                    }
+
+                    if (exitSnapshots != null) {
+                        for (QueryDocumentSnapshot documentSnapshot : exitSnapshots) {
+                            String alertTitle = documentSnapshot.getString("alertName");
+                            String unID = documentSnapshot.getString("uniqueID");
+                            int imageResource = R.drawable.get_out;
+
+                            // Add new DataModel5 object to the list
+                            dataList.add(new DataModel5(alertTitle, imageResource, unID));
+                        }
+                    }
+
+                    // Notify the adapter about data changes
+                    adapterSched.notifyDataSetChanged();
+                });
 
 
 
